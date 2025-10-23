@@ -10,7 +10,6 @@ export interface AuthenticateOptions {
   host: string;
   email: string;
   password: string;
-  clientInstanceId: string;
   fetchImpl?: typeof fetch;
 }
 

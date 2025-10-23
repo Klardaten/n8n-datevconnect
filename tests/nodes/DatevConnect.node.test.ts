@@ -13,7 +13,7 @@ const { DatevConnect, clientApi } = await import(
 const realAuthenticate = clientApi.authenticate;
 const realFetchClients = clientApi.fetchClients;
 
-const authenticateMock = mock(async () => ({ token: "token-123" }));
+const authenticateMock = mock(async () => ({ access_token: "token-123" }));
 const fetchClientsMock = mock(async () => [] as JsonValue);
 
 type InputItem = { json: Record<string, unknown> };
@@ -84,7 +84,7 @@ function createExecuteContext(options: ExecuteContextOptions = {}) {
 describe("DatevConnect node", () => {
   beforeEach(() => {
     authenticateMock.mockClear();
-    authenticateMock.mockImplementation(async () => ({ token: "token-123" }));
+    authenticateMock.mockImplementation(async () => ({ access_token: "token-123" }));
     fetchClientsMock.mockClear();
     fetchClientsMock.mockImplementation(async () => [] as JsonValue);
     clientApi.authenticate = authenticateMock as typeof clientApi.authenticate;
@@ -125,7 +125,6 @@ describe("DatevConnect node", () => {
       host: "https://api.example.com",
       email: "user@example.com",
       password: "secret",
-      clientInstanceId: "instance-1",
     });
 
     expect(fetchClientsMock).toHaveBeenCalledTimes(2);

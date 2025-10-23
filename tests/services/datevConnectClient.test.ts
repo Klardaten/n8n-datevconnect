@@ -38,20 +38,19 @@ describe("authenticate", () => {
 
     const fetchMock = createFetchMock(async (input, init) => {
       calls.push({ url: new URL(String(input)), init });
-      return createJsonResponse({ token: "abc123" }, { status: 200 });
+      return createJsonResponse({ access_token: "abc123" }, { status: 200 });
     });
 
     const options: AuthenticateOptions = {
       host: "https://api.example.com",
       email: "user@example.com",
       password: "secret",
-      clientInstanceId: "instance-1",
       fetchImpl: fetchMock,
     };
 
     const response = await authenticate(options);
 
-    expect(response).toEqual({ token: "abc123" });
+    expect(response).toEqual({ access_token: "abc123" });
     expect(calls).toHaveLength(1);
 
     const [{ url, init }] = calls;
@@ -59,7 +58,6 @@ describe("authenticate", () => {
     expect(init?.method).toBe("POST");
     expect(init?.headers).toMatchObject({
       "content-type": "application/json",
-      "x-client-instance-id": "instance-1",
     });
     expect(init?.body).toBeDefined();
 
@@ -67,7 +65,6 @@ describe("authenticate", () => {
     expect(parsedBody).toEqual({
       email: "user@example.com",
       password: "secret",
-      clientInstanceId: "instance-1",
     });
   });
 
@@ -81,11 +78,10 @@ describe("authenticate", () => {
         host: "https://api.example.com",
         email: "user@example.com",
         password: "secret",
-        clientInstanceId: "instance-1",
         fetchImpl: fetchMock,
       }),
     ).rejects.toThrowError(
-      "DATEVconnect request failed: Authentication response missing token.",
+      "DATEVconnect request failed: Authentication response missing access_token.",
     );
   });
 });
