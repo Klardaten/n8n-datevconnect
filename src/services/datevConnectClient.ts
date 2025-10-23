@@ -15,7 +15,7 @@ export interface AuthenticateOptions {
 }
 
 export interface AuthenticateResponse extends Record<string, JsonValue> {
-  token: string;
+  access_token: string;
 }
 
 export interface FetchClientsOptions {
@@ -118,15 +118,14 @@ export async function authenticate(options: AuthenticateOptions): Promise<Authen
     method: "POST",
     headers: buildHeaders({
       "content-type": JSON_CONTENT_TYPE,
-      "x-client-instance-id": clientInstanceId,
     }),
-    body: JSON.stringify({ email, password, clientInstanceId }),
+    body: JSON.stringify({ email, password }),
   });
 
   const body = await ensureSuccess(response);
 
-  if (!body || typeof body !== "object" || !("token" in body) || typeof body.token !== "string") {
-    throw new Error(`${DEFAULT_ERROR_PREFIX}: Authentication response missing token.`);
+  if (!body || typeof body !== "object" || !("access_token" in body) || typeof body.access_token !== "string") {
+    throw new Error(`${DEFAULT_ERROR_PREFIX}: Authentication response missing access_token.`);
   }
 
   return body as AuthenticateResponse;

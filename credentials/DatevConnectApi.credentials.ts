@@ -56,16 +56,15 @@ export class DatevConnectApi implements ICredentialType {
 			body: {
 				email: '={{ $credentials.email }}',
 				password: '={{ $credentials.password }}',
-				clientInstanceId: '={{ $credentials.clientInstanceId }}',
 			},
 		},
 		rules: [
 			{
 				type: 'responseSuccessBody',
 				properties: {
-					key: 'token',
+					key: 'access_token',
 					value: undefined,
-					message: 'Login successful response must include a token.',
+					message: 'Login successful response must include a access_token.',
 				},
 			},
 		],
