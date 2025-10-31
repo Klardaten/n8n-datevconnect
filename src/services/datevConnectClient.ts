@@ -144,6 +144,11 @@ export interface UpdateEmployeeOptions extends BaseRequestOptions {
   employee: JsonValue;
 }
 
+export interface FetchCountryCodesOptions extends BaseRequestOptions {
+  select?: string;
+  filter?: string;
+}
+
 const JSON_CONTENT_TYPE = "application/json";
 
 const DEFAULT_ERROR_PREFIX = "DATEVconnect request failed";
@@ -257,6 +262,7 @@ const RELATIONSHIP_TYPES_PATH = `${MASTER_DATA_BASE_PATH}/relationship-types`;
 const LEGAL_FORMS_PATH = `${MASTER_DATA_BASE_PATH}/legal-forms`;
 const CORPORATE_STRUCTURES_PATH = `${MASTER_DATA_BASE_PATH}/corporate-structures`;
 const EMPLOYEES_PATH = `${MASTER_DATA_BASE_PATH}/employees`;
+const COUNTRY_CODES_PATH = `${MASTER_DATA_BASE_PATH}/country-codes`;
 
 type RequestMethod = "GET" | "POST" | "PUT";
 
@@ -726,4 +732,24 @@ export async function updateEmployee(options: UpdateEmployeeOptions): Promise<Js
     method: "PUT",
     body: employee,
   });
+}
+
+export async function fetchCountryCodes(options: FetchCountryCodesOptions): Promise<JsonValue> {
+  const { select, filter } = options;
+
+  const body = await sendMasterDataRequest({
+    ...options,
+    path: COUNTRY_CODES_PATH,
+    method: "GET",
+    query: {
+      select,
+      filter,
+    },
+  });
+
+  if (body === undefined) {
+    throw new Error(`${DEFAULT_ERROR_PREFIX}: Expected country codes payload.`);
+  }
+
+  return body;
 }

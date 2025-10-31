@@ -51,6 +51,10 @@ export const masterDataNodeDescription: INodeTypeDescription = {
           name: "Employee",
           value: "employee",
         },
+        {
+          name: "Country Code",
+          value: "countryCode",
+        },
       ],
       default: "client",
     },
@@ -272,6 +276,25 @@ export const masterDataNodeDescription: INodeTypeDescription = {
       default: "getAll",
     },
     {
+      displayName: "Operation",
+      name: "operation",
+      type: "options",
+      displayOptions: {
+        show: {
+          resource: ["countryCode"],
+        },
+      },
+      options: [
+        {
+          name: "Get Many",
+          value: "getAll",
+          description: "Retrieve a list of countries",
+          action: "Get many countries",
+        },
+      ],
+      default: "getAll",
+    },
+    {
       displayName: "Limit",
       name: "top",
       type: "number",
@@ -309,7 +332,7 @@ export const masterDataNodeDescription: INodeTypeDescription = {
       type: "string",
       displayOptions: {
         show: {
-          resource: ["client", "taxAuthority", "relationship", "legalForm", "corporateStructure", "employee"],
+          resource: ["client", "taxAuthority", "relationship", "legalForm", "corporateStructure", "employee", "countryCode"],
           operation: [
             "getAll",
             "get",
@@ -331,7 +354,7 @@ export const masterDataNodeDescription: INodeTypeDescription = {
       type: "string",
       displayOptions: {
         show: {
-          resource: ["client", "taxAuthority", "relationship", "corporateStructure", "employee"],
+          resource: ["client", "taxAuthority", "relationship", "corporateStructure", "employee", "countryCode"],
           operation: ["getAll", "getDeletionLog", "getTypes"],
         },
       },

@@ -125,7 +125,7 @@ export interface UpdateEmployeeParams extends EmployeeOperationParams {
 /**
  * Supported resources
  */
-export type Resource = "client" | "taxAuthority" | "relationship" | "legalForm" | "corporateStructure" | "employee";
+export type Resource = "client" | "taxAuthority" | "relationship" | "legalForm" | "corporateStructure" | "employee" | "countryCode";
 
 /**
  * Supported client operations
@@ -170,9 +170,14 @@ export type CorporateStructureOperation = "getAll" | "get" | "getEstablishment";
 export type EmployeeOperation = "getAll" | "get" | "create" | "update";
 
 /**
+ * Supported country code operations
+ */
+export type CountryCodeOperation = "getAll";
+
+/**
  * All supported operations
  */
-export type Operation = ClientOperation | TaxAuthorityOperation | RelationshipOperation | LegalFormOperation | CorporateStructureOperation | EmployeeOperation;
+export type Operation = ClientOperation | TaxAuthorityOperation | RelationshipOperation | LegalFormOperation | CorporateStructureOperation | EmployeeOperation | CountryCodeOperation;
 
 /**
  * Success response format

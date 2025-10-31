@@ -21,6 +21,7 @@ import {
   fetchEmployee,
   createEmployee,
   updateEmployee,
+  fetchCountryCodes,
   updateClient,
   updateClientCategories,
   updateClientGroups,
@@ -45,6 +46,7 @@ import {
   type FetchEmployeeOptions,
   type CreateEmployeeOptions,
   type UpdateEmployeeOptions,
+  type FetchCountryCodesOptions,
   type UpdateClientCategoriesOptions,
   type UpdateClientGroupsOptions,
   type UpdateClientOptions,
@@ -999,5 +1001,54 @@ describe("updateEmployee", () => {
       display_name: "Updated Employee Name",
       email: "updated.email@example.com"
     });
+  });
+});
+
+describe("fetchCountryCodes", () => {
+  test("requests country codes with optional select and filter", async () => {
+    const calls: FetchCall[] = [];
+
+    const fetchMock = createFetchMock(async (input, init) => {
+      calls.push({ url: new URL(String(input)), init });
+      return createJsonResponse([
+        {
+          id: "DE",
+          name: "Deutschland"
+        },
+        {
+          id: "AT",
+          name: "Österreich"
+        }
+      ], { status: 200 });
+    });
+
+    const options: FetchCountryCodesOptions = {
+      host: "https://api.example.com",
+      token: "token-123",
+      clientInstanceId: "instance-1",
+      select: "id,name",
+      filter: "startswith(name, 'D')",
+      fetchImpl: fetchMock,
+    };
+
+    const response = await fetchCountryCodes(options);
+
+    expect(response).toEqual([
+      {
+        id: "DE",
+        name: "Deutschland"
+      },
+      {
+        id: "AT",
+        name: "Österreich"
+      }
+    ]);
+    expect(calls).toHaveLength(1);
+
+    const [{ url, init }] = calls;
+    expect(url.pathname).toBe("/datevconnect/master-data/v1/country-codes");
+    expect(url.searchParams.get("select")).toBe("id,name");
+    expect(url.searchParams.get("filter")).toBe("startswith(name, 'D')");
+    expect(init?.method).toBe("GET");
   });
 });
