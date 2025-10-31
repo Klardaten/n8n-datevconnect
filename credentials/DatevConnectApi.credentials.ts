@@ -14,9 +14,9 @@ export class DatevConnectApi implements ICredentialType {
 			displayName: 'Host',
 			name: 'host',
 			type: 'string',
-			default: '',
+			default: 'https://api.klardaten.com',
 			required: true,
-			description: 'Base URL of the DATEVconnect service, e.g. https://example.datev.de',
+			description: 'Base URL of the Klardaten DATEVconnect service, e.g. https://api.klardaten.com',
 		},
 		{
 			displayName: 'Email',
@@ -24,7 +24,7 @@ export class DatevConnectApi implements ICredentialType {
 			type: 'string',
 			default: '',
 			required: true,
-			description: 'Account email for DATEVconnect login',
+			description: 'Klardaten user login',
 		},
 		{
 			displayName: 'Password',
@@ -35,7 +35,7 @@ export class DatevConnectApi implements ICredentialType {
 			typeOptions: {
 				password: true,
 			},
-			description: 'Account password for DATEVconnect login',
+			description: 'Klardaten user password',
 		},
 		{
 			displayName: 'Client Instance ID',
@@ -43,7 +43,7 @@ export class DatevConnectApi implements ICredentialType {
 			type: 'string',
 			default: '',
 			required: true,
-			description: 'DATEV client instance identifier used for authentication',
+			description: 'Klardaten client instance identifier',
 		},
 	];
 

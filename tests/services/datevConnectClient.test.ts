@@ -2,9 +2,31 @@ import { describe, expect, test } from "bun:test";
 
 import {
   authenticate,
+  createClient,
+  fetchClient,
+  fetchClientCategories,
+  fetchClientDeletionLog,
+  fetchClientGroups,
+  fetchClientResponsibilities,
   fetchClients,
+  fetchNextFreeClientNumber,
+  updateClient,
+  updateClientCategories,
+  updateClientGroups,
+  updateClientResponsibilities,
   type AuthenticateOptions,
+  type CreateClientOptions,
+  type FetchClientCategoriesOptions,
+  type FetchClientDeletionLogOptions,
+  type FetchClientGroupsOptions,
+  type FetchClientOptions,
+  type FetchClientResponsibilitiesOptions,
   type FetchClientsOptions,
+  type FetchNextFreeClientNumberOptions,
+  type UpdateClientCategoriesOptions,
+  type UpdateClientGroupsOptions,
+  type UpdateClientOptions,
+  type UpdateClientResponsibilitiesOptions,
 } from "../../src/services/datevConnectClient";
 
 type FetchCall = {
@@ -87,7 +109,7 @@ describe("authenticate", () => {
 });
 
 describe("fetchClients", () => {
-  test("requests clients using provided paging options", async () => {
+  test("requests clients using provided query options", async () => {
     const calls: FetchCall[] = [];
 
     const fetchMock = createFetchMock(async (input, init) => {
@@ -101,6 +123,8 @@ describe("fetchClients", () => {
       clientInstanceId: "instance-1",
       top: 10,
       skip: 5,
+      select: "id,name",
+      filter: "status eq active",
       fetchImpl: fetchMock,
     };
 
@@ -110,7 +134,11 @@ describe("fetchClients", () => {
     expect(calls).toHaveLength(1);
 
     const [{ url, init }] = calls;
-    expect(url.toString()).toBe("https://api.example.com/api/clients?top=10&skip=5");
+    expect(url.pathname).toBe("/datevconnect/master-data/v1/clients");
+    expect(url.searchParams.get("top")).toBe("10");
+    expect(url.searchParams.get("skip")).toBe("5");
+    expect(url.searchParams.get("select")).toBe("id,name");
+    expect(url.searchParams.get("filter")).toBe("status eq active");
     expect(init?.method).toBe("GET");
     expect(init?.headers).toMatchObject({
       accept: "application/json",
@@ -138,8 +166,336 @@ describe("fetchClients", () => {
         clientInstanceId: "instance-1",
         fetchImpl: fetchMock,
       }),
-    ).rejects.toThrowError(
-      "DATEVconnect request failed (401 Unauthorized): Something went wrong",
+    ).rejects.toThrowError("DATEVconnect request failed (401 Unauthorized): Something went wrong");
+  });
+});
+
+describe("fetchClient", () => {
+  test("requests a single client with optional select", async () => {
+    const calls: FetchCall[] = [];
+
+    const fetchMock = createFetchMock(async (input, init) => {
+      calls.push({ url: new URL(String(input)), init });
+      return createJsonResponse({ id: "client-1" }, { status: 200 });
+    });
+
+    const options: FetchClientOptions = {
+      host: "https://api.example.com",
+      token: "token-123",
+      clientInstanceId: "instance-1",
+      clientId: "client-1",
+      select: "id,name",
+      fetchImpl: fetchMock,
+    };
+
+    const response = await fetchClient(options);
+
+    expect(response).toEqual({ id: "client-1" });
+    expect(calls).toHaveLength(1);
+
+    const [{ url, init }] = calls;
+    expect(url.pathname).toBe("/datevconnect/master-data/v1/clients/client-1");
+    expect(url.searchParams.get("select")).toBe("id,name");
+    expect(init?.method).toBe("GET");
+  });
+});
+
+describe("createClient", () => {
+  test("creates a client with optional max number", async () => {
+    const calls: FetchCall[] = [];
+
+    const fetchMock = createFetchMock(async (input, init) => {
+      calls.push({ url: new URL(String(input)), init });
+      return new Response(null, { status: 204 });
+    });
+
+    const options: CreateClientOptions = {
+      host: "https://api.example.com",
+      token: "token-123",
+      clientInstanceId: "instance-1",
+      client: { name: "New Client" },
+      maxNumber: 999,
+      fetchImpl: fetchMock,
+    };
+
+    const response = await createClient(options);
+
+    expect(response).toBeUndefined();
+    expect(calls).toHaveLength(1);
+
+    const [{ url, init }] = calls;
+    expect(url.toString()).toBe(
+      "https://api.example.com/datevconnect/master-data/v1/clients?max-number=999",
+    );
+    expect(init?.method).toBe("POST");
+    expect(init?.headers).toMatchObject({
+      authorization: "Bearer token-123",
+    });
+    expect(init?.body).toBeDefined();
+    expect(JSON.parse(String(init?.body))).toEqual({ name: "New Client" });
+  });
+});
+
+describe("updateClient", () => {
+  test("updates a client by id", async () => {
+    const calls: FetchCall[] = [];
+
+    const fetchMock = createFetchMock(async (input, init) => {
+      calls.push({ url: new URL(String(input)), init });
+      return new Response(null, { status: 204 });
+    });
+
+    const options: UpdateClientOptions = {
+      host: "https://api.example.com",
+      token: "token-123",
+      clientInstanceId: "instance-1",
+      clientId: "client-1",
+      client: { note: "Updated note" },
+      fetchImpl: fetchMock,
+    };
+
+    await updateClient(options);
+
+    expect(calls).toHaveLength(1);
+    const [{ url, init }] = calls;
+    expect(url.toString()).toBe(
+      "https://api.example.com/datevconnect/master-data/v1/clients/client-1",
+    );
+    expect(init?.method).toBe("PUT");
+    expect(JSON.parse(String(init?.body))).toEqual({ note: "Updated note" });
+  });
+});
+
+describe("client responsibilities", () => {
+  test("fetches responsibilities for a client", async () => {
+    const calls: FetchCall[] = [];
+
+    const fetchMock = createFetchMock(async (input, init) => {
+      calls.push({ url: new URL(String(input)), init });
+      return createJsonResponse([{ id: 1 }], { status: 200 });
+    });
+
+    const options: FetchClientResponsibilitiesOptions = {
+      host: "https://api.example.com",
+      token: "token-123",
+      clientInstanceId: "instance-1",
+      clientId: "client-1",
+      select: "id,employee_number",
+      fetchImpl: fetchMock,
+    };
+
+    const response = await fetchClientResponsibilities(options);
+
+    expect(response).toEqual([{ id: 1 }]);
+    expect(calls).toHaveLength(1);
+    const [{ url, init }] = calls;
+    expect(url.pathname).toBe(
+      "/datevconnect/master-data/v1/clients/client-1/responsibilities",
+    );
+    expect(url.searchParams.get("select")).toBe("id,employee_number");
+    expect(init?.method).toBe("GET");
+  });
+
+  test("updates responsibilities for a client", async () => {
+    const calls: FetchCall[] = [];
+
+    const fetchMock = createFetchMock(async (input, init) => {
+      calls.push({ url: new URL(String(input)), init });
+      return new Response(null, { status: 204 });
+    });
+
+    const options: UpdateClientResponsibilitiesOptions = {
+      host: "https://api.example.com",
+      token: "token-123",
+      clientInstanceId: "instance-1",
+      clientId: "client-1",
+      responsibilities: [{ id: 1, area_of_responsibility_id: "AB" }],
+      fetchImpl: fetchMock,
+    };
+
+    await updateClientResponsibilities(options);
+
+    expect(calls).toHaveLength(1);
+    const [{ url, init }] = calls;
+    expect(url.toString()).toBe(
+      "https://api.example.com/datevconnect/master-data/v1/clients/client-1/responsibilities",
+    );
+    expect(init?.method).toBe("PUT");
+    expect(JSON.parse(String(init?.body))).toEqual([
+      { id: 1, area_of_responsibility_id: "AB" },
+    ]);
+  });
+});
+
+describe("client categories", () => {
+  test("fetches client categories by client id", async () => {
+    const calls: FetchCall[] = [];
+
+    const fetchMock = createFetchMock(async (input, init) => {
+      calls.push({ url: new URL(String(input)), init });
+      return createJsonResponse([{ id: "cat-1" }], { status: 200 });
+    });
+
+    const options: FetchClientCategoriesOptions = {
+      host: "https://api.example.com",
+      token: "token-123",
+      clientInstanceId: "instance-1",
+      clientId: "client-1",
+      select: "id,name",
+      fetchImpl: fetchMock,
+    };
+
+    const response = await fetchClientCategories(options);
+
+    expect(response).toEqual([{ id: "cat-1" }]);
+    expect(calls).toHaveLength(1);
+
+    const [{ url }] = calls;
+    expect(url.pathname).toBe(
+      "/datevconnect/master-data/v1/clients/client-1/client-categories",
+    );
+    expect(url.searchParams.get("select")).toBe("id,name");
+  });
+
+  test("updates client categories for a client", async () => {
+    const calls: FetchCall[] = [];
+
+    const fetchMock = createFetchMock(async (input, init) => {
+      calls.push({ url: new URL(String(input)), init });
+      return new Response(null, { status: 204 });
+    });
+
+    const options: UpdateClientCategoriesOptions = {
+      host: "https://api.example.com",
+      token: "token-123",
+      clientInstanceId: "instance-1",
+      clientId: "client-1",
+      categories: [{ id: "cat-1" }],
+      fetchImpl: fetchMock,
+    };
+
+    await updateClientCategories(options);
+
+    expect(calls).toHaveLength(1);
+    const [{ url, init }] = calls;
+    expect(url.toString()).toBe(
+      "https://api.example.com/datevconnect/master-data/v1/clients/client-1/client-categories",
+    );
+    expect(JSON.parse(String(init?.body))).toEqual([{ id: "cat-1" }]);
+  });
+});
+
+describe("client groups", () => {
+  test("fetches client groups by client id", async () => {
+    const calls: FetchCall[] = [];
+
+    const fetchMock = createFetchMock(async (input, init) => {
+      calls.push({ url: new URL(String(input)), init });
+      return createJsonResponse([{ id: "group-1" }], { status: 200 });
+    });
+
+    const options: FetchClientGroupsOptions = {
+      host: "https://api.example.com",
+      token: "token-123",
+      clientInstanceId: "instance-1",
+      clientId: "client-1",
+      select: "id,name",
+      fetchImpl: fetchMock,
+    };
+
+    const response = await fetchClientGroups(options);
+
+    expect(response).toEqual([{ id: "group-1" }]);
+    expect(calls).toHaveLength(1);
+    const [{ url }] = calls;
+    expect(url.pathname).toBe(
+      "/datevconnect/master-data/v1/clients/client-1/client-groups",
+    );
+    expect(url.searchParams.get("select")).toBe("id,name");
+  });
+
+  test("updates client groups for a client", async () => {
+    const calls: FetchCall[] = [];
+
+    const fetchMock = createFetchMock(async (input, init) => {
+      calls.push({ url: new URL(String(input)), init });
+      return new Response(null, { status: 204 });
+    });
+
+    const options: UpdateClientGroupsOptions = {
+      host: "https://api.example.com",
+      token: "token-123",
+      clientInstanceId: "instance-1",
+      clientId: "client-1",
+      groups: [{ id: "group-1" }],
+      fetchImpl: fetchMock,
+    };
+
+    await updateClientGroups(options);
+
+    expect(calls).toHaveLength(1);
+    const [{ url, init }] = calls;
+    expect(url.toString()).toBe(
+      "https://api.example.com/datevconnect/master-data/v1/clients/client-1/client-groups",
+    );
+    expect(JSON.parse(String(init?.body))).toEqual([{ id: "group-1" }]);
+  });
+});
+
+describe("fetchClientDeletionLog", () => {
+  test("requests deleted clients with select and filter", async () => {
+    const calls: FetchCall[] = [];
+
+    const fetchMock = createFetchMock(async (input, init) => {
+      calls.push({ url: new URL(String(input)), init });
+      return createJsonResponse([{ id: "client-1" }], { status: 200 });
+    });
+
+    const options: FetchClientDeletionLogOptions = {
+      host: "https://api.example.com",
+      token: "token-123",
+      clientInstanceId: "instance-1",
+      select: "id",
+      filter: "timestamp gt 2020-01-01T00:00:00.000",
+      fetchImpl: fetchMock,
+    };
+
+    const response = await fetchClientDeletionLog(options);
+
+    expect(response).toEqual([{ id: "client-1" }]);
+    expect(calls).toHaveLength(1);
+    const [{ url }] = calls;
+    expect(url.pathname).toBe("/datevconnect/master-data/v1/clients/deletion-log");
+    expect(url.searchParams.get("select")).toBe("id");
+    expect(url.searchParams.get("filter")).toBe("timestamp gt 2020-01-01T00:00:00.000");
+  });
+});
+
+describe("fetchNextFreeClientNumber", () => {
+  test("requests next free number using start and optional range", async () => {
+    const calls: FetchCall[] = [];
+
+    const fetchMock = createFetchMock(async (input, init) => {
+      calls.push({ url: new URL(String(input)), init });
+      return createJsonResponse({ next_free_number: 12345 }, { status: 200 });
+    });
+
+    const options: FetchNextFreeClientNumberOptions = {
+      host: "https://api.example.com",
+      token: "token-123",
+      clientInstanceId: "instance-1",
+      start: 10000,
+      range: 500,
+      fetchImpl: fetchMock,
+    };
+
+    const response = await fetchNextFreeClientNumber(options);
+
+    expect(response).toEqual({ next_free_number: 12345 });
+    expect(calls).toHaveLength(1);
+    const [{ url }] = calls;
+    expect(url.toString()).toBe(
+      "https://api.example.com/datevconnect/master-data/v1/clients/next-free-number?start=10000&range=500",
     );
   });
 });

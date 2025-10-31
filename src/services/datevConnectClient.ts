@@ -17,13 +17,76 @@ export interface AuthenticateResponse extends Record<string, JsonValue> {
   access_token: string;
 }
 
-export interface FetchClientsOptions {
+interface BaseClientRequestOptions {
+  host: string;
+  token: string;
+  clientInstanceId: string;
+  fetchImpl?: typeof fetch;
+}
+
+export interface FetchClientsOptions extends BaseClientRequestOptions {
   host: string;
   token: string;
   clientInstanceId: string;
   top?: number;
   skip?: number;
-  fetchImpl?: typeof fetch;
+  select?: string;
+  filter?: string;
+}
+
+export interface FetchClientOptions extends BaseClientRequestOptions {
+  clientId: string;
+  select?: string;
+}
+
+export interface CreateClientOptions extends BaseClientRequestOptions {
+  client: JsonValue;
+  maxNumber?: number;
+}
+
+export interface UpdateClientOptions extends BaseClientRequestOptions {
+  clientId: string;
+  client: JsonValue;
+}
+
+export interface FetchClientResponsibilitiesOptions extends BaseClientRequestOptions {
+  clientId: string;
+  select?: string;
+}
+
+export interface UpdateClientResponsibilitiesOptions extends BaseClientRequestOptions {
+  clientId: string;
+  responsibilities: JsonValue;
+}
+
+export interface FetchClientCategoriesOptions extends BaseClientRequestOptions {
+  clientId: string;
+  select?: string;
+}
+
+export interface UpdateClientCategoriesOptions extends BaseClientRequestOptions {
+  clientId: string;
+  categories: JsonValue;
+}
+
+export interface FetchClientGroupsOptions extends BaseClientRequestOptions {
+  clientId: string;
+  select?: string;
+}
+
+export interface UpdateClientGroupsOptions extends BaseClientRequestOptions {
+  clientId: string;
+  groups: JsonValue;
+}
+
+export interface FetchClientDeletionLogOptions extends BaseClientRequestOptions {
+  select?: string;
+  filter?: string;
+}
+
+export interface FetchNextFreeClientNumberOptions extends BaseClientRequestOptions {
+  start: number;
+  range?: number;
 }
 
 const JSON_CONTENT_TYPE = "application/json";
@@ -59,7 +122,8 @@ async function readResponseBody(response: Response): Promise<JsonValue | string 
   }
 
   try {
-    return await response.text();
+    const text = await response.text();
+    return text.length > 0 ? text : undefined;
   } catch {
     return undefined;
   }
@@ -130,33 +194,259 @@ export async function authenticate(options: AuthenticateOptions): Promise<Authen
   return body as AuthenticateResponse;
 }
 
-export async function fetchClients(options: FetchClientsOptions): Promise<JsonValue> {
-  const { host, token, clientInstanceId, top, skip, fetchImpl = fetch } = options;
+const MASTER_DATA_BASE_PATH = "datevconnect/master-data/v1";
+const CLIENTS_PATH = `${MASTER_DATA_BASE_PATH}/clients`;
+
+type RequestMethod = "GET" | "POST" | "PUT";
+
+interface ClientRequestOptions {
+  host: string;
+  token: string;
+  clientInstanceId: string;
+  path: string;
+  method: RequestMethod;
+  query?: Record<string, string | number | undefined | null>;
+  body?: JsonValue;
+  fetchImpl?: typeof fetch;
+}
+
+function buildApiUrl(host: string, path: string): URL {
   const baseUrl = normaliseBaseUrl(host);
-  const url = new URL("datevconnect/master-data/v1/clients", baseUrl);
+  const trimmedPath = path.startsWith("/") ? path.slice(1) : path;
+  return new URL(trimmedPath, baseUrl);
+}
 
-  if (typeof top === "number") {
-    url.searchParams.set("top", top.toString());
-  }
+async function sendClientRequest(options: ClientRequestOptions): Promise<JsonValue | undefined> {
+  const { host, token, clientInstanceId, path, method, query, body, fetchImpl = fetch } = options;
+  const url = buildApiUrl(host, path);
 
-  if (typeof skip === "number") {
-    url.searchParams.set("skip", skip.toString());
+  if (query) {
+    for (const [key, value] of Object.entries(query)) {
+      if (value === undefined || value === null) {
+        continue;
+      }
+      url.searchParams.set(key, String(value));
+    }
   }
 
   const response = await fetchImpl(url, {
-    method: "GET",
+    method,
     headers: buildHeaders({
       accept: JSON_CONTENT_TYPE,
       authorization: `Bearer ${token}`,
       "content-type": JSON_CONTENT_TYPE,
       "x-client-instance-id": clientInstanceId,
     }),
+    body: body === undefined ? undefined : JSON.stringify(body),
   });
 
-  const body = await ensureSuccess(response);
+  return ensureSuccess(response);
+}
+
+export async function fetchClients(options: FetchClientsOptions): Promise<JsonValue> {
+  const { top, skip, select, filter } = options;
+
+  const body = await sendClientRequest({
+    ...options,
+    path: CLIENTS_PATH,
+    method: "GET",
+    query: {
+      top,
+      skip,
+      select,
+      filter,
+    },
+  });
 
   if (body === undefined) {
     throw new Error(`${DEFAULT_ERROR_PREFIX}: Expected clients payload.`);
+  }
+
+  return body;
+}
+
+export async function fetchClient(options: FetchClientOptions): Promise<JsonValue> {
+  const { clientId, select } = options;
+  const body = await sendClientRequest({
+    ...options,
+    path: `${CLIENTS_PATH}/${encodeURIComponent(clientId)}`,
+    method: "GET",
+    query: {
+      select,
+    },
+  });
+
+  if (body === undefined) {
+    throw new Error(`${DEFAULT_ERROR_PREFIX}: Expected client payload.`);
+  }
+
+  return body;
+}
+
+export async function createClient(options: CreateClientOptions): Promise<JsonValue | undefined> {
+  const { client, maxNumber } = options;
+
+  return sendClientRequest({
+    ...options,
+    path: CLIENTS_PATH,
+    method: "POST",
+    query: {
+      "max-number": maxNumber,
+    },
+    body: client,
+  });
+}
+
+export async function updateClient(options: UpdateClientOptions): Promise<JsonValue | undefined> {
+  const { clientId, client } = options;
+
+  return sendClientRequest({
+    ...options,
+    path: `${CLIENTS_PATH}/${encodeURIComponent(clientId)}`,
+    method: "PUT",
+    body: client,
+  });
+}
+
+export async function fetchClientResponsibilities(
+  options: FetchClientResponsibilitiesOptions,
+): Promise<JsonValue> {
+  const { clientId, select } = options;
+
+  const body = await sendClientRequest({
+    ...options,
+    path: `${CLIENTS_PATH}/${encodeURIComponent(clientId)}/responsibilities`,
+    method: "GET",
+    query: {
+      select,
+    },
+  });
+
+  if (body === undefined) {
+    throw new Error(`${DEFAULT_ERROR_PREFIX}: Expected responsibilities payload.`);
+  }
+
+  return body;
+}
+
+export async function updateClientResponsibilities(
+  options: UpdateClientResponsibilitiesOptions,
+): Promise<JsonValue | undefined> {
+  const { clientId, responsibilities } = options;
+
+  return sendClientRequest({
+    ...options,
+    path: `${CLIENTS_PATH}/${encodeURIComponent(clientId)}/responsibilities`,
+    method: "PUT",
+    body: responsibilities,
+  });
+}
+
+export async function fetchClientCategories(
+  options: FetchClientCategoriesOptions,
+): Promise<JsonValue> {
+  const { clientId, select } = options;
+
+  const body = await sendClientRequest({
+    ...options,
+    path: `${CLIENTS_PATH}/${encodeURIComponent(clientId)}/client-categories`,
+    method: "GET",
+    query: {
+      select,
+    },
+  });
+
+  if (body === undefined) {
+    throw new Error(`${DEFAULT_ERROR_PREFIX}: Expected client categories payload.`);
+  }
+
+  return body;
+}
+
+export async function updateClientCategories(
+  options: UpdateClientCategoriesOptions,
+): Promise<JsonValue | undefined> {
+  const { clientId, categories } = options;
+
+  return sendClientRequest({
+    ...options,
+    path: `${CLIENTS_PATH}/${encodeURIComponent(clientId)}/client-categories`,
+    method: "PUT",
+    body: categories,
+  });
+}
+
+export async function fetchClientGroups(options: FetchClientGroupsOptions): Promise<JsonValue> {
+  const { clientId, select } = options;
+
+  const body = await sendClientRequest({
+    ...options,
+    path: `${CLIENTS_PATH}/${encodeURIComponent(clientId)}/client-groups`,
+    method: "GET",
+    query: {
+      select,
+    },
+  });
+
+  if (body === undefined) {
+    throw new Error(`${DEFAULT_ERROR_PREFIX}: Expected client groups payload.`);
+  }
+
+  return body;
+}
+
+export async function updateClientGroups(
+  options: UpdateClientGroupsOptions,
+): Promise<JsonValue | undefined> {
+  const { clientId, groups } = options;
+
+  return sendClientRequest({
+    ...options,
+    path: `${CLIENTS_PATH}/${encodeURIComponent(clientId)}/client-groups`,
+    method: "PUT",
+    body: groups,
+  });
+}
+
+export async function fetchClientDeletionLog(
+  options: FetchClientDeletionLogOptions,
+): Promise<JsonValue> {
+  const { select, filter } = options;
+
+  const body = await sendClientRequest({
+    ...options,
+    path: `${CLIENTS_PATH}/deletion-log`,
+    method: "GET",
+    query: {
+      select,
+      filter,
+    },
+  });
+
+  if (body === undefined) {
+    throw new Error(`${DEFAULT_ERROR_PREFIX}: Expected client deletion log payload.`);
+  }
+
+  return body;
+}
+
+export async function fetchNextFreeClientNumber(
+  options: FetchNextFreeClientNumberOptions,
+): Promise<JsonValue> {
+  const { start, range } = options;
+
+  const body = await sendClientRequest({
+    ...options,
+    path: `${CLIENTS_PATH}/next-free-number`,
+    method: "GET",
+    query: {
+      start,
+      range,
+    },
+  });
+
+  if (body === undefined) {
+    throw new Error(`${DEFAULT_ERROR_PREFIX}: Expected next free number payload.`);
   }
 
   return body;
