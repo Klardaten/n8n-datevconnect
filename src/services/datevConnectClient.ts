@@ -104,6 +104,11 @@ export interface FetchRelationshipTypesOptions extends BaseRequestOptions {
   filter?: string;
 }
 
+export interface FetchLegalFormsOptions extends BaseRequestOptions {
+  select?: string;
+  nationalRight?: string;
+}
+
 const JSON_CONTENT_TYPE = "application/json";
 
 const DEFAULT_ERROR_PREFIX = "DATEVconnect request failed";
@@ -214,6 +219,7 @@ const CLIENTS_PATH = `${MASTER_DATA_BASE_PATH}/clients`;
 const TAX_AUTHORITIES_PATH = `${MASTER_DATA_BASE_PATH}/tax-authorities`;
 const RELATIONSHIPS_PATH = `${MASTER_DATA_BASE_PATH}/relationships`;
 const RELATIONSHIP_TYPES_PATH = `${MASTER_DATA_BASE_PATH}/relationship-types`;
+const LEGAL_FORMS_PATH = `${MASTER_DATA_BASE_PATH}/legal-forms`;
 
 type RequestMethod = "GET" | "POST" | "PUT";
 
@@ -533,6 +539,28 @@ export async function fetchRelationshipTypes(
 
   if (body === undefined) {
     throw new Error(`${DEFAULT_ERROR_PREFIX}: Expected relationship types payload.`);
+  }
+
+  return body;
+}
+
+export async function fetchLegalForms(
+  options: FetchLegalFormsOptions,
+): Promise<JsonValue> {
+  const { select, nationalRight } = options;
+
+  const body = await sendMasterDataRequest({
+    ...options,
+    path: LEGAL_FORMS_PATH,
+    method: "GET",
+    query: {
+      select,
+      "national-right": nationalRight,
+    },
+  });
+
+  if (body === undefined) {
+    throw new Error(`${DEFAULT_ERROR_PREFIX}: Expected legal forms payload.`);
   }
 
   return body;

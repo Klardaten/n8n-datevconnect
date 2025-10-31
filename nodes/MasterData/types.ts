@@ -90,7 +90,7 @@ export interface NextFreeNumberParams {
 /**
  * Supported resources
  */
-export type Resource = "client" | "taxAuthority" | "relationship" | "relationshipType";
+export type Resource = "client" | "taxAuthority" | "relationship" | "relationshipType" | "legalForm";
 
 /**
  * Supported client operations
@@ -125,9 +125,14 @@ export type RelationshipOperation = "getAll";
 export type RelationshipTypeOperation = "getAll";
 
 /**
+ * Supported legal form operations
+ */
+export type LegalFormOperation = "getAll";
+
+/**
  * All supported operations
  */
-export type Operation = ClientOperation | TaxAuthorityOperation | RelationshipOperation | RelationshipTypeOperation;
+export type Operation = ClientOperation | TaxAuthorityOperation | RelationshipOperation | RelationshipTypeOperation | LegalFormOperation;
 
 /**
  * Success response format

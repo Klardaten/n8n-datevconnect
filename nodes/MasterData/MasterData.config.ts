@@ -43,6 +43,10 @@ export const masterDataNodeDescription: INodeTypeDescription = {
           name: "Relationship Type",
           value: "relationshipType",
         },
+        {
+          name: "Legal Form",
+          value: "legalForm",
+        },
       ],
       default: "client",
     },
@@ -189,6 +193,25 @@ export const masterDataNodeDescription: INodeTypeDescription = {
       default: "getAll",
     },
     {
+      displayName: "Operation",
+      name: "operation",
+      type: "options",
+      displayOptions: {
+        show: {
+          resource: ["legalForm"],
+        },
+      },
+      options: [
+        {
+          name: "Get Many",
+          value: "getAll",
+          description: "Retrieve a list of legal forms",
+          action: "Get many legal forms",
+        },
+      ],
+      default: "getAll",
+    },
+    {
       displayName: "Limit",
       name: "top",
       type: "number",
@@ -226,7 +249,7 @@ export const masterDataNodeDescription: INodeTypeDescription = {
       type: "string",
       displayOptions: {
         show: {
-          resource: ["client", "taxAuthority", "relationship", "relationshipType"],
+          resource: ["client", "taxAuthority", "relationship", "relationshipType", "legalForm"],
           operation: [
             "getAll",
             "get",
@@ -374,6 +397,29 @@ export const masterDataNodeDescription: INodeTypeDescription = {
       },
       default: 0,
       description: "Optional range for the next free number search",
+    },
+    {
+      displayName: "National Right",
+      name: "nationalRight",
+      type: "options",
+      displayOptions: {
+        show: {
+          resource: ["legalForm"],
+          operation: ["getAll"],
+        },
+      },
+      options: [
+        {
+          name: "German",
+          value: "german",
+        },
+        {
+          name: "Austrian",
+          value: "austrian",
+        },
+      ],
+      default: "",
+      description: "Filter legal forms by national law (German or Austrian)",
     },
   ],
 };

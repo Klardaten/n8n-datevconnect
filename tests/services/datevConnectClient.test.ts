@@ -13,6 +13,7 @@ import {
   fetchTaxAuthorities,
   fetchRelationships,
   fetchRelationshipTypes,
+  fetchLegalForms,
   updateClient,
   updateClientCategories,
   updateClientGroups,
@@ -29,6 +30,7 @@ import {
   type FetchTaxAuthoritiesOptions,
   type FetchRelationshipsOptions,
   type FetchRelationshipTypesOptions,
+  type FetchLegalFormsOptions,
   type UpdateClientCategoriesOptions,
   type UpdateClientGroupsOptions,
   type UpdateClientOptions,
@@ -611,6 +613,55 @@ describe("fetchRelationshipTypes", () => {
     expect(url.pathname).toBe("/datevconnect/master-data/v1/relationship-types");
     expect(url.searchParams.get("select")).toBe("id,name,abbreviation");
     expect(url.searchParams.get("filter")).toBe("standard eq true");
+    expect(init?.method).toBe("GET");
+  });
+});
+
+describe("fetchLegalForms", () => {
+  test("requests legal forms with optional select and national-right", async () => {
+    const calls: FetchCall[] = [];
+
+    const fetchMock = createFetchMock(async (input, init) => {
+      calls.push({ url: new URL(String(input)), init });
+      return createJsonResponse([
+        { 
+          id: "000001", 
+          display_name: "GmbH - Gesellschaft mit beschränkter Haftung",
+          short_name: "GmbH",
+          long_name: "Gesellschaft mit beschränkter Haftung",
+          nation: "DE",
+          type: 3
+        }
+      ], { status: 200 });
+    });
+
+    const options: FetchLegalFormsOptions = {
+      host: "https://api.example.com",
+      token: "token-123",
+      clientInstanceId: "instance-1",
+      select: "id,display_name,nation",
+      nationalRight: "german",
+      fetchImpl: fetchMock,
+    };
+
+    const response = await fetchLegalForms(options);
+
+    expect(response).toEqual([
+      { 
+        id: "000001", 
+        display_name: "GmbH - Gesellschaft mit beschränkter Haftung",
+        short_name: "GmbH",
+        long_name: "Gesellschaft mit beschränkter Haftung",
+        nation: "DE",
+        type: 3
+      }
+    ]);
+    expect(calls).toHaveLength(1);
+
+    const [{ url, init }] = calls;
+    expect(url.pathname).toBe("/datevconnect/master-data/v1/legal-forms");
+    expect(url.searchParams.get("select")).toBe("id,display_name,nation");
+    expect(url.searchParams.get("national-right")).toBe("german");
     expect(init?.method).toBe("GET");
   });
 });
