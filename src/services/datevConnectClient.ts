@@ -94,6 +94,11 @@ export interface FetchTaxAuthoritiesOptions extends BaseRequestOptions {
   filter?: string;
 }
 
+export interface FetchRelationshipsOptions extends BaseRequestOptions {
+  select?: string;
+  filter?: string;
+}
+
 const JSON_CONTENT_TYPE = "application/json";
 
 const DEFAULT_ERROR_PREFIX = "DATEVconnect request failed";
@@ -202,6 +207,7 @@ export async function authenticate(options: AuthenticateOptions): Promise<Authen
 const MASTER_DATA_BASE_PATH = "datevconnect/master-data/v1";
 const CLIENTS_PATH = `${MASTER_DATA_BASE_PATH}/clients`;
 const TAX_AUTHORITIES_PATH = `${MASTER_DATA_BASE_PATH}/tax-authorities`;
+const RELATIONSHIPS_PATH = `${MASTER_DATA_BASE_PATH}/relationships`;
 
 type RequestMethod = "GET" | "POST" | "PUT";
 
@@ -477,6 +483,28 @@ export async function fetchTaxAuthorities(
 
   if (body === undefined) {
     throw new Error(`${DEFAULT_ERROR_PREFIX}: Expected tax authorities payload.`);
+  }
+
+  return body;
+}
+
+export async function fetchRelationships(
+  options: FetchRelationshipsOptions,
+): Promise<JsonValue> {
+  const { select, filter } = options;
+
+  const body = await sendMasterDataRequest({
+    ...options,
+    path: RELATIONSHIPS_PATH,
+    method: "GET",
+    query: {
+      select,
+      filter,
+    },
+  });
+
+  if (body === undefined) {
+    throw new Error(`${DEFAULT_ERROR_PREFIX}: Expected relationships payload.`);
   }
 
   return body;

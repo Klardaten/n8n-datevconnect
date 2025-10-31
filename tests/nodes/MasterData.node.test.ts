@@ -11,6 +11,7 @@ import type {
   FetchClientsOptions,
   FetchNextFreeClientNumberOptions,
   FetchTaxAuthoritiesOptions,
+  FetchRelationshipsOptions,
   JsonValue,
   UpdateClientCategoriesOptions,
   UpdateClientGroupsOptions,
@@ -36,6 +37,7 @@ const realUpdateClientGroups = clientApi.updateClientGroups;
 const realFetchClientDeletionLog = clientApi.fetchClientDeletionLog;
 const realFetchNextFreeClientNumber = clientApi.fetchNextFreeClientNumber;
 const realFetchTaxAuthorities = clientApi.fetchTaxAuthorities;
+const realFetchRelationships = clientApi.fetchRelationships;
 
 const authenticateMock = mock(async () => ({ access_token: "token-123" }));
 const fetchClientsMock = mock(async () => [] as JsonValue);
@@ -51,6 +53,7 @@ const updateClientGroupsMock = mock(async () => undefined);
 const fetchClientDeletionLogMock = mock(async () => [] as JsonValue);
 const fetchNextFreeClientNumberMock = mock(async () => ({ next_free_number: 100 } as JsonValue));
 const fetchTaxAuthoritiesMock = mock(async () => [] as JsonValue);
+const fetchRelationshipsMock = mock(async () => [] as JsonValue);
 
 type InputItem = { json: Record<string, unknown> };
 
@@ -147,6 +150,8 @@ describe("MasterData node", () => {
     fetchNextFreeClientNumberMock.mockImplementation(async () => ({ next_free_number: 100 }));
     fetchTaxAuthoritiesMock.mockClear();
     fetchTaxAuthoritiesMock.mockImplementation(async () => [] as JsonValue);
+    fetchRelationshipsMock.mockClear();
+    fetchRelationshipsMock.mockImplementation(async () => [] as JsonValue);
     clientApi.authenticate = authenticateMock as typeof clientApi.authenticate;
     clientApi.fetchClients = fetchClientsMock as typeof clientApi.fetchClients;
     clientApi.fetchClient = fetchClientMock as typeof clientApi.fetchClient;
@@ -168,6 +173,8 @@ describe("MasterData node", () => {
       fetchNextFreeClientNumberMock as typeof clientApi.fetchNextFreeClientNumber;
     clientApi.fetchTaxAuthorities =
       fetchTaxAuthoritiesMock as typeof clientApi.fetchTaxAuthorities;
+    clientApi.fetchRelationships =
+      fetchRelationshipsMock as typeof clientApi.fetchRelationships;
   });
 
   afterEach(() => {
@@ -185,6 +192,7 @@ describe("MasterData node", () => {
     clientApi.fetchClientDeletionLog = realFetchClientDeletionLog;
     clientApi.fetchNextFreeClientNumber = realFetchNextFreeClientNumber;
     clientApi.fetchTaxAuthorities = realFetchTaxAuthorities;
+    clientApi.fetchRelationships = realFetchRelationships;
   });
 
   test("authenticates once and fetches clients for each input item", async () => {
@@ -285,6 +293,41 @@ describe("MasterData node", () => {
 
     expect(result).toEqual([
       [{ json: { id: "9241", name: "Nürnberg-Zentral" }, pairedItem: { item: 0 } }],
+    ]);
+  });
+
+  test("fetches relationships with select and filter", async () => {
+    fetchRelationshipsMock.mockImplementationOnce(async () => [
+      { id: "rel-1", name: "Has Member" },
+    ]);
+
+    const node = new MasterData();
+    const context = createExecuteContext({
+      parameters: {
+        resource: "relationship",
+        operation: "getAll",
+        select: "id,name",
+        filter: "type_id eq S00058",
+      },
+    });
+
+    const result = await node.execute.call(context as unknown as IExecuteFunctions);
+
+    expect(fetchRelationshipsMock).toHaveBeenCalledTimes(1);
+    const call = fetchRelationshipsMock.mock.calls[0] as unknown as
+      | [FetchRelationshipsOptions]
+      | undefined;
+    expect(call).toBeDefined();
+    expect(call![0]).toMatchObject({
+      host: "https://api.example.com",
+      token: "token-123",
+      clientInstanceId: "instance-1",
+      select: "id,name",
+      filter: "type_id eq S00058",
+    });
+
+    expect(result).toEqual([
+      [{ json: { id: "rel-1", name: "Has Member" }, pairedItem: { item: 0 } }],
     ]);
   });
 

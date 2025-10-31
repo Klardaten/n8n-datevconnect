@@ -19,6 +19,7 @@ import {
   fetchClientResponsibilities,
   fetchClients,
   fetchNextFreeClientNumber,
+  fetchRelationships,
   fetchTaxAuthorities,
   updateClient,
   updateClientCategories,
@@ -41,6 +42,7 @@ export const clientApi = {
   updateClientGroups,
   fetchClientDeletionLog,
   fetchNextFreeClientNumber,
+  fetchRelationships,
   fetchTaxAuthorities,
 };
 
@@ -121,6 +123,10 @@ export class MasterData implements INodeType {
           {
             name: "Tax Authority",
             value: "taxAuthority",
+          },
+          {
+            name: "Relationship",
+            value: "relationship",
           },
         ],
         default: "client",
@@ -230,6 +236,25 @@ export class MasterData implements INodeType {
         default: "getAll",
       },
       {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["relationship"],
+          },
+        },
+        options: [
+          {
+            name: "Get Many",
+            value: "getAll",
+            description: "Retrieve a list of relationships",
+            action: "Get many relationships",
+          },
+        ],
+        default: "getAll",
+      },
+      {
         displayName: "Limit",
         name: "top",
         type: "number",
@@ -267,7 +292,7 @@ export class MasterData implements INodeType {
         type: "string",
         displayOptions: {
           show: {
-            resource: ["client", "taxAuthority"],
+            resource: ["client", "taxAuthority", "relationship"],
             operation: [
               "getAll",
               "get",
@@ -287,7 +312,7 @@ export class MasterData implements INodeType {
         type: "string",
         displayOptions: {
           show: {
-            resource: ["client", "taxAuthority"],
+            resource: ["client", "taxAuthority", "relationship"],
             operation: ["getAll", "getDeletionLog"],
           },
         },
@@ -702,6 +727,27 @@ export class MasterData implements INodeType {
             const filter = getOptionalString("filter");
 
             response = await clientApi.fetchTaxAuthorities({
+              host,
+              token,
+              clientInstanceId,
+              select,
+              filter,
+            });
+            break;
+          }
+          case "relationship": {
+            if (operation !== "getAll") {
+              throw new NodeOperationError(
+                this.getNode(),
+                `The operation "${operation}" is not supported for resource "${resource}".`,
+                { itemIndex },
+              );
+            }
+
+            const select = getOptionalString("select");
+            const filter = getOptionalString("filter");
+
+            response = await clientApi.fetchRelationships({
               host,
               token,
               clientInstanceId,
