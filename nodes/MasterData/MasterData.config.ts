@@ -39,6 +39,10 @@ export const masterDataNodeDescription: INodeTypeDescription = {
           name: "Relationship",
           value: "relationship",
         },
+        {
+          name: "Relationship Type",
+          value: "relationshipType",
+        },
       ],
       default: "client",
     },
@@ -166,6 +170,25 @@ export const masterDataNodeDescription: INodeTypeDescription = {
       default: "getAll",
     },
     {
+      displayName: "Operation",
+      name: "operation",
+      type: "options",
+      displayOptions: {
+        show: {
+          resource: ["relationshipType"],
+        },
+      },
+      options: [
+        {
+          name: "Get Many",
+          value: "getAll",
+          description: "Retrieve a list of relationship types",
+          action: "Get many relationship types",
+        },
+      ],
+      default: "getAll",
+    },
+    {
       displayName: "Limit",
       name: "top",
       type: "number",
@@ -203,7 +226,7 @@ export const masterDataNodeDescription: INodeTypeDescription = {
       type: "string",
       displayOptions: {
         show: {
-          resource: ["client", "taxAuthority", "relationship"],
+          resource: ["client", "taxAuthority", "relationship", "relationshipType"],
           operation: [
             "getAll",
             "get",
@@ -223,7 +246,7 @@ export const masterDataNodeDescription: INodeTypeDescription = {
       type: "string",
       displayOptions: {
         show: {
-          resource: ["client", "taxAuthority", "relationship"],
+          resource: ["client", "taxAuthority", "relationship", "relationshipType"],
           operation: ["getAll", "getDeletionLog"],
         },
       },

@@ -99,6 +99,11 @@ export interface FetchRelationshipsOptions extends BaseRequestOptions {
   filter?: string;
 }
 
+export interface FetchRelationshipTypesOptions extends BaseRequestOptions {
+  select?: string;
+  filter?: string;
+}
+
 const JSON_CONTENT_TYPE = "application/json";
 
 const DEFAULT_ERROR_PREFIX = "DATEVconnect request failed";
@@ -208,6 +213,7 @@ const MASTER_DATA_BASE_PATH = "datevconnect/master-data/v1";
 const CLIENTS_PATH = `${MASTER_DATA_BASE_PATH}/clients`;
 const TAX_AUTHORITIES_PATH = `${MASTER_DATA_BASE_PATH}/tax-authorities`;
 const RELATIONSHIPS_PATH = `${MASTER_DATA_BASE_PATH}/relationships`;
+const RELATIONSHIP_TYPES_PATH = `${MASTER_DATA_BASE_PATH}/relationship-types`;
 
 type RequestMethod = "GET" | "POST" | "PUT";
 
@@ -505,6 +511,28 @@ export async function fetchRelationships(
 
   if (body === undefined) {
     throw new Error(`${DEFAULT_ERROR_PREFIX}: Expected relationships payload.`);
+  }
+
+  return body;
+}
+
+export async function fetchRelationshipTypes(
+  options: FetchRelationshipTypesOptions,
+): Promise<JsonValue> {
+  const { select, filter } = options;
+
+  const body = await sendMasterDataRequest({
+    ...options,
+    path: RELATIONSHIP_TYPES_PATH,
+    method: "GET",
+    query: {
+      select,
+      filter,
+    },
+  });
+
+  if (body === undefined) {
+    throw new Error(`${DEFAULT_ERROR_PREFIX}: Expected relationship types payload.`);
   }
 
   return body;

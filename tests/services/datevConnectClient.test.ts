@@ -12,6 +12,7 @@ import {
   fetchNextFreeClientNumber,
   fetchTaxAuthorities,
   fetchRelationships,
+  fetchRelationshipTypes,
   updateClient,
   updateClientCategories,
   updateClientGroups,
@@ -27,6 +28,7 @@ import {
   type FetchNextFreeClientNumberOptions,
   type FetchTaxAuthoritiesOptions,
   type FetchRelationshipsOptions,
+  type FetchRelationshipTypesOptions,
   type UpdateClientCategoriesOptions,
   type UpdateClientGroupsOptions,
   type UpdateClientOptions,
@@ -562,6 +564,53 @@ describe("fetchRelationships", () => {
     expect(url.pathname).toBe("/datevconnect/master-data/v1/relationships");
     expect(url.searchParams.get("select")).toBe("id,name");
     expect(url.searchParams.get("filter")).toBe("type_id eq S00058");
+    expect(init?.method).toBe("GET");
+  });
+});
+
+describe("fetchRelationshipTypes", () => {
+  test("requests relationship types with optional select and filter", async () => {
+    const calls: FetchCall[] = [];
+
+    const fetchMock = createFetchMock(async (input, init) => {
+      calls.push({ url: new URL(String(input)), init });
+      return createJsonResponse([
+        { 
+          id: "S00051", 
+          abbreviation: "GV", 
+          name: "Gesetzlicher Vertreter des Unternehmens",
+          standard: true,
+          type: 2
+        }
+      ], { status: 200 });
+    });
+
+    const options: FetchRelationshipTypesOptions = {
+      host: "https://api.example.com",
+      token: "token-123",
+      clientInstanceId: "instance-1",
+      select: "id,name,abbreviation",
+      filter: "standard eq true",
+      fetchImpl: fetchMock,
+    };
+
+    const response = await fetchRelationshipTypes(options);
+
+    expect(response).toEqual([
+      { 
+        id: "S00051", 
+        abbreviation: "GV", 
+        name: "Gesetzlicher Vertreter des Unternehmens",
+        standard: true,
+        type: 2
+      }
+    ]);
+    expect(calls).toHaveLength(1);
+
+    const [{ url, init }] = calls;
+    expect(url.pathname).toBe("/datevconnect/master-data/v1/relationship-types");
+    expect(url.searchParams.get("select")).toBe("id,name,abbreviation");
+    expect(url.searchParams.get("filter")).toBe("standard eq true");
     expect(init?.method).toBe("GET");
   });
 });
