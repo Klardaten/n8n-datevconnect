@@ -78,6 +78,8 @@ describe("EmployeeResourceHandler", () => {
 
       expect(fetchEmployeesSpy).toHaveBeenCalledWith({
         ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,name,email",
         filter: "status eq active",
       });
@@ -117,6 +119,8 @@ describe("EmployeeResourceHandler", () => {
 
       expect(fetchEmployeesSpy).toHaveBeenCalledWith({
         ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: undefined,
         filter: undefined,
       });
@@ -314,6 +318,8 @@ describe("EmployeeResourceHandler", () => {
 
       expect(fetchEmployeesSpy).toHaveBeenCalledWith({
         ...customAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,name,email",
         filter: "status eq active",
       });
@@ -365,6 +371,8 @@ describe("EmployeeResourceHandler", () => {
 
       expect(fetchEmployeesSpy).toHaveBeenCalledWith({
         ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,name,status",
         filter: "status eq active",
       });
@@ -383,6 +391,8 @@ describe("EmployeeResourceHandler", () => {
 
       expect(fetchEmployeesSpy).toHaveBeenCalledWith({
         ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,name,email",
         filter: "number gt 1000",
       });

@@ -82,6 +82,8 @@ export interface UpdateClientGroupsOptions extends BaseRequestOptions {
 export interface FetchClientDeletionLogOptions extends BaseRequestOptions {
   select?: string;
   filter?: string;
+  top?: number;
+  skip?: number;
 }
 
 export interface FetchNextFreeClientNumberOptions extends BaseRequestOptions {
@@ -109,11 +111,15 @@ export interface FetchRelationshipTypesOptions extends BaseRequestOptions {
 }
 
 export interface FetchLegalFormsOptions extends BaseRequestOptions {
+  top?: number;
+  skip?: number;
   select?: string;
   nationalRight?: string;
 }
 
 export interface FetchCorporateStructuresOptions extends BaseRequestOptions {
+  top?: number;
+  skip?: number;
   select?: string;
   filter?: string;
 }
@@ -130,6 +136,8 @@ export interface FetchEstablishmentOptions extends BaseRequestOptions {
 }
 
 export interface FetchEmployeesOptions extends BaseRequestOptions {
+  top?: number;
+  skip?: number;
   select?: string;
   filter?: string;
 }
@@ -151,11 +159,15 @@ export interface UpdateEmployeeOptions extends BaseRequestOptions {
 export interface FetchCountryCodesOptions extends BaseRequestOptions {
   select?: string;
   filter?: string;
+  top?: number;
+  skip?: number;
 }
 
 export interface FetchClientGroupTypesOptions extends BaseRequestOptions {
   select?: string;
   filter?: string;
+  top?: number;
+  skip?: number;
 }
 
 export interface FetchClientGroupTypeOptions extends BaseRequestOptions {
@@ -175,6 +187,8 @@ export interface UpdateClientGroupTypeOptions extends BaseRequestOptions {
 export interface FetchClientCategoryTypesOptions extends BaseRequestOptions {
   select?: string;
   filter?: string;
+  top?: number;
+  skip?: number;
 }
 
 export interface FetchClientCategoryTypeOptions extends BaseRequestOptions {
@@ -194,16 +208,22 @@ export interface UpdateClientCategoryTypeOptions extends BaseRequestOptions {
 export interface FetchBanksOptions extends BaseRequestOptions {
   select?: string;
   filter?: string;
+  top?: number;
+  skip?: number;
 }
 
 export interface FetchAreaOfResponsibilitiesOptions extends BaseRequestOptions {
   select?: string;
   filter?: string;
+  top?: number;
+  skip?: number;
 }
 
 export interface FetchAddresseesOptions extends BaseRequestOptions {
   select?: string;
   filter?: string;
+  top?: number;
+  skip?: number;
 }
 
 export interface FetchAddresseeOptions extends BaseRequestOptions {
@@ -225,6 +245,8 @@ export interface UpdateAddresseeOptions extends BaseRequestOptions {
 export interface FetchAddresseesDeletionLogOptions extends BaseRequestOptions {
   select?: string;
   filter?: string;
+  top?: number;
+  skip?: number;
 }
 
 const JSON_CONTENT_TYPE = "application/json";
@@ -564,7 +586,7 @@ export async function updateClientGroups(
 export async function fetchClientDeletionLog(
   options: FetchClientDeletionLogOptions,
 ): Promise<JsonValue> {
-  const { select, filter } = options;
+  const { select, filter, top, skip } = options;
 
   const body = await sendMasterDataRequest({
     ...options,
@@ -573,6 +595,8 @@ export async function fetchClientDeletionLog(
     query: {
       select,
       filter,
+      top,
+      skip,
     },
   });
 
@@ -608,7 +632,7 @@ export async function fetchNextFreeClientNumber(
 export async function fetchTaxAuthorities(
   options: FetchTaxAuthoritiesOptions,
 ): Promise<JsonValue> {
-  const { select, filter } = options;
+  const { select, filter, top, skip } = options;
 
   const body = await sendMasterDataRequest({
     ...options,
@@ -617,6 +641,8 @@ export async function fetchTaxAuthorities(
     query: {
       select,
       filter,
+      top,
+      skip,
     },
   });
 
@@ -630,7 +656,7 @@ export async function fetchTaxAuthorities(
 export async function fetchRelationships(
   options: FetchRelationshipsOptions,
 ): Promise<JsonValue> {
-  const { select, filter } = options;
+  const { select, filter, top, skip } = options;
 
   const body = await sendMasterDataRequest({
     ...options,
@@ -639,6 +665,8 @@ export async function fetchRelationships(
     query: {
       select,
       filter,
+      top,
+      skip,
     },
   });
 
@@ -674,7 +702,7 @@ export async function fetchRelationshipTypes(
 export async function fetchLegalForms(
   options: FetchLegalFormsOptions,
 ): Promise<JsonValue> {
-  const { select, nationalRight } = options;
+  const { select, nationalRight, top, skip } = options;
 
   const body = await sendMasterDataRequest({
     ...options,
@@ -683,6 +711,8 @@ export async function fetchLegalForms(
     query: {
       select,
       "national-right": nationalRight,
+      top,
+      skip,
     },
   });
 
@@ -696,7 +726,7 @@ export async function fetchLegalForms(
 export async function fetchCorporateStructures(
   options: FetchCorporateStructuresOptions,
 ): Promise<JsonValue> {
-  const { select, filter } = options;
+  const { select, filter, top, skip } = options;
 
   const body = await sendMasterDataRequest({
     ...options,
@@ -705,6 +735,8 @@ export async function fetchCorporateStructures(
     query: {
       select,
       filter,
+      top,
+      skip,
     },
   });
 
@@ -758,7 +790,7 @@ export async function fetchEstablishment(
 }
 
 export async function fetchEmployees(options: FetchEmployeesOptions): Promise<JsonValue> {
-  const { select, filter } = options;
+  const { select, filter, top, skip } = options;
 
   const body = await sendMasterDataRequest({
     ...options,
@@ -767,6 +799,8 @@ export async function fetchEmployees(options: FetchEmployeesOptions): Promise<Js
     query: {
       select,
       filter,
+      top,
+      skip,
     },
   });
 
@@ -819,7 +853,7 @@ export async function updateEmployee(options: UpdateEmployeeOptions): Promise<Js
 }
 
 export async function fetchCountryCodes(options: FetchCountryCodesOptions): Promise<JsonValue> {
-  const { select, filter } = options;
+  const { select, filter, top, skip } = options;
 
   const body = await sendMasterDataRequest({
     ...options,
@@ -828,6 +862,8 @@ export async function fetchCountryCodes(options: FetchCountryCodesOptions): Prom
     query: {
       select,
       filter,
+      top,
+      skip,
     },
   });
 
@@ -839,7 +875,7 @@ export async function fetchCountryCodes(options: FetchCountryCodesOptions): Prom
 }
 
 export async function fetchClientGroupTypes(options: FetchClientGroupTypesOptions): Promise<JsonValue> {
-  const { select, filter } = options;
+  const { select, filter, top, skip } = options;
 
   const body = await sendMasterDataRequest({
     ...options,
@@ -848,6 +884,8 @@ export async function fetchClientGroupTypes(options: FetchClientGroupTypesOption
     query: {
       select,
       filter,
+      top,
+      skip,
     },
   });
 
@@ -904,7 +942,7 @@ export async function updateClientGroupType(options: UpdateClientGroupTypeOption
 }
 
 export async function fetchClientCategoryTypes(options: FetchClientCategoryTypesOptions): Promise<JsonValue> {
-  const { select, filter } = options;
+  const { select, filter, top, skip } = options;
 
   const body = await sendMasterDataRequest({
     ...options,
@@ -913,6 +951,8 @@ export async function fetchClientCategoryTypes(options: FetchClientCategoryTypes
     query: {
       select,
       filter,
+      top,
+      skip,
     },
   });
 
@@ -969,7 +1009,7 @@ export async function updateClientCategoryType(options: UpdateClientCategoryType
 }
 
 export async function fetchBanks(options: FetchBanksOptions): Promise<JsonValue> {
-  const { select, filter } = options;
+  const { select, filter, top, skip } = options;
 
   const body = await sendMasterDataRequest({
     ...options,
@@ -978,6 +1018,8 @@ export async function fetchBanks(options: FetchBanksOptions): Promise<JsonValue>
     query: {
       select,
       filter,
+      top,
+      skip,
     },
   });
 
@@ -989,7 +1031,7 @@ export async function fetchBanks(options: FetchBanksOptions): Promise<JsonValue>
 }
 
 export async function fetchAreaOfResponsibilities(options: FetchAreaOfResponsibilitiesOptions): Promise<JsonValue> {
-  const { select, filter } = options;
+  const { select, filter, top, skip } = options;
 
   const body = await sendMasterDataRequest({
     ...options,
@@ -998,6 +1040,8 @@ export async function fetchAreaOfResponsibilities(options: FetchAreaOfResponsibi
     query: {
       select,
       filter,
+      top,
+      skip,
     },
   });
 
@@ -1009,7 +1053,7 @@ export async function fetchAreaOfResponsibilities(options: FetchAreaOfResponsibi
 }
 
 export async function fetchAddressees(options: FetchAddresseesOptions): Promise<JsonValue> {
-  const { select, filter } = options;
+  const { select, filter, top, skip } = options;
 
   const body = await sendMasterDataRequest({
     ...options,
@@ -1018,6 +1062,8 @@ export async function fetchAddressees(options: FetchAddresseesOptions): Promise<
     query: {
       select,
       filter,
+      top,
+      skip,
     },
   });
 
@@ -1078,7 +1124,7 @@ export async function updateAddressee(options: UpdateAddresseeOptions): Promise<
 }
 
 export async function fetchAddresseesDeletionLog(options: FetchAddresseesDeletionLogOptions): Promise<JsonValue> {
-  const { select, filter } = options;
+  const { select, filter, top, skip } = options;
 
   const body = await sendMasterDataRequest({
     ...options,
@@ -1087,6 +1133,8 @@ export async function fetchAddresseesDeletionLog(options: FetchAddresseesDeletio
     query: {
       select,
       filter,
+      top,
+      skip,
     },
   });
 

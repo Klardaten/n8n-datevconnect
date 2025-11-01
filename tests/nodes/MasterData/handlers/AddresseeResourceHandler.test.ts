@@ -86,6 +86,8 @@ describe("AddresseeResourceHandler", () => {
 
       expect(fetchAddresseesSpy).toHaveBeenCalledWith({
         ...mockAuthContext,
+        top: 50,
+        skip: 10,
         select: "id,name",
         filter: "status eq active",
       });
@@ -179,6 +181,8 @@ describe("AddresseeResourceHandler", () => {
 
       expect(fetchAddresseesDeletionLogSpy).toHaveBeenCalledWith({
         ...mockAuthContext,
+        top: 50,
+        skip: 10,
         select: "id,name",
         filter: "status eq active",
       });

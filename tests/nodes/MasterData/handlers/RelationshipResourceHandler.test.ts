@@ -70,6 +70,8 @@ describe("RelationshipResourceHandler", () => {
 
       expect(fetchRelationshipsSpy).toHaveBeenCalledWith({
         ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,type,status",
         filter: "status eq active",
       });
@@ -109,6 +111,8 @@ describe("RelationshipResourceHandler", () => {
 
       expect(fetchRelationshipsSpy).toHaveBeenCalledWith({
         ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: undefined,
         filter: undefined,
       });
@@ -243,6 +247,8 @@ describe("RelationshipResourceHandler", () => {
 
       expect(fetchRelationshipsSpy).toHaveBeenCalledWith({
         ...customAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,type,status",
         filter: "status eq active",
       });

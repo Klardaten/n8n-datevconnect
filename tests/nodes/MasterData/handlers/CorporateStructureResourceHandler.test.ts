@@ -99,6 +99,8 @@ describe("CorporateStructureResourceHandler", () => {
 
       expect(fetchCorporateStructuresSpy).toHaveBeenCalledWith({
         ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,name,number",
         filter: "status eq active",
       });
@@ -140,6 +142,8 @@ describe("CorporateStructureResourceHandler", () => {
 
       expect(fetchCorporateStructuresSpy).toHaveBeenCalledWith({
         ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: undefined,
         filter: undefined,
       });
@@ -359,6 +363,8 @@ describe("CorporateStructureResourceHandler", () => {
 
       expect(fetchCorporateStructuresSpy).toHaveBeenCalledWith({
         ...customAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,name,number",
         filter: "status eq active",
       });
@@ -417,6 +423,8 @@ describe("CorporateStructureResourceHandler", () => {
 
       expect(fetchCorporateStructuresSpy).toHaveBeenCalledWith({
         ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,name,status,establishments,functional_areas",
         filter: "status eq active",
       });
@@ -438,6 +446,8 @@ describe("CorporateStructureResourceHandler", () => {
 
       expect(fetchCorporateStructuresSpy).toHaveBeenCalledWith({
         ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,name,number",
         filter: "contains(name, 'Muster')",
       });

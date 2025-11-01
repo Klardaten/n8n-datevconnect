@@ -82,14 +82,12 @@ describe("ClientCategoryTypeResourceHandler", () => {
       await handler.execute("getAll", mockAuthContext, returnData);
 
       expect(fetchClientCategoryTypesSpy).toHaveBeenCalledWith({
-        host: "https://api.example.com",
-        token: "test-token",
-        clientInstanceId: "instance-1",
+        ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,name,short_name",
         filter: "startswith(name, 'Test')",
-      });
-
-      expect(returnData).toHaveLength(2);
+      });      expect(returnData).toHaveLength(2);
       expect(returnData[0].json).toEqual({ id: "c43f9c3g-380c-494e-47c8-d12fff738188", name: "Test Category Type", short_name: "TCT" });
       expect(returnData[1].json).toEqual({ id: "d54g8d4h-491d-495f-48d9-e23ggg849199", name: "Another Category Type", short_name: "ACT" });
     });
@@ -127,6 +125,8 @@ describe("ClientCategoryTypeResourceHandler", () => {
         host: "https://api.example.com",
         token: "test-token",
         clientInstanceId: "instance-1",
+        top: 100,
+        skip: 0,
         select: undefined,
         filter: undefined,
       });

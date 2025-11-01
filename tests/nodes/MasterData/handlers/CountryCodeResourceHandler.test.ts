@@ -67,9 +67,9 @@ describe("CountryCodeResourceHandler", () => {
       await handler.execute("getAll", mockAuthContext, returnData);
 
       expect(fetchCountryCodesSpy).toHaveBeenCalledWith({
-        host: "https://api.example.com",
-        token: "test-token",
-        clientInstanceId: "instance-1",
+        ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,name",
         filter: "startswith(name, 'D')",
       });
@@ -112,6 +112,8 @@ describe("CountryCodeResourceHandler", () => {
         host: "https://api.example.com",
         token: "test-token",
         clientInstanceId: "instance-1",
+        top: 100,
+        skip: 0,
         select: undefined,
         filter: undefined,
       });

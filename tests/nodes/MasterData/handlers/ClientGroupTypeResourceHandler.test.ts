@@ -81,10 +81,10 @@ describe("ClientGroupTypeResourceHandler", () => {
 
       await handler.execute("getAll", mockAuthContext, returnData);
 
-      expect(fetchClientGroupTypesSpy).toHaveBeenCalledWith({
-        host: "https://api.example.com",
-        token: "test-token",
-        clientInstanceId: "instance-1",
+            expect(fetchClientGroupTypesSpy).toHaveBeenCalledWith({
+        ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,name,short_name",
         filter: "startswith(name, 'Test')",
       });
@@ -127,6 +127,8 @@ describe("ClientGroupTypeResourceHandler", () => {
         host: "https://api.example.com",
         token: "test-token",
         clientInstanceId: "instance-1",
+        top: 100,
+        skip: 0,
         select: undefined,
         filter: undefined,
       });

@@ -71,9 +71,9 @@ describe("BankResourceHandler", () => {
       await handler.execute("getAll", mockAuthContext, returnData);
 
       expect(fetchBanksSpy).toHaveBeenCalledWith({
-        host: "https://api.example.com",
-        token: "test-token",
-        clientInstanceId: "instance-1",
+        ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,name,city",
         filter: "city eq Nürnberg",
       });
@@ -115,9 +115,9 @@ describe("BankResourceHandler", () => {
       await handler.execute("getAll", mockAuthContext, returnData);
 
       expect(fetchBanksSpy).toHaveBeenCalledWith({
-        host: "https://api.example.com",
-        token: "test-token",
-        clientInstanceId: "instance-1",
+        ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: undefined,
         filter: undefined,
       });

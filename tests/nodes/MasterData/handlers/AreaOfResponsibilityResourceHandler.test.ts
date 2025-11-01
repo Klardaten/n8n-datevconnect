@@ -73,9 +73,9 @@ describe("AreaOfResponsibilityResourceHandler", () => {
       await handler.execute("getAll", mockAuthContext, returnData);
 
       expect(fetchAreaOfResponsibilitiesSpy).toHaveBeenCalledWith({
-        host: "https://api.example.com",
-        token: "test-token",
-        clientInstanceId: "instance-1",
+        ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,name,status",
         filter: "status eq active",
       });
@@ -119,9 +119,9 @@ describe("AreaOfResponsibilityResourceHandler", () => {
       await handler.execute("getAll", mockAuthContext, returnData);
 
       expect(fetchAreaOfResponsibilitiesSpy).toHaveBeenCalledWith({
-        host: "https://api.example.com",
-        token: "test-token",
-        clientInstanceId: "instance-1",
+        ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: undefined,
         filter: undefined,
       });

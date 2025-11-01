@@ -55,11 +55,15 @@ export class AddresseeResourceHandler extends BaseResourceHandler {
   }
 
   private async handleGetAll(authContext: AuthContext): Promise<JsonValue> {
+    const top = this.getNumberParameter("top", 100);
+    const skip = this.getNumberParameter("skip", 0);
     const select = this.getOptionalString("select");
     const filter = this.getOptionalString("filter");
 
     return await fetchAddressees({
       ...authContext,
+      top,
+      skip,
       select,
       filter,
     });
@@ -103,11 +107,15 @@ export class AddresseeResourceHandler extends BaseResourceHandler {
   }
 
   private async handleGetDeletionLog(authContext: AuthContext): Promise<JsonValue> {
+    const top = this.getNumberParameter("top", 100);
+    const skip = this.getNumberParameter("skip", 0);
     const select = this.getOptionalString("select");
     const filter = this.getOptionalString("filter");
 
     return await fetchAddresseesDeletionLog({
       ...authContext,
+      top,
+      skip,
       select,
       filter,
     });

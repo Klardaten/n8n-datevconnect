@@ -67,6 +67,8 @@ describe("TaxAuthorityResourceHandler", () => {
 
       expect(fetchTaxAuthoritiesSpy).toHaveBeenCalledWith({
         ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,name,code",
         filter: "active eq true",
       });
@@ -106,6 +108,8 @@ describe("TaxAuthorityResourceHandler", () => {
 
       expect(fetchTaxAuthoritiesSpy).toHaveBeenCalledWith({
         ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: undefined,
         filter: undefined,
       });
@@ -176,6 +180,8 @@ describe("TaxAuthorityResourceHandler", () => {
 
       expect(fetchTaxAuthoritiesSpy).toHaveBeenCalledWith({
         ...customAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,name,code",
         filter: "active eq true",
       });

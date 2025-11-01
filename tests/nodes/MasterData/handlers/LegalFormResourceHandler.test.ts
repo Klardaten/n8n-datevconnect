@@ -81,6 +81,8 @@ describe("LegalFormResourceHandler", () => {
 
       expect(fetchLegalFormsSpy).toHaveBeenCalledWith({
         ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,display_name,nation",
         nationalRight: "german",
       });
@@ -137,6 +139,8 @@ describe("LegalFormResourceHandler", () => {
 
       expect(fetchLegalFormsSpy).toHaveBeenCalledWith({
         ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: undefined,
         nationalRight: undefined,
       });
@@ -170,6 +174,8 @@ describe("LegalFormResourceHandler", () => {
 
       expect(fetchLegalFormsSpy).toHaveBeenCalledWith({
         ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,display_name,nation,type",
         nationalRight: "austrian",
       });
@@ -290,6 +296,8 @@ describe("LegalFormResourceHandler", () => {
 
       expect(fetchLegalFormsSpy).toHaveBeenCalledWith({
         ...customAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,display_name,nation",
         nationalRight: "german",
       });
@@ -348,6 +356,8 @@ describe("LegalFormResourceHandler", () => {
 
       expect(fetchLegalFormsSpy).toHaveBeenCalledWith({
         ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,short_name,long_name,type",
         nationalRight: "german",
       });
@@ -369,6 +379,8 @@ describe("LegalFormResourceHandler", () => {
 
       expect(fetchLegalFormsSpy).toHaveBeenCalledWith({
         ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,display_name,nation",
         nationalRight: "austrian",
       });
@@ -390,6 +402,8 @@ describe("LegalFormResourceHandler", () => {
 
       expect(fetchLegalFormsSpy).toHaveBeenCalledWith({
         ...mockAuthContext,
+        top: 100,
+        skip: 0,
         select: "id,display_name,nation",
         nationalRight: undefined, // Empty string should be converted to undefined
       });
