@@ -90,12 +90,16 @@ export interface FetchNextFreeClientNumberOptions extends BaseRequestOptions {
 }
 
 export interface FetchTaxAuthoritiesOptions extends BaseRequestOptions {
+  top?: number;
+  skip?: number;
   select?: string;
   filter?: string;
 }
 
 export interface FetchRelationshipsOptions extends BaseRequestOptions {
-  select?: string;
+  top?: number;
+  skip?: number;
+  select?: string;  
   filter?: string;
 }
 

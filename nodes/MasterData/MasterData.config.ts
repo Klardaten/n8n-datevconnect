@@ -476,7 +476,7 @@ export const masterDataNodeDescription: INodeTypeDescription = {
       displayOptions: {
         show: {
           resource: ["client"],
-          operation: ["getAll"],
+          operation: ["getAll", "getDeletionLog"],
         },
       },
       typeOptions: {
@@ -492,7 +492,39 @@ export const masterDataNodeDescription: INodeTypeDescription = {
       displayOptions: {
         show: {
           resource: ["client"],
-          operation: ["getAll"],
+          operation: ["getAll", "getDeletionLog"],
+        },
+      },
+      typeOptions: {
+        minValue: 0,
+      },
+      default: 0,
+      description: "Number of records to skip from the start",
+    },
+    {
+      displayName: "Limit",
+      name: "top",
+      type: "number",
+      displayOptions: {
+        show: {
+          resource: ["taxAuthority", "relationship", "legalForm", "corporateStructure", "employee", "countryCode", "clientGroupType", "clientCategoryType", "bank", "areaOfResponsibility", "addressee"],
+          operation: ["getAll", "getDeletionLog"],
+        },
+      },
+      typeOptions: {
+        minValue: 1,
+      },
+      default: 100,
+      description: "Maximum number of records to return",
+    },
+    {
+      displayName: "Skip",
+      name: "skip",
+      type: "number",
+      displayOptions: {
+        show: {
+          resource: ["taxAuthority", "relationship", "legalForm", "corporateStructure", "employee", "countryCode", "clientGroupType", "clientCategoryType", "bank", "areaOfResponsibility", "addressee"],
+          operation: ["getAll", "getDeletionLog"],
         },
       },
       typeOptions: {
