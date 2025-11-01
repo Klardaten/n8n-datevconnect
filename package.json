@@ -12,7 +12,8 @@
   ],
   "n8n": {
     "nodes": [
-      "dist/nodes/MasterData/MasterData.node.js"
+      "dist/nodes/MasterData/MasterData.node.js",
+      "dist/nodes/Accounting/Accounting.node.js"
     ],
     "credentials": [
       "dist/credentials/DatevConnectApi.credentials.js"
