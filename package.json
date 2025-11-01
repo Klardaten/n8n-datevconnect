@@ -23,7 +23,7 @@
   "private": true,
   "scripts": {
     "clean": "rm -rf dist && mkdir -p dist/nodes dist/credentials",
-    "build": "bun run clean && sh -c 'NODES=$(find nodes -name \"*.node.ts\" -print) && [ -z \"$NODES\" ] || bun build $NODES --outdir dist/nodes --format cjs --target=node --external n8n-workflow --external n8n-core' && sh -c 'CREDS=$(find credentials -name \"*.credentials.ts\" -print) && [ -z \"$CREDS\" ] || bun build $CREDS --outdir dist/credentials --format cjs --target=node --external n8n-workflow --external n8n-core'",
+    "build": "bun run clean && sh -c 'NODES=$(find nodes -name \"*.node.ts\" -print) && [ -z \"$NODES\" ] || bun build $NODES --outdir dist/nodes --format cjs --target=node --external n8n-workflow --external n8n-core' && sh -c 'CREDS=$(find credentials -name \"*.credentials.ts\" -print) && [ -z \"$CREDS\" ] || bun build $CREDS --outdir dist/credentials --format cjs --target=node --external n8n-workflow --external n8n-core' && cp nodes/klardaten.svg dist/nodes/",
     "watch": "bun run clean && sh -c 'NODES=$(find nodes -name \"*.node.ts\" -print) && [ -z \"$NODES\" ] || bun build $NODES --outdir dist/nodes --format cjs --target=node --external n8n-workflow --external n8n-core --watch' & sh -c 'CREDS=$(find credentials -name \"*.credentials.ts\" -print) && [ -z \"$CREDS\" ] || bun build $CREDS --outdir dist/credentials --format cjs --target=node --external n8n-workflow --external n8n-core --watch'",
     "lint": "eslint --ext .ts,.tsx --max-warnings 0 .",
     "test": "bun test",
