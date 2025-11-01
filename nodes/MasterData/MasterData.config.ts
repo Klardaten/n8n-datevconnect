@@ -6,7 +6,7 @@ import type { INodeTypeDescription } from "n8n-workflow";
 export const masterDataNodeDescription: INodeTypeDescription = {
   displayName: "Klardaten DATEVconnect: Master Data",
   name: "masterData",
-  icon: "file:datevConnect.svg",
+  icon: "file:klardaten.svg",
   group: ["transform"],
   version: 1,
   description: "Interact with master data resources",

@@ -1,5 +1,23 @@
 {
-  "name": "n8n-datevconnect-masterdata",
+  "name": "n8n-datevconnect",
+  "version": "1.0.0",
+  "description": "n8n community node for DATEVconnect API via Klardaten Gateway",
+  "keywords": [
+    "n8n",
+    "n8n-community-node-package",
+    "klardaten",
+    "datev",
+    "datevconnect",
+    "master-data"
+  ],
+  "n8n": {
+    "nodes": [
+      "dist/nodes/MasterData/MasterData.node.js"
+    ],
+    "credentials": [
+      "dist/credentials/DatevConnectApi.credentials.js"
+    ]
+  },
   "type": "module",
   "module": "index.ts",
   "private": true,
