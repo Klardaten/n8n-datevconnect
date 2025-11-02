@@ -1,117 +1,130 @@
 import type { IExecuteFunctions, INodeExecutionData } from "n8n-workflow";
+import { NodeOperationError } from "n8n-workflow";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 import { datevConnectClient } from "../../../src/services/accountingClient";
+
+type CostSequencesOperation = "getAll" | "get" | "create" | "getCostAccountingRecords";
+
+interface AuthContext {
+  clientId: string;
+  fiscalYearId: string;
+}
 
 /**
  * Handler for Cost Sequences operations
  * Manages operations related to cost accounting sequences
  */
 export class CostSequencesResourceHandler extends BaseResourceHandler {
-  private operation: string;
-
-  constructor(executeFunctions: IExecuteFunctions) {
-    super(executeFunctions);
-    this.operation = executeFunctions.getNodeParameter("operation", 0) as string;
+  constructor(context: IExecuteFunctions, itemIndex: number) {
+    super(context, itemIndex);
   }
 
-  async execute(): Promise<INodeExecutionData[]> {
-    switch (this.operation) {
+  async execute(
+    operation: CostSequencesOperation,
+    authContext: AuthContext,
+    returnData: INodeExecutionData[]
+  ): Promise<void> {
+    switch (operation) {
       case "getAll":
-        return this.getAllCostSequences();
+        await this.handleGetAll(authContext, returnData);
+        break;
       case "get":
-        return this.getCostSequence();
+        await this.handleGet(authContext, returnData);
+        break;
       case "create":
-        return this.createCostSequence();
+        await this.handleCreate(authContext, returnData);
+        break;
       case "getCostAccountingRecords":
-        return this.getCostAccountingRecords();
+        await this.handleGetCostAccountingRecords(authContext, returnData);
+        break;
       default:
-        throw new Error(`Unknown operation: ${this.operation}`);
+        throw new NodeOperationError(this.context.getNode(), `Unknown operation: ${operation}`, {
+          itemIndex: this.itemIndex,
+        });
     }
   }
 
-  private async getAllCostSequences(): Promise<INodeExecutionData[]> {
+  private async handleGetAll(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const costSystemId = this.executeFunctions.getNodeParameter("costSystemId", 0) as string;
+      const costSystemId = this.getRequiredString("costSystemId");
       const queryParams = this.buildQueryParams();
       const costSequences = await datevConnectClient.accounting.getCostSequences(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         costSystemId,
         queryParams
       );
-      return this.wrapData(costSequences as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(costSequences);
     } catch (error) {
-      this.handleApiError(error, "Get all cost sequences");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getCostSequence(): Promise<INodeExecutionData[]> {
+  private async handleGet(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const costSystemId = this.executeFunctions.getNodeParameter("costSystemId", 0) as string;
-      const costSequenceId = this.executeFunctions.getNodeParameter("costSequenceId", 0) as string;
+      const costSystemId = this.getRequiredString("costSystemId");
+      const costSequenceId = this.getRequiredString("costSequenceId");
       const queryParams = this.buildQueryParams();
       const costSequence = await datevConnectClient.accounting.getCostSequence(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         costSystemId,
         costSequenceId,
         queryParams
       );
-      return this.wrapData(costSequence as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(costSequence);
     } catch (error) {
-      this.handleApiError(error, "Get cost sequence");
+      this.handleError(error, returnData);
     }
   }
 
-  private async createCostSequence(): Promise<INodeExecutionData[]> {
+  private async handleCreate(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const costSystemId = this.executeFunctions.getNodeParameter("costSystemId", 0) as string;
-      const costSequenceId = this.executeFunctions.getNodeParameter("costSequenceId", 0) as string;
-      const costSequenceData = this.executeFunctions.getNodeParameter("costSequenceData", 0) as object;
+      const costSystemId = this.getRequiredString("costSystemId");
+      const costSequenceId = this.getRequiredString("costSequenceId");
+      const costSequenceDataRaw = this.context.getNodeParameter("costSequenceData", this.itemIndex);
+      const costSequenceData = this.parseJsonParameter(costSequenceDataRaw, "costSequenceData");
+      
       const result = await datevConnectClient.accounting.createCostSequence(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         costSystemId,
         costSequenceId,
         costSequenceData
       );
-      return this.wrapData(result as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(result);
     } catch (error) {
-      this.handleApiError(error, "Create cost sequence");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getCostAccountingRecords(): Promise<INodeExecutionData[]> {
+  private async handleGetCostAccountingRecords(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const costSystemId = this.executeFunctions.getNodeParameter("costSystemId", 0) as string;
-      const costSequenceId = this.executeFunctions.getNodeParameter("costSequenceId", 0) as string;
+      const costSystemId = this.getRequiredString("costSystemId");
+      const costSequenceId = this.getRequiredString("costSequenceId");
       const queryParams = this.buildQueryParams();
       const costAccountingRecords = await datevConnectClient.accounting.getCostAccountingRecords(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         costSystemId,
         costSequenceId,
         queryParams
       );
-      return this.wrapData(costAccountingRecords as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(costAccountingRecords);
     } catch (error) {
-      this.handleApiError(error, "Get cost accounting records");
+      this.handleError(error, returnData);
     }
   }
 }

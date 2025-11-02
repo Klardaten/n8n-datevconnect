@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, test } from "bun:test";
 import { Accounting } from "../../nodes/Accounting/Accounting.node";
 
@@ -18,7 +19,7 @@ describe("Accounting node", () => {
     const resourceOptions = (resourceProperty as any)?.options;
     expect(resourceOptions).toHaveLength(20);
     
-    const resourceValues = resourceOptions.map((opt: any) => opt.value);
+    const resourceValues = resourceOptions?.map((opt: any) => opt.value);
     expect(resourceValues).toContain("client");
     expect(resourceValues).toContain("fiscalYear"); 
     expect(resourceValues).toContain("accountsReceivable");

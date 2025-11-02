@@ -1,85 +1,96 @@
 import type { IExecuteFunctions, INodeExecutionData } from "n8n-workflow";
+import { NodeOperationError } from "n8n-workflow";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 import { datevConnectClient } from "../../../src/services/accountingClient";
+
+type AccountsPayableOperation = "getAll" | "get" | "getCondensed";
+
+interface AuthContext {
+  clientId: string;
+  fiscalYearId: string;
+}
 
 /**
  * Handler for Accounts Payable operations
  * Manages operations related to accounts payable (open items on the payable side)
  */
 export class AccountsPayableResourceHandler extends BaseResourceHandler {
-  private operation: string;
-
-  constructor(executeFunctions: IExecuteFunctions) {
-    super(executeFunctions);
-    this.operation = executeFunctions.getNodeParameter("operation", 0) as string;
+  constructor(context: IExecuteFunctions, itemIndex: number) {
+    super(context, itemIndex);
   }
 
-  async execute(): Promise<INodeExecutionData[]> {
-    switch (this.operation) {
+  async execute(
+    operation: AccountsPayableOperation,
+    authContext: AuthContext,
+    returnData: INodeExecutionData[]
+  ): Promise<void> {
+    switch (operation) {
       case "getAll":
-        return this.getAllAccountsPayable();
+        await this.handleGetAll(authContext, returnData);
+        break;
       case "get":
-        return this.getAccountPayable();
+        await this.handleGet(authContext, returnData);
+        break;
       case "getCondensed":
-        return this.getCondensedAccountsPayable();
+        await this.handleGetCondensed(authContext, returnData);
+        break;
       default:
-        throw new Error(`Unknown operation: ${this.operation}`);
+        throw new NodeOperationError(this.context.getNode(), `Unknown operation: ${operation}`, {
+          itemIndex: this.itemIndex,
+        });
     }
   }
 
-  private async getAllAccountsPayable(): Promise<INodeExecutionData[]> {
+  private async handleGetAll(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
       const queryParams = this.buildQueryParams();
       const accountsPayable = await datevConnectClient.accounting.getAccountsPayable(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         queryParams
       );
-      return this.wrapData(accountsPayable as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(accountsPayable);
     } catch (error) {
-      this.handleApiError(error, "Get all accounts payable");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getAccountPayable(): Promise<INodeExecutionData[]> {
+  private async handleGet(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const accountsPayableId = this.executeFunctions.getNodeParameter("accountsPayableId", 0) as string;
+      const accountsPayableId = this.getRequiredString("accountsPayableId");
       const queryParams = this.buildQueryParams();
       const accountPayable = await datevConnectClient.accounting.getAccountPayable(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         accountsPayableId,
         queryParams
       );
-      return this.wrapData(accountPayable as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(accountPayable);
     } catch (error) {
-      this.handleApiError(error, "Get account payable");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getCondensedAccountsPayable(): Promise<INodeExecutionData[]> {
+  private async handleGetCondensed(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
       const queryParams = this.buildQueryParams();
       const condensedAccountsPayable = await datevConnectClient.accounting.getAccountsPayableCondensed(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         queryParams
       );
-      return this.wrapData(condensedAccountsPayable as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(condensedAccountsPayable);
     } catch (error) {
-      this.handleApiError(error, "Get condensed accounts payable");
+      this.handleError(error, returnData);
     }
   }
 }

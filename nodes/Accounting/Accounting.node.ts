@@ -4,9 +4,12 @@ import type {
   INodeType,
   INodeTypeDescription,
 } from "n8n-workflow";
+import { NodeOperationError, NodeApiError } from "n8n-workflow";
+import { authenticate } from "../../src/services/datevConnectClient";
 
 import { accountingNodeDescription } from "./Accounting.config";
 import { 
+  BaseResourceHandler,
   ClientResourceHandler,
   FiscalYearResourceHandler,
   AccountsReceivableResourceHandler,
@@ -61,81 +64,124 @@ export class Accounting implements INodeType {
     const items = this.getInputData();
     const returnData: INodeExecutionData[] = [];
 
+    // Get and validate credentials
+    const credentials = (await this.getCredentials("datevConnectApi")) as
+      | {
+          host: string;
+          email: string;
+          password: string;
+          clientInstanceId: string;
+          clientId: string;
+          fiscalYearId: string;
+        }
+      | null;
+
+    if (!credentials) {
+      throw new NodeOperationError(this.getNode(), "DATEVconnect credentials are missing");
+    }
+
+    const { host, email, password, clientInstanceId, clientId, fiscalYearId } = credentials;
+
+    if (!host || !email || !password || !clientInstanceId || !clientId || !fiscalYearId) {
+      throw new NodeOperationError(
+        this.getNode(),
+        "All DATEVconnect credential fields must be provided"
+      );
+    }
+
+    // Authenticate once for all items
+    let token: string;
+    try {
+      const authResponse = await authenticate({
+        host,
+        email,
+        password,
+      });
+      token = authResponse.access_token;
+    } catch (error) {
+      throw new NodeApiError(this.getNode(), { 
+        message: error instanceof Error ? error.message : String(error)
+      });
+    }
+
+    // Create authentication context
+    const authContext = { host, token, clientInstanceId, clientId, fiscalYearId };
+
     for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
       try {
         // Get resource and operation from node parameters
         const resource = this.getNodeParameter("resource", itemIndex) as string;
+        const operation = this.getNodeParameter("operation", itemIndex) as string;
         
         // Get the appropriate handler for this resource
-        let handler;
+        let handler: BaseResourceHandler;
         switch (resource) {
           case "client":
-            handler = new ClientResourceHandler(this);
+            handler = new ClientResourceHandler(this, itemIndex);
             break;
           case "fiscalYear":
-            handler = new FiscalYearResourceHandler(this);
+            handler = new FiscalYearResourceHandler(this, itemIndex);
             break;
           case "accountsReceivable":
-            handler = new AccountsReceivableResourceHandler(this);
+            handler = new AccountsReceivableResourceHandler(this, itemIndex);
             break;
           case "accountsPayable":
-            handler = new AccountsPayableResourceHandler(this);
+            handler = new AccountsPayableResourceHandler(this, itemIndex);
             break;
           case "accountPosting":
-            handler = new AccountPostingResourceHandler(this);
+            handler = new AccountPostingResourceHandler(this, itemIndex);
             break;
           case "accountingSequence":
-            handler = new AccountingSequenceResourceHandler(this);
+            handler = new AccountingSequenceResourceHandler(this, itemIndex);
             break;
           case "postingProposals":
-            handler = new PostingProposalsResourceHandler(this);
+            handler = new PostingProposalsResourceHandler(this, itemIndex);
             break;
           case "accountingSumsAndBalances":
-            handler = new AccountingSumsAndBalancesResourceHandler(this);
+            handler = new AccountingSumsAndBalancesResourceHandler(this, itemIndex);
             break;
           case "businessPartners":
-            handler = new BusinessPartnersResourceHandler(this);
+            handler = new BusinessPartnersResourceHandler(this, itemIndex);
             break;
           case "generalLedgerAccounts":
-            handler = new GeneralLedgerAccountsResourceHandler(this);
+            handler = new GeneralLedgerAccountsResourceHandler(this, itemIndex);
             break;
           case "termsOfPayment":
-            handler = new TermsOfPaymentResourceHandler(this);
+            handler = new TermsOfPaymentResourceHandler(this, itemIndex);
             break;
           case "stocktakingData":
-            handler = new StocktakingDataResourceHandler(this);
+            handler = new StocktakingDataResourceHandler(this, itemIndex);
             break;
           case "costSystems":
-            handler = new CostSystemsResourceHandler(this);
+            handler = new CostSystemsResourceHandler(this, itemIndex);
             break;
           case "costCentersUnits":
-            handler = new CostCentersUnitsResourceHandler(this);
+            handler = new CostCentersUnitsResourceHandler(this, itemIndex);
             break;
           case "costCenterProperties":
-            handler = new CostCenterPropertiesResourceHandler(this);
+            handler = new CostCenterPropertiesResourceHandler(this, itemIndex);
             break;
           case "internalCostServices":
-            handler = new InternalCostServicesResourceHandler(this);
+            handler = new InternalCostServicesResourceHandler(this, itemIndex);
             break;
           case "costSequences":
-            handler = new CostSequencesResourceHandler(this);
+            handler = new CostSequencesResourceHandler(this, itemIndex);
             break;
           case "accountingStatistics":
-            handler = new AccountingStatisticsResourceHandler(this);
+            handler = new AccountingStatisticsResourceHandler(this, itemIndex);
             break;
           case "accountingTransactionKeys":
-            handler = new AccountingTransactionKeysResourceHandler(this);
+            handler = new AccountingTransactionKeysResourceHandler(this, itemIndex);
             break;
           case "variousAddresses":
-            handler = new VariousAddressesResourceHandler(this);
+            handler = new VariousAddressesResourceHandler(this, itemIndex);
             break;
           default:
             throw new Error(`Unknown resource: ${resource}`);
         }
         
         // Execute the handler and get results
-        const results = await handler.execute();
-        returnData.push(...results);
+        await handler.execute(operation, authContext, returnData);
         
       } catch (error) {
         if (this.continueOnFail()) {

@@ -7,6 +7,8 @@ export interface AuthContext {
   host: string;
   token: string;
   clientInstanceId: string;
+  clientId: string;
+  fiscalYearId: string;
 }
 
 // Supported accounting resources
@@ -23,6 +25,22 @@ export type FiscalYearOperation = "getAll" | "get";
 export type AccountsReceivableOperation = "getAll" | "get" | "getCondensed";
 export type AccountPostingOperation = "getAll" | "get";
 export type AccountingSequenceOperation = "create" | "getAll" | "get";
+export type TermsOfPaymentOperation = "getAll" | "get" | "create" | "update";
+export type CreditorOperation = "getAll" | "get" | "create" | "update";
+export type CostSequenceOperation = "getAll" | "get" | "create";
+export type DebitorsOperation = "getAll" | "get" | "create" | "update";
+export type FixedAssetOperation = "getAll" | "get";
+export type InternalCostServiceOperation = "getAll" | "get" | "create";
+export type PostingProposalOperation = "getAll" | "get" | "getRulesIncoming" | "getRulesOutgoing" | "getRulesCashRegister" | "getRuleIncoming" | "getRuleOutgoing" | "getRuleCashRegister" | "batchIncoming" | "batchOutgoing" | "batchCashRegister";
+export type StocktakingDataOperation = "getAll" | "get" | "update";
+export type VariousAddressOperation = "getAll" | "get" | "create";
+export type VariousDocumentOperation = "getAll" | "get";
+export type MasterDataCostSequenceOperation = "getAll" | "get" | "create";
+export type MasterDataCreditorOperation = "getAll" | "get" | "create" | "update";
+export type MasterDataDebitorOperation = "getAll" | "get" | "create" | "update";
+export type MasterDataFixedAssetOperation = "getAll" | "get";
+export type MasterDataStocktakingDataOperation = "getAll" | "get" | "update";
+export type MasterDataVariousAddressOperation = "getAll" | "get" | "create";
 
 // Union type for all operations
 export type AccountingOperation = 
@@ -134,6 +152,6 @@ export interface ErrorResponse {
   error?: {
     code?: string;
     message?: string;
-    details?: any;
+    details?: Record<string, unknown>;
   };
 }

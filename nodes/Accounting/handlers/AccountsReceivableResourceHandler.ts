@@ -1,82 +1,76 @@
-import type { IExecuteFunctions, INodeExecutionData } from "n8n-workflow";
-import { BaseResourceHandler } from "./BaseResourceHandler";
+import { NodeOperationError, type INodeExecutionData } from "n8n-workflow";
+import type { JsonValue } from "../../../src/services/datevConnectClient";
 import { datevConnectClient } from "../../../src/services/accountingClient";
-import type { AccountsReceivable } from "../types";
+import type { AuthContext, AccountsReceivableOperation } from "../types";
+import { BaseResourceHandler } from "./BaseResourceHandler";
 
 export class AccountsReceivableResourceHandler extends BaseResourceHandler {
-  private operation: string;
+  async execute(
+    operation: string,
+    authContext: AuthContext,
+    returnData: INodeExecutionData[],
+  ): Promise<void> {
+    const sendSuccess = this.createSendSuccess(returnData);
 
-  constructor(executeFunctions: IExecuteFunctions) {
-    super(executeFunctions);
-    this.operation = executeFunctions.getNodeParameter("operation", 0) as string;
-  }
-
-  async execute(): Promise<INodeExecutionData[]> {
-    switch (this.operation) {
-      case "getAll":
-        return this.getAllAccountsReceivable();
-      case "get":
-        return this.getAccountReceivable();
-      case "getCondensed":
-        return this.getCondensedAccountsReceivable();
-      default:
-        throw new Error(`Unknown operation: ${this.operation}`);
-    }
-  }
-
-  private async getAllAccountsReceivable(): Promise<INodeExecutionData[]> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
+      let response: JsonValue | undefined;
+
+      switch (operation as AccountsReceivableOperation) {
+        case "getAll":
+          response = await this.handleGetAll(authContext);
+          break;
+        case "get":
+          response = await this.handleGet(authContext);
+          break;
+        case "getCondensed":
+          response = await this.handleGetCondensed(authContext);
+          break;
+        default:
+          throw new NodeOperationError(
+            this.context.getNode(),
+            `The operation "${operation}" is not supported for resource "accountsReceivable".`,
+            { itemIndex: this.itemIndex },
+          );
       }
-      const queryParams = this.buildQueryParams();
-      const accountsReceivable = await datevConnectClient.accounting.getAccountsReceivable(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
-        queryParams
-      );
-      return this.wrapData(accountsReceivable as any);
+
+      sendSuccess(response);
     } catch (error) {
-      this.handleApiError(error, "Get all accounts receivable");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getAccountReceivable(): Promise<INodeExecutionData[]> {
-    try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const accountsReceivableId = this.executeFunctions.getNodeParameter("accountsReceivableId", 0) as string;
-      const queryParams = this.buildQueryParams();
-      const accountReceivable = await datevConnectClient.accounting.getAccountReceivable(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
-        accountsReceivableId,
-        queryParams
-      );
-      return this.wrapData(accountReceivable as any);
-    } catch (error) {
-      this.handleApiError(error, "Get account receivable");
-    }
+  private async handleGetAll(authContext: AuthContext): Promise<JsonValue> {
+    const queryParams = this.buildQueryParams();
+    const result = await datevConnectClient.accounting.getAccountsReceivable(
+      this.context,
+      authContext.clientId,
+      authContext.fiscalYearId,
+      queryParams
+    );
+    return result ?? null;
   }
 
-  private async getCondensedAccountsReceivable(): Promise<INodeExecutionData[]> {
-    try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const queryParams = this.buildQueryParams();
-      const condensedAccountsReceivable = await datevConnectClient.accounting.getAccountsReceivableCondensed(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
-        queryParams
-      );
-      return this.wrapData(condensedAccountsReceivable as any);
-    } catch (error) {
-      this.handleApiError(error, "Get condensed accounts receivable");
-    }
+  private async handleGet(authContext: AuthContext): Promise<JsonValue> {
+    const accountsReceivableId = this.getRequiredString("accountsReceivableId");
+    const queryParams = this.buildQueryParams();
+    const result = await datevConnectClient.accounting.getAccountReceivable(
+      this.context,
+      authContext.clientId,
+      authContext.fiscalYearId,
+      accountsReceivableId,
+      queryParams
+    );
+    return result ?? null;
+  }
+
+  private async handleGetCondensed(authContext: AuthContext): Promise<JsonValue> {
+    const queryParams = this.buildQueryParams();
+    const result = await datevConnectClient.accounting.getAccountsReceivableCondensed(
+      this.context,
+      authContext.clientId,
+      authContext.fiscalYearId,
+      queryParams
+    );
+    return result ?? null;
   }
 }

@@ -1,89 +1,89 @@
-import type { IExecuteFunctions, INodeExecutionData } from "n8n-workflow";
-import { BaseResourceHandler } from "./BaseResourceHandler";
+import { NodeOperationError, type INodeExecutionData } from "n8n-workflow";
+import type { JsonValue } from "../../../src/services/datevConnectClient";
 import { datevConnectClient } from "../../../src/services/accountingClient";
-import type { AccountingSequence } from "../types";
+import type { AuthContext, AccountingSequenceOperation } from "../types";
+import { BaseResourceHandler } from "./BaseResourceHandler";
 
+/**
+ * Handler for all accounting sequence-related operations
+ */
 export class AccountingSequenceResourceHandler extends BaseResourceHandler {
-  private operation: string;
+  async execute(
+    operation: string,
+    authContext: AuthContext,
+    returnData: INodeExecutionData[],
+  ): Promise<void> {
+    const sendSuccess = this.createSendSuccess(returnData);
 
-  constructor(executeFunctions: IExecuteFunctions) {
-    super(executeFunctions);
-    this.operation = executeFunctions.getNodeParameter("operation", 0) as string;
-  }
-
-  async execute(): Promise<INodeExecutionData[]> {
-    switch (this.operation) {
-      case "create":
-        return this.createAccountingSequence();
-      case "getAll":
-        return this.getAllAccountingSequences();
-      case "get":
-        return this.getAccountingSequence();
-      default:
-        throw new Error(`Unknown operation: ${this.operation}`);
-    }
-  }
-
-  private async createAccountingSequence(): Promise<INodeExecutionData[]> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const accountingSequenceData = this.executeFunctions.getNodeParameter("accountingSequenceData", 0) as string;
-      let parsedData: any;
-      try {
-        parsedData = JSON.parse(accountingSequenceData);
-      } catch (error) {
-        throw new Error("Invalid JSON in accounting sequence data");
+      let response: JsonValue | undefined;
+
+      switch (operation as AccountingSequenceOperation) {
+        case "create":
+          response = await this.handleCreate(authContext);
+          break;
+        case "getAll":
+          response = await this.handleGetAll(authContext);
+          break;
+        case "get":
+          response = await this.handleGet(authContext);
+          break;
+        default:
+          throw new NodeOperationError(
+            this.context.getNode(),
+            `The operation "${operation}" is not supported for resource "accountingSequence".`,
+            { itemIndex: this.itemIndex },
+          );
       }
 
-      const accountingSequence = await datevConnectClient.accounting.createAccountingSequence(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
-        parsedData
-      );
-      return this.wrapData(accountingSequence as any);
+      sendSuccess(response);
     } catch (error) {
-      this.handleApiError(error, "Create accounting sequence");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getAllAccountingSequences(): Promise<INodeExecutionData[]> {
-    try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const queryParams = this.buildQueryParams();
-      const accountingSequences = await datevConnectClient.accounting.getAccountingSequences(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
-        queryParams
+  private async handleCreate(authContext: AuthContext): Promise<JsonValue> {
+    const accountingSequenceData = this.getRequiredString("accountingSequenceData");
+    const data = this.parseJsonParameter(accountingSequenceData, "accountingSequenceData");
+    
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      throw new NodeOperationError(
+        this.context.getNode(),
+        "Accounting sequence data must be a valid JSON object",
+        { itemIndex: this.itemIndex }
       );
-      return this.wrapData(accountingSequences as any);
-    } catch (error) {
-      this.handleApiError(error, "Get all accounting sequences");
     }
+    
+    const result = await datevConnectClient.accounting.createAccountingSequence(
+      this.context,
+      authContext.clientId,
+      authContext.fiscalYearId,
+      data,
+    );
+    
+    return result ?? null;
   }
 
-  private async getAccountingSequence(): Promise<INodeExecutionData[]> {
-    try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const accountingSequenceId = this.executeFunctions.getNodeParameter("accountingSequenceId", 0) as string;
-      const queryParams = this.buildQueryParams();
-      const accountingSequence = await datevConnectClient.accounting.getAccountingSequence(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
-        accountingSequenceId,
-        queryParams
-      );
-      return this.wrapData(accountingSequence as any);
-    } catch (error) {
-      this.handleApiError(error, "Get accounting sequence");
-    }
+  private async handleGetAll(authContext: AuthContext): Promise<JsonValue> {
+    const result = await datevConnectClient.accounting.getAccountingSequences(
+      this.context,
+      authContext.clientId,
+      authContext.fiscalYearId,
+    );
+    
+    return result ?? null;
+  }
+
+  private async handleGet(authContext: AuthContext): Promise<JsonValue> {
+    const accountingSequenceId = this.getRequiredString("accountingSequenceId");
+    
+    const result = await datevConnectClient.accounting.getAccountingSequence(
+      this.context,
+      authContext.clientId,
+      authContext.fiscalYearId,
+      accountingSequenceId,
+    );
+    
+    return result ?? null;
   }
 }

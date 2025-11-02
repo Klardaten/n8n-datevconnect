@@ -1,87 +1,92 @@
-import type { IExecuteFunctions, INodeExecutionData } from "n8n-workflow";
-import { BaseResourceHandler } from "./BaseResourceHandler";
+import { NodeOperationError, type INodeExecutionData } from "n8n-workflow";
+import type { JsonValue } from "../../../src/services/datevConnectClient";
 import { datevConnectClient } from "../../../src/services/accountingClient";
+import type { AuthContext, StocktakingDataOperation } from "../types";
+import { BaseResourceHandler } from "./BaseResourceHandler";
 
 /**
  * Handler for Stocktaking Data operations
  * Manages operations related to inventory/stocktaking data in asset accounting
  */
 export class StocktakingDataResourceHandler extends BaseResourceHandler {
-  private operation: string;
+  async execute(
+    operation: string,
+    authContext: AuthContext,
+    returnData: INodeExecutionData[],
+  ): Promise<void> {
+    const sendSuccess = this.createSendSuccess(returnData);
 
-  constructor(executeFunctions: IExecuteFunctions) {
-    super(executeFunctions);
-    this.operation = executeFunctions.getNodeParameter("operation", 0) as string;
-  }
-
-  async execute(): Promise<INodeExecutionData[]> {
-    switch (this.operation) {
-      case "getAll":
-        return this.getAllStocktakingData();
-      case "getByAsset":
-        return this.getStocktakingDataByAsset();
-      case "update":
-        return this.updateStocktakingData();
-      default:
-        throw new Error(`Unknown operation: ${this.operation}`);
-    }
-  }
-
-  private async getAllStocktakingData(): Promise<INodeExecutionData[]> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
+      let response: JsonValue | undefined;
+
+      switch (operation as StocktakingDataOperation) {
+        case "getAll":
+          response = await this.handleGetAll(authContext);
+          break;
+        case "get":
+          response = await this.handleGet(authContext);
+          break;
+        case "update":
+          response = await this.handleUpdate(authContext);
+          break;
+        default:
+          throw new NodeOperationError(
+            this.context.getNode(),
+            `The operation "${operation}" is not supported for resource "stocktakingData".`,
+            { itemIndex: this.itemIndex },
+          );
       }
-      const queryParams = this.buildQueryParams();
-      const stocktakingData = await datevConnectClient.accounting.getStocktakingData(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
-        queryParams
-      );
-      return this.wrapData(stocktakingData as any);
+
+      sendSuccess(response);
     } catch (error) {
-      this.handleApiError(error, "Get all stocktaking data");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getStocktakingDataByAsset(): Promise<INodeExecutionData[]> {
-    try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const assetId = this.executeFunctions.getNodeParameter("assetId", 0) as string;
-      const queryParams = this.buildQueryParams();
-      const stocktakingData = await datevConnectClient.accounting.getStocktakingDataByAsset(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
-        assetId,
-        queryParams
-      );
-      return this.wrapData(stocktakingData as any);
-    } catch (error) {
-      this.handleApiError(error, "Get stocktaking data by asset");
-    }
+  private async handleGetAll(authContext: AuthContext): Promise<JsonValue> {
+    const queryParams = this.buildQueryParams();
+    const result = await datevConnectClient.accounting.getStocktakingData(
+      this.context,
+      authContext.clientId,
+      authContext.fiscalYearId,
+      queryParams
+    );
+    return result ?? null;
   }
 
-  private async updateStocktakingData(): Promise<INodeExecutionData[]> {
-    try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const assetId = this.executeFunctions.getNodeParameter("assetId", 0) as string;
-      const stocktakingData = this.executeFunctions.getNodeParameter("stocktakingData", 0) as object;
-      const result = await datevConnectClient.accounting.updateStocktakingData(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
-        assetId,
-        stocktakingData
+  private async handleGet(authContext: AuthContext): Promise<JsonValue> {
+    const assetId = this.getRequiredString("assetId");
+    const queryParams = this.buildQueryParams();
+    const result = await datevConnectClient.accounting.getStocktakingDataByAsset(
+      this.context,
+      authContext.clientId,
+      authContext.fiscalYearId,
+      assetId,
+      queryParams
+    );
+    return result ?? null;
+  }
+
+  private async handleUpdate(authContext: AuthContext): Promise<JsonValue> {
+    const assetId = this.getRequiredString("assetId");
+    const stocktakingData = this.getRequiredString("stocktakingData");
+    const data = this.parseJsonParameter(stocktakingData, "stocktakingData");
+    
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      throw new NodeOperationError(
+        this.context.getNode(),
+        "Stocktaking data must be a valid JSON object",
+        { itemIndex: this.itemIndex }
       );
-      return this.wrapData(result as any);
-    } catch (error) {
-      this.handleApiError(error, "Update stocktaking data");
     }
+    
+    const result = await datevConnectClient.accounting.updateStocktakingData(
+      this.context,
+      authContext.clientId,
+      authContext.fiscalYearId,
+      assetId,
+      data
+    );
+    return result ?? null;
   }
 }

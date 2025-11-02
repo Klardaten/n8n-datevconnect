@@ -1,69 +1,80 @@
 import type { IExecuteFunctions, INodeExecutionData } from "n8n-workflow";
+import { NodeOperationError } from "n8n-workflow";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 import { datevConnectClient } from "../../../src/services/accountingClient";
+
+type CostCenterPropertiesOperation = "getAll" | "get";
+
+interface AuthContext {
+  clientId: string;
+  fiscalYearId: string;
+}
 
 /**
  * Handler for Cost Center Properties operations
  * Manages operations related to cost center property management
  */
 export class CostCenterPropertiesResourceHandler extends BaseResourceHandler {
-  private operation: string;
-
-  constructor(executeFunctions: IExecuteFunctions) {
-    super(executeFunctions);
-    this.operation = executeFunctions.getNodeParameter("operation", 0) as string;
+  constructor(context: IExecuteFunctions, itemIndex: number) {
+    super(context, itemIndex);
   }
 
-  async execute(): Promise<INodeExecutionData[]> {
-    switch (this.operation) {
+  async execute(
+    operation: CostCenterPropertiesOperation,
+    authContext: AuthContext,
+    returnData: INodeExecutionData[]
+  ): Promise<void> {
+    switch (operation) {
       case "getAll":
-        return this.getAllCostCenterProperties();
+        await this.handleGetAll(authContext, returnData);
+        break;
       case "get":
-        return this.getCostCenterProperty();
+        await this.handleGet(authContext, returnData);
+        break;
       default:
-        throw new Error(`Unknown operation: ${this.operation}`);
+        throw new NodeOperationError(this.context.getNode(), `Unknown operation: ${operation}`, {
+          itemIndex: this.itemIndex,
+        });
     }
   }
 
-  private async getAllCostCenterProperties(): Promise<INodeExecutionData[]> {
+  private async handleGetAll(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const costSystemId = this.executeFunctions.getNodeParameter("costSystemId", 0) as string;
+      const costSystemId = this.getRequiredString("costSystemId");
       const queryParams = this.buildQueryParams();
       const costCenterProperties = await datevConnectClient.accounting.getCostCenterProperties(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         costSystemId,
         queryParams
       );
-      return this.wrapData(costCenterProperties as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(costCenterProperties);
     } catch (error) {
-      this.handleApiError(error, "Get all cost center properties");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getCostCenterProperty(): Promise<INodeExecutionData[]> {
+  private async handleGet(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const costSystemId = this.executeFunctions.getNodeParameter("costSystemId", 0) as string;
-      const costCenterPropertyId = this.executeFunctions.getNodeParameter("costCenterPropertyId", 0) as string;
+      const costSystemId = this.getRequiredString("costSystemId");
+      const costCenterPropertyId = this.getRequiredString("costCenterPropertyId");
       const queryParams = this.buildQueryParams();
       const costCenterProperty = await datevConnectClient.accounting.getCostCenterProperty(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         costSystemId,
         costCenterPropertyId,
         queryParams
       );
-      return this.wrapData(costCenterProperty as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(costCenterProperty);
     } catch (error) {
-      this.handleApiError(error, "Get cost center property");
+      this.handleError(error, returnData);
     }
   }
 }

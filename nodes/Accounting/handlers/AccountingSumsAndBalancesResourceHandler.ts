@@ -1,65 +1,76 @@
 import type { IExecuteFunctions, INodeExecutionData } from "n8n-workflow";
+import { NodeOperationError } from "n8n-workflow";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 import { datevConnectClient } from "../../../src/services/accountingClient";
+
+type AccountingSumsAndBalancesOperation = "getAll" | "get";
+
+interface AuthContext {
+  clientId: string;
+  fiscalYearId: string;
+}
 
 /**
  * Handler for Accounting Sums and Balances operations
  * Manages operations related to accounting balance sheet and P&L data
  */
 export class AccountingSumsAndBalancesResourceHandler extends BaseResourceHandler {
-  private operation: string;
-
-  constructor(executeFunctions: IExecuteFunctions) {
-    super(executeFunctions);
-    this.operation = executeFunctions.getNodeParameter("operation", 0) as string;
+  constructor(context: IExecuteFunctions, itemIndex: number) {
+    super(context, itemIndex);
   }
 
-  async execute(): Promise<INodeExecutionData[]> {
-    switch (this.operation) {
+  async execute(
+    operation: AccountingSumsAndBalancesOperation,
+    authContext: AuthContext,
+    returnData: INodeExecutionData[]
+  ): Promise<void> {
+    switch (operation) {
       case "getAll":
-        return this.getAllAccountingSumsAndBalances();
+        await this.handleGetAll(authContext, returnData);
+        break;
       case "get":
-        return this.getAccountingSumsAndBalances();
+        await this.handleGet(authContext, returnData);
+        break;
       default:
-        throw new Error(`Unknown operation: ${this.operation}`);
+        throw new NodeOperationError(this.context.getNode(), `Unknown operation: ${operation}`, {
+          itemIndex: this.itemIndex,
+        });
     }
   }
 
-  private async getAllAccountingSumsAndBalances(): Promise<INodeExecutionData[]> {
+  private async handleGetAll(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
       const queryParams = this.buildQueryParams();
       const sumsAndBalances = await datevConnectClient.accounting.getAccountingSumsAndBalances(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         queryParams
       );
-      return this.wrapData(sumsAndBalances as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(sumsAndBalances);
     } catch (error) {
-      this.handleApiError(error, "Get all accounting sums and balances");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getAccountingSumsAndBalances(): Promise<INodeExecutionData[]> {
+  private async handleGet(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const accountingSumsAndBalancesId = this.executeFunctions.getNodeParameter("accountingSumsAndBalancesId", 0) as string;
+      const accountingSumsAndBalancesId = this.getRequiredString("accountingSumsAndBalancesId");
       const queryParams = this.buildQueryParams();
       const sumsAndBalances = await datevConnectClient.accounting.getAccountingSumsAndBalance(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         accountingSumsAndBalancesId,
         queryParams
       );
-      return this.wrapData(sumsAndBalances as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(sumsAndBalances);
     } catch (error) {
-      this.handleApiError(error, "Get accounting sums and balances");
+      this.handleError(error, returnData);
     }
   }
 }

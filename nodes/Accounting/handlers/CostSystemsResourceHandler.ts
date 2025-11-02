@@ -1,65 +1,76 @@
 import type { IExecuteFunctions, INodeExecutionData } from "n8n-workflow";
+import { NodeOperationError } from "n8n-workflow";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 import { datevConnectClient } from "../../../src/services/accountingClient";
+
+type CostSystemsOperation = "getAll" | "get";
+
+interface AuthContext {
+  clientId: string;
+  fiscalYearId: string;
+}
 
 /**
  * Handler for Cost Systems operations
  * Manages operations related to cost accounting system configurations
  */
 export class CostSystemsResourceHandler extends BaseResourceHandler {
-  private operation: string;
-
-  constructor(executeFunctions: IExecuteFunctions) {
-    super(executeFunctions);
-    this.operation = executeFunctions.getNodeParameter("operation", 0) as string;
+  constructor(context: IExecuteFunctions, itemIndex: number) {
+    super(context, itemIndex);
   }
 
-  async execute(): Promise<INodeExecutionData[]> {
-    switch (this.operation) {
+  async execute(
+    operation: CostSystemsOperation,
+    authContext: AuthContext,
+    returnData: INodeExecutionData[]
+  ): Promise<void> {
+    switch (operation) {
       case "getAll":
-        return this.getAllCostSystems();
+        await this.handleGetAll(authContext, returnData);
+        break;
       case "get":
-        return this.getCostSystem();
+        await this.handleGet(authContext, returnData);
+        break;
       default:
-        throw new Error(`Unknown operation: ${this.operation}`);
+        throw new NodeOperationError(this.context.getNode(), `Unknown operation: ${operation}`, {
+          itemIndex: this.itemIndex,
+        });
     }
   }
 
-  private async getAllCostSystems(): Promise<INodeExecutionData[]> {
+  private async handleGetAll(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
       const queryParams = this.buildQueryParams();
       const costSystems = await datevConnectClient.accounting.getCostSystems(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         queryParams
       );
-      return this.wrapData(costSystems as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(costSystems);
     } catch (error) {
-      this.handleApiError(error, "Get all cost systems");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getCostSystem(): Promise<INodeExecutionData[]> {
+  private async handleGet(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const costSystemId = this.executeFunctions.getNodeParameter("costSystemId", 0) as string;
+      const costSystemId = this.getRequiredString("costSystemId");
       const queryParams = this.buildQueryParams();
       const costSystem = await datevConnectClient.accounting.getCostSystem(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         costSystemId,
         queryParams
       );
-      return this.wrapData(costSystem as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(costSystem);
     } catch (error) {
-      this.handleApiError(error, "Get cost system");
+      this.handleError(error, returnData);
     }
   }
 }

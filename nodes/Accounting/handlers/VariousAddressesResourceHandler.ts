@@ -1,85 +1,90 @@
-import type { IExecuteFunctions, INodeExecutionData } from "n8n-workflow";
-import { BaseResourceHandler } from "./BaseResourceHandler";
+import { NodeOperationError, type INodeExecutionData } from "n8n-workflow";
+import type { JsonValue } from "../../../src/services/datevConnectClient";
 import { datevConnectClient } from "../../../src/services/accountingClient";
+import type { AuthContext, VariousAddressOperation } from "../types";
+import { BaseResourceHandler } from "./BaseResourceHandler";
 
 /**
  * Handler for Various Addresses operations
  * Manages operations related to address management for various business partners
  */
 export class VariousAddressesResourceHandler extends BaseResourceHandler {
-  private operation: string;
+  async execute(
+    operation: string,
+    authContext: AuthContext,
+    returnData: INodeExecutionData[],
+  ): Promise<void> {
+    const sendSuccess = this.createSendSuccess(returnData);
 
-  constructor(executeFunctions: IExecuteFunctions) {
-    super(executeFunctions);
-    this.operation = executeFunctions.getNodeParameter("operation", 0) as string;
-  }
-
-  async execute(): Promise<INodeExecutionData[]> {
-    switch (this.operation) {
-      case "getAll":
-        return this.getAllVariousAddresses();
-      case "get":
-        return this.getVariousAddress();
-      case "create":
-        return this.createVariousAddress();
-      default:
-        throw new Error(`Unknown operation: ${this.operation}`);
-    }
-  }
-
-  private async getAllVariousAddresses(): Promise<INodeExecutionData[]> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
+      let response: JsonValue | undefined;
+
+      switch (operation as VariousAddressOperation) {
+        case "getAll":
+          response = await this.handleGetAll(authContext);
+          break;
+        case "get":
+          response = await this.handleGet(authContext);
+          break;
+        case "create":
+          response = await this.handleCreate(authContext);
+          break;
+        default:
+          throw new NodeOperationError(
+            this.context.getNode(),
+            `The operation "${operation}" is not supported for resource "variousAddresses".`,
+            { itemIndex: this.itemIndex },
+          );
       }
-      const queryParams = this.buildQueryParams();
-      const variousAddresses = await datevConnectClient.accounting.getVariousAddresses(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
-        queryParams
-      );
-      return this.wrapData(variousAddresses as any);
+
+      sendSuccess(response);
     } catch (error) {
-      this.handleApiError(error, "Get all various addresses");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getVariousAddress(): Promise<INodeExecutionData[]> {
-    try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const variousAddressId = this.executeFunctions.getNodeParameter("variousAddressId", 0) as string;
-      const queryParams = this.buildQueryParams();
-      const variousAddress = await datevConnectClient.accounting.getVariousAddress(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
-        variousAddressId,
-        queryParams
-      );
-      return this.wrapData(variousAddress as any);
-    } catch (error) {
-      this.handleApiError(error, "Get various address");
-    }
+  private async handleGetAll(authContext: AuthContext): Promise<JsonValue> {
+    const queryParams = this.buildQueryParams();
+    const result = await datevConnectClient.accounting.getVariousAddresses(
+      this.context,
+      authContext.clientId,
+      authContext.fiscalYearId,
+      queryParams
+    );
+    return result ?? null;
   }
 
-  private async createVariousAddress(): Promise<INodeExecutionData[]> {
-    try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const variousAddressData = this.executeFunctions.getNodeParameter("variousAddressData", 0) as object;
-      const result = await datevConnectClient.accounting.createVariousAddress(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
-        variousAddressData
+  private async handleGet(authContext: AuthContext): Promise<JsonValue> {
+    const variousAddressId = this.getRequiredString("variousAddressId");
+    const queryParams = this.buildQueryParams();
+    const result = await datevConnectClient.accounting.getVariousAddress(
+      this.context,
+      authContext.clientId,
+      authContext.fiscalYearId,
+      variousAddressId,
+      queryParams
+    );
+    return result ?? null;
+  }
+
+  private async handleCreate(authContext: AuthContext): Promise<JsonValue> {
+    const variousAddressData = this.getRequiredString("variousAddressData");
+    const data = this.parseJsonParameter(variousAddressData, "variousAddressData");
+    
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      throw new NodeOperationError(
+        this.context.getNode(),
+        "Various address data must be a valid JSON object",
+        { itemIndex: this.itemIndex }
       );
-      return this.wrapData(result as any);
-    } catch (error) {
-      this.handleApiError(error, "Create various address");
     }
+    
+    const result = await datevConnectClient.accounting.createVariousAddress(
+      this.context,
+      authContext.clientId,
+      authContext.fiscalYearId,
+      data
+    );
+    return result ?? null;
   }
 }

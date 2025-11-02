@@ -1,231 +1,273 @@
 import type { IExecuteFunctions, INodeExecutionData } from "n8n-workflow";
+import { NodeOperationError } from "n8n-workflow";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 import { datevConnectClient } from "../../../src/services/accountingClient";
+
+type BusinessPartnersOperation = 
+  | "getDebitors" 
+  | "getDebitor" 
+  | "createDebitor" 
+  | "updateDebitor" 
+  | "getNextAvailableDebitor"
+  | "getCreditors" 
+  | "getCreditor" 
+  | "createCreditor" 
+  | "updateCreditor" 
+  | "getNextAvailableCreditor";
+
+interface AuthContext {
+  clientId: string;
+  fiscalYearId: string;
+}
 
 /**
  * Handler for Business Partners operations
  * Manages operations related to debitors (customers) and creditors (suppliers)
  */
 export class BusinessPartnersResourceHandler extends BaseResourceHandler {
-  private operation: string;
-
-  constructor(executeFunctions: IExecuteFunctions) {
-    super(executeFunctions);
-    this.operation = executeFunctions.getNodeParameter("operation", 0) as string;
+  constructor(context: IExecuteFunctions, itemIndex: number) {
+    super(context, itemIndex);
   }
 
-  async execute(): Promise<INodeExecutionData[]> {
-    switch (this.operation) {
+  async execute(
+    operation: BusinessPartnersOperation,
+    authContext: AuthContext,
+    returnData: INodeExecutionData[]
+  ): Promise<void> {
+    switch (operation) {
       case "getDebitors":
-        return this.getDebitors();
+        await this.handleGetDebitors(authContext, returnData);
+        break;
       case "getDebitor":
-        return this.getDebitor();
+        await this.handleGetDebitor(authContext, returnData);
+        break;
       case "createDebitor":
-        return this.createDebitor();
+        await this.handleCreateDebitor(authContext, returnData);
+        break;
       case "updateDebitor":
-        return this.updateDebitor();
+        await this.handleUpdateDebitor(authContext, returnData);
+        break;
       case "getNextAvailableDebitor":
-        return this.getNextAvailableDebitor();
+        await this.handleGetNextAvailableDebitor(authContext, returnData);
+        break;
       case "getCreditors":
-        return this.getCreditors();
+        await this.handleGetCreditors(authContext, returnData);
+        break;
       case "getCreditor":
-        return this.getCreditor();
+        await this.handleGetCreditor(authContext, returnData);
+        break;
       case "createCreditor":
-        return this.createCreditor();
+        await this.handleCreateCreditor(authContext, returnData);
+        break;
       case "updateCreditor":
-        return this.updateCreditor();
+        await this.handleUpdateCreditor(authContext, returnData);
+        break;
       case "getNextAvailableCreditor":
-        return this.getNextAvailableCreditor();
+        await this.handleGetNextAvailableCreditor(authContext, returnData);
+        break;
       default:
-        throw new Error(`Unknown operation: ${this.operation}`);
+        throw new NodeOperationError(this.context.getNode(), `Unknown operation: ${operation}`, {
+          itemIndex: this.itemIndex,
+        });
     }
   }
 
-  private async getDebitors(): Promise<INodeExecutionData[]> {
+  // New handle methods for the converted pattern
+  private async handleGetDebitors(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
       const queryParams = this.buildQueryParams();
       const debitors = await datevConnectClient.accounting.getDebitors(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         queryParams
       );
-      return this.wrapData(debitors as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(debitors);
     } catch (error) {
-      this.handleApiError(error, "Get debitors");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getDebitor(): Promise<INodeExecutionData[]> {
+  private async handleGetDebitor(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const debitorId = this.executeFunctions.getNodeParameter("debitorId", 0) as string;
+      const debitorId = this.getRequiredString("debitorId");
       const queryParams = this.buildQueryParams();
       const debitor = await datevConnectClient.accounting.getDebitor(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         debitorId,
         queryParams
       );
-      return this.wrapData(debitor as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(debitor);
     } catch (error) {
-      this.handleApiError(error, "Get debitor");
+      this.handleError(error, returnData);
     }
   }
 
-  private async createDebitor(): Promise<INodeExecutionData[]> {
+  private async handleCreateDebitor(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
+      const debitorDataRaw = this.context.getNodeParameter("debitorData", this.itemIndex);
+      const debitorData = this.parseJsonParameter(debitorDataRaw, "debitorData");
+      if (debitorData === undefined) {
+        throw new Error("debitorData is required for creating debitor");
       }
-      const debitorData = this.executeFunctions.getNodeParameter("debitorData", 0) as any;
-      const debitor = await datevConnectClient.accounting.createDebitor(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
-        debitorData
+      
+      const result = await datevConnectClient.accounting.createDebitor(
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
+        debitorData as any
       );
-      return this.wrapData(debitor as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(result);
     } catch (error) {
-      this.handleApiError(error, "Create debitor");
+      this.handleError(error, returnData);
     }
   }
 
-  private async updateDebitor(): Promise<INodeExecutionData[]> {
+  private async handleUpdateDebitor(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
+      const debitorId = this.getRequiredString("debitorId");
+      const debitorDataRaw = this.context.getNodeParameter("debitorData", this.itemIndex);
+      const debitorData = this.parseJsonParameter(debitorDataRaw, "debitorData");
+      if (debitorData === undefined) {
+        throw new Error("debitorData is required for updating debitor");
       }
-      const debitorId = this.executeFunctions.getNodeParameter("debitorId", 0) as string;
-      const debitorData = this.executeFunctions.getNodeParameter("debitorData", 0) as any;
-      const debitor = await datevConnectClient.accounting.updateDebitor(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+      
+      const result = await datevConnectClient.accounting.updateDebitor(
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         debitorId,
-        debitorData
+        debitorData as any
       );
-      return this.wrapData(debitor as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(result);
     } catch (error) {
-      this.handleApiError(error, "Update debitor");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getNextAvailableDebitor(): Promise<INodeExecutionData[]> {
+  private async handleGetNextAvailableDebitor(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
       const queryParams = this.buildQueryParams();
       const nextAvailable = await datevConnectClient.accounting.getNextAvailableDebitor(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         queryParams
       );
-      return this.wrapData(nextAvailable as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(nextAvailable);
     } catch (error) {
-      this.handleApiError(error, "Get next available debitor");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getCreditors(): Promise<INodeExecutionData[]> {
+  private async handleGetCreditors(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
       const queryParams = this.buildQueryParams();
       const creditors = await datevConnectClient.accounting.getCreditors(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         queryParams
       );
-      return this.wrapData(creditors as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(creditors);
     } catch (error) {
-      this.handleApiError(error, "Get creditors");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getCreditor(): Promise<INodeExecutionData[]> {
+  private async handleGetCreditor(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const creditorId = this.executeFunctions.getNodeParameter("creditorId", 0) as string;
+      const creditorId = this.getRequiredString("creditorId");
       const queryParams = this.buildQueryParams();
       const creditor = await datevConnectClient.accounting.getCreditor(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         creditorId,
         queryParams
       );
-      return this.wrapData(creditor as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(creditor);
     } catch (error) {
-      this.handleApiError(error, "Get creditor");
+      this.handleError(error, returnData);
     }
   }
 
-  private async createCreditor(): Promise<INodeExecutionData[]> {
+  private async handleCreateCreditor(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
+      const creditorDataRaw = this.context.getNodeParameter("creditorData", this.itemIndex);
+      const creditorData = this.parseJsonParameter(creditorDataRaw, "creditorData");
+      if (creditorData === undefined) {
+        throw new Error("creditorData is required for creating creditor");
       }
-      const creditorData = this.executeFunctions.getNodeParameter("creditorData", 0) as any;
-      const creditor = await datevConnectClient.accounting.createCreditor(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
-        creditorData
+      
+      const result = await datevConnectClient.accounting.createCreditor(
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
+        creditorData as any
       );
-      return this.wrapData(creditor as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(result);
     } catch (error) {
-      this.handleApiError(error, "Create creditor");
+      this.handleError(error, returnData);
     }
   }
 
-  private async updateCreditor(): Promise<INodeExecutionData[]> {
+  private async handleUpdateCreditor(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
+      const creditorId = this.getRequiredString("creditorId");
+      const creditorDataRaw = this.context.getNodeParameter("creditorData", this.itemIndex);
+      const creditorData = this.parseJsonParameter(creditorDataRaw, "creditorData");
+      if (creditorData === undefined) {
+        throw new Error("creditorData is required for updating creditor");
       }
-      const creditorId = this.executeFunctions.getNodeParameter("creditorId", 0) as string;
-      const creditorData = this.executeFunctions.getNodeParameter("creditorData", 0) as any;
-      const creditor = await datevConnectClient.accounting.updateCreditor(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+      
+      const result = await datevConnectClient.accounting.updateCreditor(
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         creditorId,
-        creditorData
+        creditorData as any
       );
-      return this.wrapData(creditor as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(result);
     } catch (error) {
-      this.handleApiError(error, "Update creditor");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getNextAvailableCreditor(): Promise<INodeExecutionData[]> {
+  private async handleGetNextAvailableCreditor(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
       const queryParams = this.buildQueryParams();
       const nextAvailable = await datevConnectClient.accounting.getNextAvailableCreditor(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         queryParams
       );
-      return this.wrapData(nextAvailable as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(nextAvailable);
     } catch (error) {
-      this.handleApiError(error, "Get next available creditor");
+      this.handleError(error, returnData);
     }
   }
 }

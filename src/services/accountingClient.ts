@@ -1,5 +1,6 @@
 import type { IExecuteFunctions, IDataObject } from "n8n-workflow";
 import * as client from "./datevConnectClient";
+import type { JsonValue } from "./datevConnectClient";
 
 interface CredentialsData {
   host: string;
@@ -197,7 +198,7 @@ export const datevConnectClient = {
       });
     },
 
-    async createAccountingSequence(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, accountingSequence: any) {
+    async createAccountingSequence(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, accountingSequence: JsonValue) {
       const options = await getAuthenticatedOptions(executeFunctions);
       return client.createAccountingSequence({
         ...options,
@@ -270,7 +271,7 @@ export const datevConnectClient = {
       });
     },
 
-    async batchPostingProposalsIncoming(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, postingProposals: any) {
+    async batchPostingProposalsIncoming(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, postingProposals: JsonValue) {
       const options = await getAuthenticatedOptions(executeFunctions);
       return client.batchPostingProposalsIncoming({
         ...options,
@@ -280,7 +281,7 @@ export const datevConnectClient = {
       });
     },
 
-    async batchPostingProposalsOutgoing(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, postingProposals: any) {
+    async batchPostingProposalsOutgoing(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, postingProposals: JsonValue) {
       const options = await getAuthenticatedOptions(executeFunctions);
       return client.batchPostingProposalsOutgoing({
         ...options,
@@ -290,7 +291,7 @@ export const datevConnectClient = {
       });
     },
 
-    async batchPostingProposalsCashRegister(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, postingProposals: any) {
+    async batchPostingProposalsCashRegister(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, postingProposals: JsonValue) {
       const options = await getAuthenticatedOptions(executeFunctions);
       return client.batchPostingProposalsCashRegister({
         ...options,
@@ -311,7 +312,7 @@ export const datevConnectClient = {
       });
     },
 
-    async getAccountingSumsAndBalance(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, accountingSumsAndBalancesId: string, queryParams: IDataObject = {}) {
+    async getAccountingSumsAndBalance(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, accountingSumsAndBalancesId: string, _queryParams: IDataObject = {}) {
       const options = await getAuthenticatedOptions(executeFunctions);
       return client.fetchAccountingSumsAndBalance({
         ...options,
@@ -347,7 +348,7 @@ export const datevConnectClient = {
       });
     },
 
-    async createDebitor(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, debitor: any) {
+    async createDebitor(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, debitor: JsonValue) {
       const options = await getAuthenticatedOptions(executeFunctions);
       return client.createDebitor({
         ...options,
@@ -357,7 +358,7 @@ export const datevConnectClient = {
       });
     },
 
-    async updateDebitor(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, debitorId: string, debitor: any) {
+    async updateDebitor(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, debitorId: string, debitor: JsonValue) {
       const options = await getAuthenticatedOptions(executeFunctions);
       return client.updateDebitor({
         ...options,
@@ -404,7 +405,7 @@ export const datevConnectClient = {
       });
     },
 
-    async createCreditor(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, creditor: any) {
+    async createCreditor(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, creditor: JsonValue) {
       const options = await getAuthenticatedOptions(executeFunctions);
       return client.createCreditor({
         ...options,
@@ -414,7 +415,7 @@ export const datevConnectClient = {
       });
     },
 
-    async updateCreditor(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, creditorId: string, creditor: any) {
+    async updateCreditor(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, creditorId: string, creditor: JsonValue) {
       const options = await getAuthenticatedOptions(executeFunctions);
       return client.updateCreditor({
         ...options,
@@ -494,7 +495,7 @@ export const datevConnectClient = {
       });
     },
 
-    async createTermOfPayment(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, termOfPaymentData: any) {
+    async createTermOfPayment(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, termOfPaymentData: JsonValue) {
       const options = await getAuthenticatedOptions(executeFunctions);
       return client.createTermOfPayment({
         ...options,
@@ -504,7 +505,7 @@ export const datevConnectClient = {
       });
     },
 
-    async updateTermOfPayment(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, termOfPaymentId: string, termOfPaymentData: any) {
+    async updateTermOfPayment(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, termOfPaymentId: string, termOfPaymentData: JsonValue) {
       const options = await getAuthenticatedOptions(executeFunctions);
       return client.updateTermOfPayment({
         ...options,
@@ -542,7 +543,7 @@ export const datevConnectClient = {
       });
     },
 
-    async updateStocktakingData(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, assetId: string, stocktakingData: any) {
+    async updateStocktakingData(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, assetId: string, stocktakingData: JsonValue) {
       const options = await getAuthenticatedOptions(executeFunctions);
       return client.updateStocktakingData({
         ...options,
@@ -628,7 +629,7 @@ export const datevConnectClient = {
     },
 
     // Internal Cost Services methods
-    async createInternalCostService(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, costSystemId: string, internalCostServiceData: any) {
+    async createInternalCostService(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, costSystemId: string, internalCostServiceData: JsonValue) {
       const options = await getAuthenticatedOptions(executeFunctions);
       return client.createInternalCostService({
         ...options,
@@ -665,7 +666,7 @@ export const datevConnectClient = {
       });
     },
 
-    async createCostSequence(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, costSystemId: string, costSequenceId: string, costSequenceData: any) {
+    async createCostSequence(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, costSystemId: string, costSequenceId: string, costSequenceData: JsonValue) {
       const options = await getAuthenticatedOptions(executeFunctions);
       return client.createCostSequence({
         ...options,
@@ -760,7 +761,7 @@ export const datevConnectClient = {
       });
     },
 
-    async createVariousAddress(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, variousAddressData: any) {
+    async createVariousAddress(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, variousAddressData: JsonValue) {
       const options = await getAuthenticatedOptions(executeFunctions);
       return client.createVariousAddress({
         ...options,

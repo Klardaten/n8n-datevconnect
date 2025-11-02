@@ -1,59 +1,59 @@
-import type { IExecuteFunctions, INodeExecutionData } from "n8n-workflow";
-import { BaseResourceHandler } from "./BaseResourceHandler";
+import { NodeOperationError, type INodeExecutionData } from "n8n-workflow";
+import type { JsonValue } from "../../../src/services/datevConnectClient";
 import { datevConnectClient } from "../../../src/services/accountingClient";
-import type { FiscalYear } from "../types";
+import type { AuthContext, FiscalYearOperation } from "../types";
+import { BaseResourceHandler } from "./BaseResourceHandler";
 
 export class FiscalYearResourceHandler extends BaseResourceHandler {
-  private operation: string;
+  async execute(
+    operation: string,
+    authContext: AuthContext,
+    returnData: INodeExecutionData[],
+  ): Promise<void> {
+    const sendSuccess = this.createSendSuccess(returnData);
 
-  constructor(executeFunctions: IExecuteFunctions) {
-    super(executeFunctions);
-    this.operation = executeFunctions.getNodeParameter("operation", 0) as string;
-  }
-
-  async execute(): Promise<INodeExecutionData[]> {
-    switch (this.operation) {
-      case "getAll":
-        return this.getAllFiscalYears();
-      case "get":
-        return this.getFiscalYear();
-      default:
-        throw new Error(`Unknown operation: ${this.operation}`);
-    }
-  }
-
-  private async getAllFiscalYears(): Promise<INodeExecutionData[]> {
     try {
-      if (!this.clientId) {
-        throw new Error("Client ID is required for fiscal year operations");
+      let response: JsonValue | undefined;
+
+      switch (operation as FiscalYearOperation) {
+        case "getAll":
+          response = await this.handleGetAll(authContext);
+          break;
+        case "get":
+          response = await this.handleGet(authContext);
+          break;
+        default:
+          throw new NodeOperationError(
+            this.context.getNode(),
+            `The operation "${operation}" is not supported for resource "fiscalYear".`,
+            { itemIndex: this.itemIndex },
+          );
       }
-      const queryParams = this.buildQueryParams();
-      const fiscalYears = await datevConnectClient.accounting.getFiscalYears(
-        this.executeFunctions,
-        this.clientId,
-        queryParams
-      );
-      return this.wrapData(fiscalYears as any);
+
+      sendSuccess(response);
     } catch (error) {
-      this.handleApiError(error, "Get all fiscal years");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getFiscalYear(): Promise<INodeExecutionData[]> {
-    try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const queryParams = this.buildQueryParams();
-      const fiscalYear = await datevConnectClient.accounting.getFiscalYear(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
-        queryParams
-      );
-      return this.wrapData(fiscalYear as any);
-    } catch (error) {
-      this.handleApiError(error, "Get fiscal year");
-    }
+  private async handleGetAll(authContext: AuthContext): Promise<JsonValue> {
+    const queryParams = this.buildQueryParams();
+    const result = await datevConnectClient.accounting.getFiscalYears(
+      this.context,
+      authContext.clientId,
+      queryParams
+    );
+    return result ?? null;
+  }
+
+  private async handleGet(authContext: AuthContext): Promise<JsonValue> {
+    const queryParams = this.buildQueryParams();
+    const result = await datevConnectClient.accounting.getFiscalYear(
+      this.context,
+      authContext.clientId,
+      authContext.fiscalYearId,
+      queryParams
+    );
+    return result ?? null;
   }
 }

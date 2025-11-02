@@ -1,65 +1,76 @@
 import type { IExecuteFunctions, INodeExecutionData } from "n8n-workflow";
+import { NodeOperationError } from "n8n-workflow";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 import { datevConnectClient } from "../../../src/services/accountingClient";
+
+type AccountingTransactionKeysOperation = "getAll" | "get";
+
+interface AuthContext {
+  clientId: string;
+  fiscalYearId: string;
+}
 
 /**
  * Handler for Accounting Transaction Keys operations
  * Manages operations related to transaction key management
  */
 export class AccountingTransactionKeysResourceHandler extends BaseResourceHandler {
-  private operation: string;
-
-  constructor(executeFunctions: IExecuteFunctions) {
-    super(executeFunctions);
-    this.operation = executeFunctions.getNodeParameter("operation", 0) as string;
+  constructor(context: IExecuteFunctions, itemIndex: number) {
+    super(context, itemIndex);
   }
 
-  async execute(): Promise<INodeExecutionData[]> {
-    switch (this.operation) {
+  async execute(
+    operation: AccountingTransactionKeysOperation,
+    authContext: AuthContext,
+    returnData: INodeExecutionData[]
+  ): Promise<void> {
+    switch (operation) {
       case "getAll":
-        return this.getAllAccountingTransactionKeys();
+        await this.handleGetAll(authContext, returnData);
+        break;
       case "get":
-        return this.getAccountingTransactionKey();
+        await this.handleGet(authContext, returnData);
+        break;
       default:
-        throw new Error(`Unknown operation: ${this.operation}`);
+        throw new NodeOperationError(this.context.getNode(), `Unknown operation: ${operation}`, {
+          itemIndex: this.itemIndex,
+        });
     }
   }
 
-  private async getAllAccountingTransactionKeys(): Promise<INodeExecutionData[]> {
+  private async handleGetAll(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
       const queryParams = this.buildQueryParams();
       const accountingTransactionKeys = await datevConnectClient.accounting.getAccountingTransactionKeys(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         queryParams
       );
-      return this.wrapData(accountingTransactionKeys as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(accountingTransactionKeys);
     } catch (error) {
-      this.handleApiError(error, "Get all accounting transaction keys");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getAccountingTransactionKey(): Promise<INodeExecutionData[]> {
+  private async handleGet(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const accountingTransactionKeyId = this.executeFunctions.getNodeParameter("accountingTransactionKeyId", 0) as string;
+      const accountingTransactionKeyId = this.getRequiredString("accountingTransactionKeyId");
       const queryParams = this.buildQueryParams();
       const accountingTransactionKey = await datevConnectClient.accounting.getAccountingTransactionKey(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         accountingTransactionKeyId,
         queryParams
       );
-      return this.wrapData(accountingTransactionKey as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(accountingTransactionKey);
     } catch (error) {
-      this.handleApiError(error, "Get accounting transaction key");
+      this.handleError(error, returnData);
     }
   }
 }

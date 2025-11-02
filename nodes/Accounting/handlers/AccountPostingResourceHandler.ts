@@ -1,62 +1,62 @@
-import type { IExecuteFunctions, INodeExecutionData } from "n8n-workflow";
-import { BaseResourceHandler } from "./BaseResourceHandler";
+import { NodeOperationError, type INodeExecutionData } from "n8n-workflow";
+import type { JsonValue } from "../../../src/services/datevConnectClient";
 import { datevConnectClient } from "../../../src/services/accountingClient";
-import type { AccountPosting } from "../types";
+import type { AuthContext, AccountPostingOperation } from "../types";
+import { BaseResourceHandler } from "./BaseResourceHandler";
 
 export class AccountPostingResourceHandler extends BaseResourceHandler {
-  private operation: string;
+  async execute(
+    operation: string,
+    authContext: AuthContext,
+    returnData: INodeExecutionData[],
+  ): Promise<void> {
+    const sendSuccess = this.createSendSuccess(returnData);
 
-  constructor(executeFunctions: IExecuteFunctions) {
-    super(executeFunctions);
-    this.operation = executeFunctions.getNodeParameter("operation", 0) as string;
-  }
-
-  async execute(): Promise<INodeExecutionData[]> {
-    switch (this.operation) {
-      case "getAll":
-        return this.getAllAccountPostings();
-      case "get":
-        return this.getAccountPosting();
-      default:
-        throw new Error(`Unknown operation: ${this.operation}`);
-    }
-  }
-
-  private async getAllAccountPostings(): Promise<INodeExecutionData[]> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
+      let response: JsonValue | undefined;
+
+      switch (operation as AccountPostingOperation) {
+        case "getAll":
+          response = await this.handleGetAll(authContext);
+          break;
+        case "get":
+          response = await this.handleGet(authContext);
+          break;
+        default:
+          throw new NodeOperationError(
+            this.context.getNode(),
+            `The operation "${operation}" is not supported for resource "accountPosting".`,
+            { itemIndex: this.itemIndex },
+          );
       }
-      const queryParams = this.buildQueryParams();
-      const accountPostings = await datevConnectClient.accounting.getAccountPostings(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
-        queryParams
-      );
-      return this.wrapData(accountPostings as any);
+
+      sendSuccess(response);
     } catch (error) {
-      this.handleApiError(error, "Get all account postings");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getAccountPosting(): Promise<INodeExecutionData[]> {
-    try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const accountPostingId = this.executeFunctions.getNodeParameter("accountPostingId", 0) as string;
-      const queryParams = this.buildQueryParams();
-      const accountPosting = await datevConnectClient.accounting.getAccountPosting(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
-        accountPostingId,
-        queryParams
-      );
-      return this.wrapData(accountPosting as any);
-    } catch (error) {
-      this.handleApiError(error, "Get account posting");
-    }
+  private async handleGetAll(authContext: AuthContext): Promise<JsonValue> {
+    const queryParams = this.buildQueryParams();
+    const result = await datevConnectClient.accounting.getAccountPostings(
+      this.context,
+      authContext.clientId,
+      authContext.fiscalYearId,
+      queryParams
+    );
+    return result ?? null;
+  }
+
+  private async handleGet(authContext: AuthContext): Promise<JsonValue> {
+    const accountPostingId = this.getRequiredString("accountPostingId");
+    const queryParams = this.buildQueryParams();
+    const result = await datevConnectClient.accounting.getAccountPosting(
+      this.context,
+      authContext.clientId,
+      authContext.fiscalYearId,
+      accountPostingId,
+      queryParams
+    );
+    return result ?? null;
   }
 }

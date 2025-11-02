@@ -1,85 +1,96 @@
 import type { IExecuteFunctions, INodeExecutionData } from "n8n-workflow";
+import { NodeOperationError } from "n8n-workflow";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 import { datevConnectClient } from "../../../src/services/accountingClient";
+
+type GeneralLedgerAccountsOperation = "getAll" | "get" | "getUtilized";
+
+interface AuthContext {
+  clientId: string;
+  fiscalYearId: string;
+}
 
 /**
  * Handler for General Ledger Accounts operations
  * Manages operations related to chart of accounts
  */
 export class GeneralLedgerAccountsResourceHandler extends BaseResourceHandler {
-  private operation: string;
-
-  constructor(executeFunctions: IExecuteFunctions) {
-    super(executeFunctions);
-    this.operation = executeFunctions.getNodeParameter("operation", 0) as string;
+  constructor(context: IExecuteFunctions, itemIndex: number) {
+    super(context, itemIndex);
   }
 
-  async execute(): Promise<INodeExecutionData[]> {
-    switch (this.operation) {
+  async execute(
+    operation: GeneralLedgerAccountsOperation,
+    authContext: AuthContext,
+    returnData: INodeExecutionData[]
+  ): Promise<void> {
+    switch (operation) {
       case "getAll":
-        return this.getAllGeneralLedgerAccounts();
+        await this.handleGetAll(authContext, returnData);
+        break;
       case "get":
-        return this.getGeneralLedgerAccount();
+        await this.handleGet(authContext, returnData);
+        break;
       case "getUtilized":
-        return this.getUtilizedGeneralLedgerAccounts();
+        await this.handleGetUtilized(authContext, returnData);
+        break;
       default:
-        throw new Error(`Unknown operation: ${this.operation}`);
+        throw new NodeOperationError(this.context.getNode(), `Unknown operation: ${operation}`, {
+          itemIndex: this.itemIndex,
+        });
     }
   }
 
-  private async getAllGeneralLedgerAccounts(): Promise<INodeExecutionData[]> {
+  private async handleGetAll(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
       const queryParams = this.buildQueryParams();
       const accounts = await datevConnectClient.accounting.getGeneralLedgerAccounts(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         queryParams
       );
-      return this.wrapData(accounts as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(accounts);
     } catch (error) {
-      this.handleApiError(error, "Get all general ledger accounts");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getGeneralLedgerAccount(): Promise<INodeExecutionData[]> {
+  private async handleGet(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
-      const generalLedgerAccountId = this.executeFunctions.getNodeParameter("generalLedgerAccountId", 0) as string;
+      const generalLedgerAccountId = this.getRequiredString("generalLedgerAccountId");
       const queryParams = this.buildQueryParams();
       const account = await datevConnectClient.accounting.getGeneralLedgerAccount(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         generalLedgerAccountId,
         queryParams
       );
-      return this.wrapData(account as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(account);
     } catch (error) {
-      this.handleApiError(error, "Get general ledger account");
+      this.handleError(error, returnData);
     }
   }
 
-  private async getUtilizedGeneralLedgerAccounts(): Promise<INodeExecutionData[]> {
+  private async handleGetUtilized(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
-      if (!this.clientId || !this.fiscalYearId) {
-        throw new Error("Client ID and Fiscal Year ID are required");
-      }
       const queryParams = this.buildQueryParams();
       const accounts = await datevConnectClient.accounting.getUtilizedGeneralLedgerAccounts(
-        this.executeFunctions,
-        this.clientId,
-        this.fiscalYearId,
+        this.context,
+        authContext.clientId,
+        authContext.fiscalYearId,
         queryParams
       );
-      return this.wrapData(accounts as any);
+      
+      const sendSuccess = this.createSendSuccess(returnData);
+      sendSuccess(accounts);
     } catch (error) {
-      this.handleApiError(error, "Get utilized general ledger accounts");
+      this.handleError(error, returnData);
     }
   }
 }
