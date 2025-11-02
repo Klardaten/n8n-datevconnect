@@ -2,6 +2,7 @@ import type { IExecuteFunctions, INodeExecutionData } from "n8n-workflow";
 import { NodeOperationError } from "n8n-workflow";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 import { datevConnectClient } from "../../../src/services/accountingClient";
+import type { JsonValue } from "../../../src/services/datevConnectClient";
 
 type BusinessPartnersOperation = 
   | "getDebitors" 
@@ -121,7 +122,7 @@ export class BusinessPartnersResourceHandler extends BaseResourceHandler {
         this.context,
         authContext.clientId,
         authContext.fiscalYearId,
-        debitorData as any
+        debitorData as JsonValue
       );
       
       const sendSuccess = this.createSendSuccess(returnData);
@@ -145,7 +146,7 @@ export class BusinessPartnersResourceHandler extends BaseResourceHandler {
         authContext.clientId,
         authContext.fiscalYearId,
         debitorId,
-        debitorData as any
+        debitorData as JsonValue
       );
       
       const sendSuccess = this.createSendSuccess(returnData);
@@ -220,7 +221,7 @@ export class BusinessPartnersResourceHandler extends BaseResourceHandler {
         this.context,
         authContext.clientId,
         authContext.fiscalYearId,
-        creditorData as any
+        creditorData as JsonValue
       );
       
       const sendSuccess = this.createSendSuccess(returnData);
@@ -244,7 +245,7 @@ export class BusinessPartnersResourceHandler extends BaseResourceHandler {
         authContext.clientId,
         authContext.fiscalYearId,
         creditorId,
-        creditorData as any
+        creditorData as JsonValue
       );
       
       const sendSuccess = this.createSendSuccess(returnData);

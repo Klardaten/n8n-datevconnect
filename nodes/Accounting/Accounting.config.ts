@@ -6,7 +6,7 @@ import type { INodeTypeDescription } from "n8n-workflow";
 export const accountingNodeDescription: INodeTypeDescription = {
   displayName: "Klardaten DATEVconnect: Accounting",
   name: "accounting",
-  icon: "file:klardaten.svg",
+  icon: "file:../klardaten.svg",
   group: ["transform"],
   version: 1,
   description: "Interact with DATEV Accounting API",

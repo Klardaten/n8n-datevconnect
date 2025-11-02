@@ -8,8 +8,9 @@ import { NodeOperationError, NodeApiError } from "n8n-workflow";
 import { authenticate } from "../../src/services/datevConnectClient";
 
 import { accountingNodeDescription } from "./Accounting.config";
-import { 
-  BaseResourceHandler,
+import type { 
+  BaseResourceHandler} from "./handlers";
+import {
   ClientResourceHandler,
   FiscalYearResourceHandler,
   AccountsReceivableResourceHandler,
