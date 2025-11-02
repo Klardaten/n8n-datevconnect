@@ -1266,6 +1266,24 @@ export interface CreateAccountingSequenceOptions extends BaseRequestOptions {
   accountingSequence: JsonValue;
 }
 
+export interface FetchAccountingRecordsOptions extends BaseRequestOptions {
+  clientId: string;
+  fiscalYearId: string;
+  accountingSequenceId: string;
+  select?: string;
+  filter?: string;
+  top?: number;
+  skip?: number;
+}
+
+export interface FetchAccountingRecordOptions extends BaseRequestOptions {
+  clientId: string;
+  fiscalYearId: string;
+  accountingSequenceId: string;
+  accountingRecordId: string;
+  select?: string;
+}
+
 export interface FetchPostingProposalRulesIncomingOptions extends BaseRequestOptions {
   clientId: string;
   fiscalYearId: string;
@@ -1973,6 +1991,47 @@ export async function createAccountingSequence(options: CreateAccountingSequence
     method: "POST",
     body: accountingSequence,
   });
+}
+
+export async function fetchAccountingRecords(options: FetchAccountingRecordsOptions): Promise<JsonValue> {
+  const { clientId, fiscalYearId, accountingSequenceId, select, filter, top, skip } = options;
+
+  const body = await sendAccountingRequest({
+    ...options,
+    path: `${ACCOUNTING_BASE_PATH}/clients/${encodeURIComponent(clientId)}/fiscal-years/${encodeURIComponent(fiscalYearId)}/accounting-sequences-processed/${encodeURIComponent(accountingSequenceId)}/accounting-records`,
+    method: "GET",
+    query: {
+      $select: select,
+      $filter: filter,
+      $top: top,
+      $skip: skip,
+    },
+  });
+
+  if (body === undefined) {
+    throw new Error(`${DEFAULT_ERROR_PREFIX}: Expected accounting records payload.`);
+  }
+
+  return body;
+}
+
+export async function fetchAccountingRecord(options: FetchAccountingRecordOptions): Promise<JsonValue> {
+  const { clientId, fiscalYearId, accountingSequenceId, accountingRecordId, select } = options;
+
+  const body = await sendAccountingRequest({
+    ...options,
+    path: `${ACCOUNTING_BASE_PATH}/clients/${encodeURIComponent(clientId)}/fiscal-years/${encodeURIComponent(fiscalYearId)}/accounting-sequences-processed/${encodeURIComponent(accountingSequenceId)}/accounting-records/${encodeURIComponent(accountingRecordId)}`,
+    method: "GET",
+    query: {
+      $select: select,
+    },
+  });
+
+  if (body === undefined) {
+    throw new Error(`${DEFAULT_ERROR_PREFIX}: Expected accounting record payload.`);
+  }
+
+  return body;
 }
 
 export async function fetchPostingProposalRulesIncoming(options: FetchPostingProposalRulesIncomingOptions): Promise<JsonValue> {

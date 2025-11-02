@@ -307,6 +307,18 @@ export const accountingNodeDescription: INodeTypeDescription = {
           description: "Retrieve a specific accounting sequence",
           action: "Get an accounting sequence",
         },
+        {
+          name: "Get Accounting Records",
+          value: "getAccountingRecords",
+          description: "Retrieve all accounting records of a specific processed sequence",
+          action: "Get accounting records from sequence",
+        },
+        {
+          name: "Get Accounting Record",
+          value: "getAccountingRecord",
+          description: "Retrieve a specific accounting record from a sequence",
+          action: "Get specific accounting record from sequence",
+        },
       ],
       default: "getAll",
     },
@@ -930,13 +942,28 @@ export const accountingNodeDescription: INodeTypeDescription = {
       required: true,
       displayOptions: {
         show: {
-          operation: ["get"],
+          operation: ["get", "getAccountingRecords", "getAccountingRecord"],
           resource: ["accountingSequence"],
         },
       },
       default: "",
       placeholder: "77",
       description: "The ID of the accounting sequence",
+    },
+    {
+      displayName: "Accounting Record ID",
+      name: "accountingRecordId",
+      type: "string",
+      required: true,
+      displayOptions: {
+        show: {
+          operation: ["getAccountingRecord"],
+          resource: ["accountingSequence"],
+        },
+      },
+      default: "",
+      placeholder: "12345",
+      description: "The ID of the accounting record within the sequence",
     },
     {
       displayName: "Posting Proposal Rule ID",

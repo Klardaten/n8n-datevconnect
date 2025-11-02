@@ -28,6 +28,12 @@ export class AccountingSequenceResourceHandler extends BaseResourceHandler {
         case "get":
           response = await this.handleGet(authContext);
           break;
+        case "getAccountingRecords":
+          response = await this.handleGetAccountingRecords(authContext);
+          break;
+        case "getAccountingRecord":
+          response = await this.handleGetAccountingRecord(authContext);
+          break;
         default:
           throw new NodeOperationError(
             this.context.getNode(),
@@ -82,6 +88,38 @@ export class AccountingSequenceResourceHandler extends BaseResourceHandler {
       authContext.clientId,
       authContext.fiscalYearId,
       accountingSequenceId,
+    );
+    
+    return result ?? null;
+  }
+
+  private async handleGetAccountingRecords(authContext: AuthContext): Promise<JsonValue> {
+    const accountingSequenceId = this.getRequiredString("accountingSequenceId");
+    const queryParams = this.buildQueryParams();
+    
+    const result = await datevConnectClient.accounting.getAccountingRecords(
+      this.context,
+      authContext.clientId,
+      authContext.fiscalYearId,
+      accountingSequenceId,
+      queryParams,
+    );
+    
+    return result ?? null;
+  }
+
+  private async handleGetAccountingRecord(authContext: AuthContext): Promise<JsonValue> {
+    const accountingSequenceId = this.getRequiredString("accountingSequenceId");
+    const accountingRecordId = this.getRequiredString("accountingRecordId");
+    const queryParams = this.buildQueryParams();
+    
+    const result = await datevConnectClient.accounting.getAccountingRecord(
+      this.context,
+      authContext.clientId,
+      authContext.fiscalYearId,
+      accountingSequenceId,
+      accountingRecordId,
+      queryParams,
     );
     
     return result ?? null;

@@ -208,6 +208,32 @@ export const datevConnectClient = {
       });
     },
 
+    async getAccountingRecords(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, accountingSequenceId: string, queryParams: IDataObject = {}) {
+      const options = await getAuthenticatedOptions(executeFunctions);
+      return client.fetchAccountingRecords({
+        ...options,
+        clientId,
+        fiscalYearId,
+        accountingSequenceId,
+        select: queryParams.$select as string,
+        filter: queryParams.$filter as string,
+        top: queryParams.$top as number,
+        skip: queryParams.$skip as number,
+      });
+    },
+
+    async getAccountingRecord(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, accountingSequenceId: string, accountingRecordId: string, queryParams: IDataObject = {}) {
+      const options = await getAuthenticatedOptions(executeFunctions);
+      return client.fetchAccountingRecord({
+        ...options,
+        clientId,
+        fiscalYearId,
+        accountingSequenceId,
+        accountingRecordId,
+        select: queryParams.$select as string,
+      });
+    },
+
     async getPostingProposalRulesIncoming(executeFunctions: IExecuteFunctions, clientId: string, fiscalYearId: string, queryParams: IDataObject = {}) {
       const options = await getAuthenticatedOptions(executeFunctions);
       return client.fetchPostingProposalRulesIncoming({

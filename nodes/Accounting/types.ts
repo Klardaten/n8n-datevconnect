@@ -16,15 +16,31 @@ export type AccountingResource =
   | "client"
   | "fiscalYear" 
   | "accountsReceivable"
+  | "accountsPayable"
   | "accountPosting"
-  | "accountingSequence";
+  | "accountingSequence"
+  | "postingProposals"
+  | "accountingSumsAndBalances"
+  | "businessPartners"
+  | "generalLedgerAccounts"
+  | "termsOfPayment"
+  | "stocktakingData"
+  | "costSystems"
+  | "costCentersUnits"
+  | "costCenterProperties"
+  | "internalCostServices"
+  | "costSequences"
+  | "accountingStatistics"
+  | "accountingTransactionKeys"
+  | "variousAddresses";
 
 // Operations for each resource
 export type ClientOperation = "getAll" | "get";
 export type FiscalYearOperation = "getAll" | "get";
 export type AccountsReceivableOperation = "getAll" | "get" | "getCondensed";
+export type AccountsPayableOperation = "getAll" | "get" | "getCondensed";
 export type AccountPostingOperation = "getAll" | "get";
-export type AccountingSequenceOperation = "create" | "getAll" | "get";
+export type AccountingSequenceOperation = "create" | "getAll" | "get" | "getAccountingRecords" | "getAccountingRecord";
 export type TermsOfPaymentOperation = "getAll" | "get" | "create" | "update";
 export type CreditorOperation = "getAll" | "get" | "create" | "update";
 export type CostSequenceOperation = "getAll" | "get" | "create";
@@ -48,7 +64,11 @@ export type AccountingOperation =
   | FiscalYearOperation
   | AccountsReceivableOperation
   | AccountPostingOperation
-  | AccountingSequenceOperation;
+  | AccountingSequenceOperation
+  | PostingProposalOperation
+  | TermsOfPaymentOperation
+  | StocktakingDataOperation
+  | VariousAddressOperation;
 
 // Client entity types
 export interface Client {
