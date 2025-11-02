@@ -17,6 +17,16 @@ import {
   AccountingSumsAndBalancesResourceHandler,
   BusinessPartnersResourceHandler,
   GeneralLedgerAccountsResourceHandler,
+  TermsOfPaymentResourceHandler,
+  StocktakingDataResourceHandler,
+  CostSystemsResourceHandler,
+  CostCentersUnitsResourceHandler,
+  CostCenterPropertiesResourceHandler,
+  InternalCostServicesResourceHandler,
+  CostSequencesResourceHandler,
+  AccountingStatisticsResourceHandler,
+  AccountingTransactionKeysResourceHandler,
+  VariousAddressesResourceHandler,
 } from "./handlers";
 
 /**
@@ -33,6 +43,16 @@ import {
  * - Accounting sums and balances
  * - Business partners (debitors/creditors)
  * - General ledger accounts
+ * - Terms of payment
+ * - Stocktaking data
+ * - Cost systems
+ * - Cost centers/units
+ * - Cost center properties
+ * - Internal cost services
+ * - Cost sequences
+ * - Accounting statistics
+ * - Accounting transaction keys
+ * - Various addresses
  */
 export class Accounting implements INodeType {
   description: INodeTypeDescription = accountingNodeDescription;
@@ -78,6 +98,36 @@ export class Accounting implements INodeType {
             break;
           case "generalLedgerAccounts":
             handler = new GeneralLedgerAccountsResourceHandler(this);
+            break;
+          case "termsOfPayment":
+            handler = new TermsOfPaymentResourceHandler(this);
+            break;
+          case "stocktakingData":
+            handler = new StocktakingDataResourceHandler(this);
+            break;
+          case "costSystems":
+            handler = new CostSystemsResourceHandler(this);
+            break;
+          case "costCentersUnits":
+            handler = new CostCentersUnitsResourceHandler(this);
+            break;
+          case "costCenterProperties":
+            handler = new CostCenterPropertiesResourceHandler(this);
+            break;
+          case "internalCostServices":
+            handler = new InternalCostServicesResourceHandler(this);
+            break;
+          case "costSequences":
+            handler = new CostSequencesResourceHandler(this);
+            break;
+          case "accountingStatistics":
+            handler = new AccountingStatisticsResourceHandler(this);
+            break;
+          case "accountingTransactionKeys":
+            handler = new AccountingTransactionKeysResourceHandler(this);
+            break;
+          case "variousAddresses":
+            handler = new VariousAddressesResourceHandler(this);
             break;
           default:
             throw new Error(`Unknown resource: ${resource}`);

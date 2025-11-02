@@ -16,7 +16,7 @@ describe("Accounting node", () => {
     expect(resourceProperty?.type).toBe("options");
     
     const resourceOptions = (resourceProperty as any)?.options;
-    expect(resourceOptions).toHaveLength(10);
+    expect(resourceOptions).toHaveLength(20);
     
     const resourceValues = resourceOptions.map((opt: any) => opt.value);
     expect(resourceValues).toContain("client");
@@ -29,6 +29,16 @@ describe("Accounting node", () => {
     expect(resourceValues).toContain("accountingSumsAndBalances");
     expect(resourceValues).toContain("businessPartners");
     expect(resourceValues).toContain("generalLedgerAccounts");
+    expect(resourceValues).toContain("termsOfPayment");
+    expect(resourceValues).toContain("stocktakingData");
+    expect(resourceValues).toContain("costSystems");
+    expect(resourceValues).toContain("costCentersUnits");
+    expect(resourceValues).toContain("costCenterProperties");
+    expect(resourceValues).toContain("internalCostServices");
+    expect(resourceValues).toContain("costSequences");
+    expect(resourceValues).toContain("accountingStatistics");
+    expect(resourceValues).toContain("accountingTransactionKeys");
+    expect(resourceValues).toContain("variousAddresses");
   });
 
   test("has correct credentials configuration", () => {

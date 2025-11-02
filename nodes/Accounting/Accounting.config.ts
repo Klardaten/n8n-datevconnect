@@ -77,6 +77,56 @@ export const accountingNodeDescription: INodeTypeDescription = {
           value: "generalLedgerAccounts",
           description: "Operations on chart of accounts",
         },
+        {
+          name: "Terms of Payment",
+          value: "termsOfPayment",
+          description: "Operations on payment terms and conditions",
+        },
+        {
+          name: "Stocktaking Data",
+          value: "stocktakingData",
+          description: "Operations on inventory stocktaking data",
+        },
+        {
+          name: "Cost Systems",
+          value: "costSystems",
+          description: "Operations on cost accounting systems",
+        },
+        {
+          name: "Cost Centers/Units",
+          value: "costCentersUnits", 
+          description: "Operations on cost centers and cost units",
+        },
+        {
+          name: "Cost Center Properties",
+          value: "costCenterProperties",
+          description: "Operations on cost center properties and attributes",
+        },
+        {
+          name: "Internal Cost Services",
+          value: "internalCostServices",
+          description: "Operations on internal cost service allocations",
+        },
+        {
+          name: "Cost Sequences",
+          value: "costSequences",
+          description: "Operations on cost accounting sequences",
+        },
+        {
+          name: "Accounting Statistics",
+          value: "accountingStatistics",
+          description: "Operations on monthly accounting sequence statistics",
+        },
+        {
+          name: "Accounting Transaction Keys",
+          value: "accountingTransactionKeys", 
+          description: "Operations on accounting transaction key master data",
+        },
+        {
+          name: "Various Addresses",
+          value: "variousAddresses",
+          description: "Operations on various business partner addresses",
+        },
       ],
       default: "client",
     },
@@ -465,6 +515,300 @@ export const accountingNodeDescription: INodeTypeDescription = {
       default: "getAll",
     },
 
+    // Terms of Payment operations
+    {
+      displayName: "Operation",
+      name: "operation",
+      type: "options",
+      displayOptions: {
+        show: {
+          resource: ["termsOfPayment"],
+        },
+      },
+      options: [
+        {
+          name: "Get Many",
+          value: "getAll",
+          description: "Retrieve a list of terms of payment",
+          action: "Get many terms of payment",
+        },
+        {
+          name: "Get",
+          value: "get",
+          description: "Retrieve a specific term of payment",
+          action: "Get a term of payment",
+        },
+        {
+          name: "Create",
+          value: "create",
+          description: "Create a new term of payment",
+          action: "Create a term of payment",
+        },
+        {
+          name: "Update",
+          value: "update",
+          description: "Update an existing term of payment",
+          action: "Update a term of payment",
+        },
+      ],
+      default: "getAll",
+    },
+
+    // Stocktaking Data operations
+    {
+      displayName: "Operation",
+      name: "operation",
+      type: "options",
+      displayOptions: {
+        show: {
+          resource: ["stocktakingData"],
+        },
+      },
+      options: [
+        {
+          name: "Get Many",
+          value: "getAll",
+          description: "Retrieve a list of stocktaking data",
+          action: "Get many stocktaking data",
+        },
+        {
+          name: "Get",
+          value: "get",
+          description: "Retrieve a specific stocktaking data entry",
+          action: "Get a stocktaking data entry",
+        },
+        {
+          name: "Create",
+          value: "create",
+          description: "Create a new stocktaking data entry",
+          action: "Create a stocktaking data entry",
+        },
+      ],
+      default: "getAll",
+    },
+
+    // Cost Systems operations
+    {
+      displayName: "Operation",
+      name: "operation",
+      type: "options",
+      displayOptions: {
+        show: {
+          resource: ["costSystems"],
+        },
+      },
+      options: [
+        {
+          name: "Get Many",
+          value: "getAll",
+          description: "Retrieve a list of cost systems",
+          action: "Get many cost systems",
+        },
+        {
+          name: "Get",
+          value: "get",
+          description: "Retrieve a specific cost system",
+          action: "Get a cost system",
+        },
+      ],
+      default: "getAll",
+    },
+
+    // Cost Centers/Units operations
+    {
+      displayName: "Operation",
+      name: "operation",
+      type: "options",
+      displayOptions: {
+        show: {
+          resource: ["costCentersUnits"],
+        },
+      },
+      options: [
+        {
+          name: "Get Many",
+          value: "getAll",
+          description: "Retrieve a list of cost centers/units",
+          action: "Get many cost centers/units",
+        },
+        {
+          name: "Get",
+          value: "get",
+          description: "Retrieve a specific cost center/unit",
+          action: "Get a cost center/unit",
+        },
+      ],
+      default: "getAll",
+    },
+
+    // Cost Center Properties operations
+    {
+      displayName: "Operation",
+      name: "operation",
+      type: "options",
+      displayOptions: {
+        show: {
+          resource: ["costCenterProperties"],
+        },
+      },
+      options: [
+        {
+          name: "Get Many",
+          value: "getAll",
+          description: "Retrieve a list of cost center properties",
+          action: "Get many cost center properties",
+        },
+        {
+          name: "Get",
+          value: "get",
+          description: "Retrieve a specific cost center property",
+          action: "Get a cost center property",
+        },
+      ],
+      default: "getAll",
+    },
+
+    // Internal Cost Services operations
+    {
+      displayName: "Operation",
+      name: "operation",
+      type: "options",
+      displayOptions: {
+        show: {
+          resource: ["internalCostServices"],
+        },
+      },
+      options: [
+        {
+          name: "Create",
+          value: "create",
+          description: "Create internal cost service allocation",
+          action: "Create internal cost service",
+        },
+      ],
+      default: "create",
+    },
+
+    // Cost Sequences operations
+    {
+      displayName: "Operation",
+      name: "operation",
+      type: "options",
+      displayOptions: {
+        show: {
+          resource: ["costSequences"],
+        },
+      },
+      options: [
+        {
+          name: "Get Many",
+          value: "getAll",
+          description: "Retrieve a list of cost sequences",
+          action: "Get many cost sequences",
+        },
+        {
+          name: "Get",
+          value: "get",
+          description: "Retrieve a specific cost sequence",
+          action: "Get a cost sequence",
+        },
+        {
+          name: "Create",
+          value: "create",
+          description: "Create a new cost sequence",
+          action: "Create a cost sequence",
+        },
+        {
+          name: "Get Cost Accounting Records",
+          value: "getCostAccountingRecords",
+          description: "Retrieve cost accounting records for a sequence",
+          action: "Get cost accounting records",
+        },
+      ],
+      default: "getAll",
+    },
+
+    // Accounting Statistics operations
+    {
+      displayName: "Operation",
+      name: "operation",
+      type: "options",
+      displayOptions: {
+        show: {
+          resource: ["accountingStatistics"],
+        },
+      },
+      options: [
+        {
+          name: "Get Many",
+          value: "getAll",
+          description: "Retrieve accounting statistics data",
+          action: "Get many accounting statistics",
+        },
+      ],
+      default: "getAll",
+    },
+
+    // Accounting Transaction Keys operations
+    {
+      displayName: "Operation",
+      name: "operation",
+      type: "options",
+      displayOptions: {
+        show: {
+          resource: ["accountingTransactionKeys"],
+        },
+      },
+      options: [
+        {
+          name: "Get Many",
+          value: "getAll",
+          description: "Retrieve a list of accounting transaction keys",
+          action: "Get many accounting transaction keys",
+        },
+        {
+          name: "Get",
+          value: "get",
+          description: "Retrieve a specific accounting transaction key",
+          action: "Get an accounting transaction key",
+        },
+      ],
+      default: "getAll",
+    },
+
+    // Various Addresses operations
+    {
+      displayName: "Operation",
+      name: "operation",
+      type: "options",
+      displayOptions: {
+        show: {
+          resource: ["variousAddresses"],
+        },
+      },
+      options: [
+        {
+          name: "Get Many",
+          value: "getAll",
+          description: "Retrieve a list of various addresses",
+          action: "Get many various addresses",
+        },
+        {
+          name: "Get",
+          value: "get",
+          description: "Retrieve a specific various address",
+          action: "Get a various address",
+        },
+        {
+          name: "Create",
+          value: "create",
+          description: "Create a new various address",
+          action: "Create a various address",
+        },
+      ],
+      default: "getAll",
+    },
+
     // Common parameters
     {
       displayName: "Client ID",
@@ -473,7 +817,7 @@ export const accountingNodeDescription: INodeTypeDescription = {
       required: true,
       displayOptions: {
         show: {
-          resource: ["fiscalYear", "accountsReceivable", "accountsPayable", "accountPosting", "accountingSequence", "postingProposals", "accountingSumsAndBalances", "businessPartners", "generalLedgerAccounts"],
+          resource: ["fiscalYear", "accountsReceivable", "accountsPayable", "accountPosting", "accountingSequence", "postingProposals", "accountingSumsAndBalances", "businessPartners", "generalLedgerAccounts", "termsOfPayment", "stocktakingData", "costSystems", "costCentersUnits", "costCenterProperties", "internalCostServices", "costSequences", "accountingStatistics", "accountingTransactionKeys", "variousAddresses"],
         },
         hide: {
           operation: ["getAll"],
@@ -506,7 +850,7 @@ export const accountingNodeDescription: INodeTypeDescription = {
       required: true,
       displayOptions: {
         show: {
-          resource: ["accountsReceivable", "accountsPayable", "accountPosting", "accountingSequence", "postingProposals", "accountingSumsAndBalances", "businessPartners", "generalLedgerAccounts"],
+          resource: ["accountsReceivable", "accountsPayable", "accountPosting", "accountingSequence", "postingProposals", "accountingSumsAndBalances", "businessPartners", "generalLedgerAccounts", "termsOfPayment", "stocktakingData", "costSystems", "costCentersUnits", "costCenterProperties", "internalCostServices", "costSequences", "accountingStatistics", "accountingTransactionKeys", "variousAddresses"],
         },
         hide: {
           operation: ["getAll"],
@@ -669,6 +1013,140 @@ export const accountingNodeDescription: INodeTypeDescription = {
       placeholder: "50000",
       description: "The ID of the general ledger account",
     },
+    {
+      displayName: "Terms of Payment ID",
+      name: "termsOfPaymentId",
+      type: "string",
+      required: true,
+      displayOptions: {
+        show: {
+          operation: ["get", "update"],
+          resource: ["termsOfPayment"],
+        },
+      },
+      default: "",
+      placeholder: "Z001",
+      description: "The ID of the terms of payment",
+    },
+    {
+      displayName: "Stocktaking Data ID",
+      name: "stocktakingDataId",
+      type: "string",
+      required: true,
+      displayOptions: {
+        show: {
+          operation: ["get"],
+          resource: ["stocktakingData"],
+        },
+      },
+      default: "",
+      placeholder: "1",
+      description: "The ID of the stocktaking data entry",
+    },
+    {
+      displayName: "Cost System ID",
+      name: "costSystemId",
+      type: "string",
+      required: true,
+      displayOptions: {
+        show: {
+          operation: ["get"],
+          resource: ["costSystems"],
+        },
+      },
+      default: "",
+      placeholder: "0",
+      description: "The ID of the cost system",
+    },
+    {
+      displayName: "Cost System ID",
+      name: "costSystemId",
+      type: "string",
+      required: true,
+      displayOptions: {
+        show: {
+          resource: ["costCentersUnits", "costCenterProperties", "internalCostServices", "costSequences"],
+        },
+      },
+      default: "",
+      placeholder: "0",
+      description: "The ID of the cost system",
+    },
+    {
+      displayName: "Cost Center/Unit ID",
+      name: "costCenterUnitId",
+      type: "string",
+      required: true,
+      displayOptions: {
+        show: {
+          operation: ["get"],
+          resource: ["costCentersUnits"],
+        },
+      },
+      default: "",
+      placeholder: "100",
+      description: "The ID of the cost center or cost unit",
+    },
+    {
+      displayName: "Cost Center Property ID",
+      name: "costCenterPropertyId",
+      type: "string",
+      required: true,
+      displayOptions: {
+        show: {
+          operation: ["get"],
+          resource: ["costCenterProperties"],
+        },
+      },
+      default: "",
+      placeholder: "1",
+      description: "The ID of the cost center property",
+    },
+    {
+      displayName: "Cost Sequence ID",
+      name: "costSequenceId",
+      type: "string",
+      required: true,
+      displayOptions: {
+        show: {
+          operation: ["get", "create", "getCostAccountingRecords"],
+          resource: ["costSequences"],
+        },
+      },
+      default: "",
+      placeholder: "1",
+      description: "The ID of the cost sequence",
+    },
+    {
+      displayName: "Accounting Transaction Key ID",
+      name: "accountingTransactionKeyId",
+      type: "string",
+      required: true,
+      displayOptions: {
+        show: {
+          operation: ["get"],
+          resource: ["accountingTransactionKeys"],
+        },
+      },
+      default: "",
+      placeholder: "40",
+      description: "The ID of the accounting transaction key",
+    },
+    {
+      displayName: "Various Address ID",
+      name: "variousAddressId",
+      type: "string",
+      required: true,
+      displayOptions: {
+        show: {
+          operation: ["get"],
+          resource: ["variousAddresses"],
+        },
+      },
+      default: "",
+      placeholder: "1",
+      description: "The ID of the various address",
+    },
 
     // Query parameters for list operations
     {
@@ -732,7 +1210,7 @@ export const accountingNodeDescription: INodeTypeDescription = {
       displayOptions: {
         show: {
           operation: ["get"],
-          resource: ["client", "accountsReceivable", "accountsPayable"],
+          resource: ["client", "accountsReceivable", "accountsPayable", "variousAddresses"],
         },
       },
       default: "",
@@ -791,6 +1269,71 @@ export const accountingNodeDescription: INodeTypeDescription = {
       },
       default: "{}",
       description: "Creditor data to send to the API",
+    },
+    {
+      displayName: "Terms of Payment Data",
+      name: "termsOfPaymentData",
+      type: "json",
+      displayOptions: {
+        show: {
+          operation: ["create", "update"],
+          resource: ["termsOfPayment"],
+        },
+      },
+      default: "{}",
+      description: "Terms of payment data to send to the API",
+    },
+    {
+      displayName: "Stocktaking Data",
+      name: "stocktakingData",
+      type: "json",
+      displayOptions: {
+        show: {
+          operation: ["create"],
+          resource: ["stocktakingData"],
+        },
+      },
+      default: "{}",
+      description: "Stocktaking data to send to the API",
+    },
+    {
+      displayName: "Internal Cost Service Data",
+      name: "internalCostServiceData",
+      type: "json",
+      displayOptions: {
+        show: {
+          operation: ["create"],
+          resource: ["internalCostServices"],
+        },
+      },
+      default: "{}",
+      description: "Internal cost service data to send to the API",
+    },
+    {
+      displayName: "Cost Sequence Data",
+      name: "costSequenceData",
+      type: "json",
+      displayOptions: {
+        show: {
+          operation: ["create"],
+          resource: ["costSequences"],
+        },
+      },
+      default: "{}",
+      description: "Cost sequence data to send to the API",
+    },
+    {
+      displayName: "Various Address Data",
+      name: "variousAddressData",
+      type: "json",
+      displayOptions: {
+        show: {
+          operation: ["create"],
+          resource: ["variousAddresses"],
+        },
+      },
+      default: "{}",
+      description: "Various address data to send to the API",
     },
   ],
 };
