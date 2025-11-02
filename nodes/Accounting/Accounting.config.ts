@@ -1176,7 +1176,8 @@ export const accountingNodeDescription: INodeTypeDescription = {
         show: {
           operation: [
             "getAll", "getCondensed", "getAccountingRecords", 
-            "getRulesIncoming", "getRulesOutgoing", "getRulesCashRegister"
+            "getRulesIncoming", "getRulesOutgoing", "getRulesCashRegister",
+            "getDebitors", "getCreditors", "getUtilized"
           ],
         },
       },
@@ -1194,7 +1195,8 @@ export const accountingNodeDescription: INodeTypeDescription = {
         show: {
           operation: [
             "getAll", "getCondensed", "getAccountingRecords", 
-            "getRulesIncoming", "getRulesOutgoing", "getRulesCashRegister"
+            "getRulesIncoming", "getRulesOutgoing", "getRulesCashRegister",
+            "getDebitors", "getCreditors", "getUtilized"
           ],
         },
       },
@@ -1213,7 +1215,8 @@ export const accountingNodeDescription: INodeTypeDescription = {
           operation: [
             "getAll", "get", "getCondensed", "getAccountingRecords", "getAccountingRecord",
             "getRulesIncoming", "getRulesOutgoing", "getRulesCashRegister",
-            "getRuleIncoming", "getRuleOutgoing", "getRuleCashRegister"
+            "getRuleIncoming", "getRuleOutgoing", "getRuleCashRegister",
+            "getDebitors", "getDebitor", "getCreditors", "getCreditor", "getUtilized"
           ],
         },
       },
@@ -1228,7 +1231,8 @@ export const accountingNodeDescription: INodeTypeDescription = {
         show: {
           operation: [
             "getAll", "getCondensed", "getAccountingRecords", 
-            "getRulesIncoming", "getRulesOutgoing", "getRulesCashRegister"
+            "getRulesIncoming", "getRulesOutgoing", "getRulesCashRegister",
+            "getDebitors", "getCreditors", "getUtilized"
           ],
         },
       },
@@ -1241,8 +1245,8 @@ export const accountingNodeDescription: INodeTypeDescription = {
       type: "string",
       displayOptions: {
         show: {
-          operation: ["get"],
-          resource: ["client", "accountsReceivable", "accountsPayable", "variousAddresses"],
+          operation: ["get", "getDebitor", "getCreditor", "getDebitors", "getCreditors"],
+          resource: ["client", "accountsReceivable", "accountsPayable", "variousAddresses", "businessPartners"],
         },
       },
       default: "",

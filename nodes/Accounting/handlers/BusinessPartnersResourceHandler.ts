@@ -105,14 +105,14 @@ export class BusinessPartnersResourceHandler extends BaseResourceHandler {
   private async handleGetDebitor(requestContext: RequestContext, returnData: INodeExecutionData[]): Promise<void> {
     this.validateRequiredParameters(requestContext);
     try {
-      this.validateRequiredParameters(requestContext);
-      
       const id = this.context.getNodeParameter("debitorId", this.itemIndex) as string;
+      const queryParams = this.buildQueryParams();
       const debitor = await datevConnectClient.accounting.getDebitor(
         this.context,
         requestContext.clientId!,
         requestContext.fiscalYearId!,
-        id
+        id,
+        queryParams
       );
       
       const sendSuccess = this.createSendSuccess(returnData);
