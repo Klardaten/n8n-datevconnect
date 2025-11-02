@@ -2,14 +2,19 @@
  * Type definitions for DATEV Accounting API
  */
 
-// Authentication context for API calls
-export interface AuthContext {
+// Request context for API calls
+export interface RequestContext {
+  // Authentication data
   host: string;
   token: string;
   clientInstanceId: string;
-  clientId: string;
-  fiscalYearId: string;
+  // Operation parameters (conditionally required based on endpoint)
+  clientId?: string;        // Optional - not needed for /clients getAll endpoint
+  fiscalYearId?: string;    // Optional - not needed for client/fiscal-year endpoints
 }
+
+// Legacy alias for backward compatibility during transition
+export type AuthContext = RequestContext;
 
 // Supported accounting resources
 export type AccountingResource = 

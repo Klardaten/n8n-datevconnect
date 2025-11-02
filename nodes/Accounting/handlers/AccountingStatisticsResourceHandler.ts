@@ -1,14 +1,11 @@
 import type { IExecuteFunctions, INodeExecutionData } from "n8n-workflow";
+import type { RequestContext } from "../types";
 import { NodeOperationError } from "n8n-workflow";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 import { datevConnectClient } from "../../../src/services/accountingClient";
 
 type AccountingStatisticsOperation = "getAll";
 
-interface AuthContext {
-  clientId: string;
-  fiscalYearId: string;
-}
 
 /**
  * Handler for Accounting Statistics operations
@@ -21,12 +18,12 @@ export class AccountingStatisticsResourceHandler extends BaseResourceHandler {
 
   async execute(
     operation: AccountingStatisticsOperation,
-    authContext: AuthContext,
+    requestContext: RequestContext,
     returnData: INodeExecutionData[]
   ): Promise<void> {
     switch (operation) {
       case "getAll":
-        await this.handleGetAll(authContext, returnData);
+        await this.handleGetAll(requestContext, returnData);
         break;
       default:
         throw new NodeOperationError(this.context.getNode(), `Unknown operation: ${operation}`, {
@@ -35,13 +32,13 @@ export class AccountingStatisticsResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleGetAll(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
+  private async handleGetAll(requestContext: RequestContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
       const queryParams = this.buildQueryParams();
       const accountingStatistics = await datevConnectClient.accounting.getAccountingStatistics(
         this.context,
-        authContext.clientId,
-        authContext.fiscalYearId,
+        requestContext.clientId!,
+        requestContext.fiscalYearId!,
         queryParams
       );
       

@@ -1,7 +1,7 @@
 import { NodeOperationError, type INodeExecutionData } from "n8n-workflow";
 import type { JsonValue } from "../../../src/services/datevConnectClient";
 import { datevConnectClient } from "../../../src/services/accountingClient";
-import type { AuthContext, PostingProposalOperation } from "../types";
+import type { RequestContext, PostingProposalOperation } from "../types";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 
 /**
@@ -11,7 +11,7 @@ import { BaseResourceHandler } from "./BaseResourceHandler";
 export class PostingProposalsResourceHandler extends BaseResourceHandler {
   async execute(
     operation: string,
-    authContext: AuthContext,
+    requestContext: RequestContext,
     returnData: INodeExecutionData[],
   ): Promise<void> {
     const sendSuccess = this.createSendSuccess(returnData);
@@ -21,31 +21,31 @@ export class PostingProposalsResourceHandler extends BaseResourceHandler {
 
       switch (operation as PostingProposalOperation) {
         case "getRulesIncoming":
-          response = await this.handleGetRulesIncoming(authContext);
+          response = await this.handleGetRulesIncoming(requestContext);
           break;
         case "getRulesOutgoing":
-          response = await this.handleGetRulesOutgoing(authContext);
+          response = await this.handleGetRulesOutgoing(requestContext);
           break;
         case "getRulesCashRegister":
-          response = await this.handleGetRulesCashRegister(authContext);
+          response = await this.handleGetRulesCashRegister(requestContext);
           break;
         case "getRuleIncoming":  
-          response = await this.handleGetRuleIncoming(authContext);
+          response = await this.handleGetRuleIncoming(requestContext);
           break;
         case "getRuleOutgoing":
-          response = await this.handleGetRuleOutgoing(authContext);
+          response = await this.handleGetRuleOutgoing(requestContext);
           break;
         case "getRuleCashRegister":
-          response = await this.handleGetRuleCashRegister(authContext);
+          response = await this.handleGetRuleCashRegister(requestContext);
           break;
         case "batchIncoming":
-          response = await this.handleBatchIncoming(authContext);
+          response = await this.handleBatchIncoming(requestContext);
           break;
         case "batchOutgoing":
-          response = await this.handleBatchOutgoing(authContext);
+          response = await this.handleBatchOutgoing(requestContext);
           break;
         case "batchCashRegister":
-          response = await this.handleBatchCashRegister(authContext);
+          response = await this.handleBatchCashRegister(requestContext);
           break;
         default:
           throw new NodeOperationError(
@@ -80,101 +80,101 @@ export class PostingProposalsResourceHandler extends BaseResourceHandler {
 
 
   // New handle methods for the converted pattern
-  private async handleGetRulesIncoming(authContext: AuthContext): Promise<JsonValue> {
+  private async handleGetRulesIncoming(requestContext: RequestContext): Promise<JsonValue> {
     const queryParams = this.buildQueryParams();
     return await datevConnectClient.accounting.getPostingProposalRulesIncoming(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       queryParams
     );
   }
 
-  private async handleGetRulesOutgoing(authContext: AuthContext): Promise<JsonValue> {
+  private async handleGetRulesOutgoing(requestContext: RequestContext): Promise<JsonValue> {
     const queryParams = this.buildQueryParams();
     return await datevConnectClient.accounting.getPostingProposalRulesOutgoing(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       queryParams
     );
   }
 
-  private async handleGetRulesCashRegister(authContext: AuthContext): Promise<JsonValue> {
+  private async handleGetRulesCashRegister(requestContext: RequestContext): Promise<JsonValue> {
     const queryParams = this.buildQueryParams();
     return await datevConnectClient.accounting.getPostingProposalRulesCashRegister(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       queryParams
     );
   }
 
-  private async handleGetRuleIncoming(authContext: AuthContext): Promise<JsonValue> {
+  private async handleGetRuleIncoming(requestContext: RequestContext): Promise<JsonValue> {
     const ruleId = this.getRequiredString("ruleId");
     const queryParams = this.buildQueryParams();
     return await datevConnectClient.accounting.getPostingProposalRuleIncoming(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       ruleId,
       queryParams
     );
   }
 
-  private async handleGetRuleOutgoing(authContext: AuthContext): Promise<JsonValue> {
+  private async handleGetRuleOutgoing(requestContext: RequestContext): Promise<JsonValue> {
     const ruleId = this.getRequiredString("ruleId");
     const queryParams = this.buildQueryParams();
     return await datevConnectClient.accounting.getPostingProposalRuleOutgoing(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       ruleId,
       queryParams
     );
   }
 
-  private async handleGetRuleCashRegister(authContext: AuthContext): Promise<JsonValue> {
+  private async handleGetRuleCashRegister(requestContext: RequestContext): Promise<JsonValue> {
     const ruleId = this.getRequiredString("ruleId");
     const queryParams = this.buildQueryParams();
     return await datevConnectClient.accounting.getPostingProposalRuleCashRegister(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       ruleId,
       queryParams
     );
   }
 
-  private async handleBatchIncoming(authContext: AuthContext): Promise<JsonValue | undefined> {
+  private async handleBatchIncoming(requestContext: RequestContext): Promise<JsonValue | undefined> {
     const batchDataRaw = this.context.getNodeParameter("batchData", this.itemIndex);
     const batchData: JsonValue = this.parseJsonParameter(batchDataRaw, "batchData");
     return await datevConnectClient.accounting.batchPostingProposalsIncoming(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       batchData
     );
   }
 
-  private async handleBatchOutgoing(authContext: AuthContext): Promise<JsonValue | undefined> {
+  private async handleBatchOutgoing(requestContext: RequestContext): Promise<JsonValue | undefined> {
     const batchDataRaw = this.context.getNodeParameter("batchData", this.itemIndex);
     const batchData: JsonValue = this.parseJsonParameter(batchDataRaw, "batchData");
     return await datevConnectClient.accounting.batchPostingProposalsOutgoing(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       batchData
     );
   }
 
-  private async handleBatchCashRegister(authContext: AuthContext): Promise<JsonValue | undefined> {
+  private async handleBatchCashRegister(requestContext: RequestContext): Promise<JsonValue | undefined> {
     const batchDataRaw = this.context.getNodeParameter("batchData", this.itemIndex);
     const batchData: JsonValue = this.parseJsonParameter(batchDataRaw, "batchData");
     return await datevConnectClient.accounting.batchPostingProposalsCashRegister(
       this.context,
-      authContext.clientId,  
-      authContext.fiscalYearId,
+      requestContext.clientId!,  
+      requestContext.fiscalYearId!,
       batchData
     );
   }

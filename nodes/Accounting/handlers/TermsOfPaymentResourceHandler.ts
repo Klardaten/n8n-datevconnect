@@ -1,7 +1,7 @@
 import { NodeOperationError, type INodeExecutionData } from "n8n-workflow";
 import type { JsonValue } from "../../../src/services/datevConnectClient";
 import { datevConnectClient } from "../../../src/services/accountingClient";
-import type { AuthContext, TermsOfPaymentOperation } from "../types";
+import type { RequestContext, TermsOfPaymentOperation } from "../types";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 
 /**
@@ -11,7 +11,7 @@ import { BaseResourceHandler } from "./BaseResourceHandler";
 export class TermsOfPaymentResourceHandler extends BaseResourceHandler {
   async execute(
     operation: string,
-    authContext: AuthContext,
+    requestContext: RequestContext,
     returnData: INodeExecutionData[],
   ): Promise<void> {
     const sendSuccess = this.createSendSuccess(returnData);
@@ -21,16 +21,16 @@ export class TermsOfPaymentResourceHandler extends BaseResourceHandler {
 
       switch (operation as TermsOfPaymentOperation) {
         case "getAll":
-          response = await this.handleGetAll(authContext);
+          response = await this.handleGetAll(requestContext);
           break;
         case "get":
-          response = await this.handleGet(authContext);
+          response = await this.handleGet(requestContext);
           break;
         case "create":
-          response = await this.handleCreate(authContext);
+          response = await this.handleCreate(requestContext);
           break;
         case "update":
-          response = await this.handleUpdate(authContext);
+          response = await this.handleUpdate(requestContext);
           break;
         default:
           throw new NodeOperationError(
@@ -46,31 +46,31 @@ export class TermsOfPaymentResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleGetAll(authContext: AuthContext): Promise<JsonValue> {
+  private async handleGetAll(requestContext: RequestContext): Promise<JsonValue> {
     const queryParams = this.buildQueryParams();
     const result = await datevConnectClient.accounting.getTermsOfPayment(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       queryParams
     );
     return result ?? null;
   }
 
-  private async handleGet(authContext: AuthContext): Promise<JsonValue> {
+  private async handleGet(requestContext: RequestContext): Promise<JsonValue> {
     const termOfPaymentId = this.getRequiredString("termOfPaymentId");
     const queryParams = this.buildQueryParams();
     const result = await datevConnectClient.accounting.getTermOfPayment(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       termOfPaymentId,
       queryParams
     );
     return result ?? null;
   }
 
-  private async handleCreate(authContext: AuthContext): Promise<JsonValue> {
+  private async handleCreate(requestContext: RequestContext): Promise<JsonValue> {
     const termOfPaymentData = this.getRequiredString("termOfPaymentData");
     const data = this.parseJsonParameter(termOfPaymentData, "termOfPaymentData");
     
@@ -84,14 +84,14 @@ export class TermsOfPaymentResourceHandler extends BaseResourceHandler {
     
     const result = await datevConnectClient.accounting.createTermOfPayment(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       data
     );
     return result ?? null;
   }
 
-  private async handleUpdate(authContext: AuthContext): Promise<JsonValue> {
+  private async handleUpdate(requestContext: RequestContext): Promise<JsonValue> {
     const termOfPaymentId = this.getRequiredString("termOfPaymentId");
     const termOfPaymentData = this.getRequiredString("termOfPaymentData");
     const data = this.parseJsonParameter(termOfPaymentData, "termOfPaymentData");
@@ -106,8 +106,8 @@ export class TermsOfPaymentResourceHandler extends BaseResourceHandler {
     
     const result = await datevConnectClient.accounting.updateTermOfPayment(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       termOfPaymentId,
       data
     );

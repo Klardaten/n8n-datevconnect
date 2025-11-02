@@ -1,14 +1,11 @@
 import type { IExecuteFunctions, INodeExecutionData } from "n8n-workflow";
+import type { RequestContext } from "../types";
 import { NodeOperationError } from "n8n-workflow";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 import { datevConnectClient } from "../../../src/services/accountingClient";
 
 type GeneralLedgerAccountsOperation = "getAll" | "get" | "getUtilized";
 
-interface AuthContext {
-  clientId: string;
-  fiscalYearId: string;
-}
 
 /**
  * Handler for General Ledger Accounts operations
@@ -21,18 +18,18 @@ export class GeneralLedgerAccountsResourceHandler extends BaseResourceHandler {
 
   async execute(
     operation: GeneralLedgerAccountsOperation,
-    authContext: AuthContext,
+    requestContext: RequestContext,
     returnData: INodeExecutionData[]
   ): Promise<void> {
     switch (operation) {
       case "getAll":
-        await this.handleGetAll(authContext, returnData);
+        await this.handleGetAll(requestContext, returnData);
         break;
       case "get":
-        await this.handleGet(authContext, returnData);
+        await this.handleGetAll(requestContext, returnData);
         break;
       case "getUtilized":
-        await this.handleGetUtilized(authContext, returnData);
+        await this.handleGetAll(requestContext, returnData);
         break;
       default:
         throw new NodeOperationError(this.context.getNode(), `Unknown operation: ${operation}`, {
@@ -41,13 +38,13 @@ export class GeneralLedgerAccountsResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleGetAll(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
+  private async handleGetAll(requestContext: RequestContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
       const queryParams = this.buildQueryParams();
       const accounts = await datevConnectClient.accounting.getGeneralLedgerAccounts(
         this.context,
-        authContext.clientId,
-        authContext.fiscalYearId,
+        requestContext.clientId!,
+        requestContext.fiscalYearId!,
         queryParams
       );
       
@@ -58,14 +55,14 @@ export class GeneralLedgerAccountsResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleGet(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
+  private async handleGet(requestContext: RequestContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
       const generalLedgerAccountId = this.getRequiredString("generalLedgerAccountId");
       const queryParams = this.buildQueryParams();
       const account = await datevConnectClient.accounting.getGeneralLedgerAccount(
         this.context,
-        authContext.clientId,
-        authContext.fiscalYearId,
+        requestContext.clientId!,
+        requestContext.fiscalYearId!,
         generalLedgerAccountId,
         queryParams
       );
@@ -77,13 +74,13 @@ export class GeneralLedgerAccountsResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleGetUtilized(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
+  private async handleGetUtilized(requestContext: RequestContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
       const queryParams = this.buildQueryParams();
       const accounts = await datevConnectClient.accounting.getUtilizedGeneralLedgerAccounts(
         this.context,
-        authContext.clientId,
-        authContext.fiscalYearId,
+        requestContext.clientId!,
+        requestContext.fiscalYearId!,
         queryParams
       );
       

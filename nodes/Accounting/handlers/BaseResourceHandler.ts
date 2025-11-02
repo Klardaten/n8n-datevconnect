@@ -7,7 +7,7 @@ import {
   type JsonObject,
 } from "n8n-workflow";
 import type { JsonValue } from "../../../src/services/datevConnectClient";
-import type { AuthContext } from "../types";
+import type { RequestContext } from "../types";
 
 /**
  * Abstract base class for accounting resource handlers
@@ -27,7 +27,7 @@ export abstract class BaseResourceHandler {
    */
   abstract execute(
     operation: string,
-    authContext: AuthContext,
+    requestContext: RequestContext,
     returnData: INodeExecutionData[],
   ): Promise<void>;
 

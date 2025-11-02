@@ -1,13 +1,13 @@
 import { NodeOperationError, type INodeExecutionData } from "n8n-workflow";
 import type { JsonValue } from "../../../src/services/datevConnectClient";
 import { datevConnectClient } from "../../../src/services/accountingClient";
-import type { AuthContext, AccountPostingOperation } from "../types";
+import type { RequestContext, AccountPostingOperation } from "../types";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 
 export class AccountPostingResourceHandler extends BaseResourceHandler {
   async execute(
     operation: string,
-    authContext: AuthContext,
+    requestContext: RequestContext,
     returnData: INodeExecutionData[],
   ): Promise<void> {
     const sendSuccess = this.createSendSuccess(returnData);
@@ -17,10 +17,10 @@ export class AccountPostingResourceHandler extends BaseResourceHandler {
 
       switch (operation as AccountPostingOperation) {
         case "getAll":
-          response = await this.handleGetAll(authContext);
+          response = await this.handleGetAll(requestContext);
           break;
         case "get":
-          response = await this.handleGet(authContext);
+          response = await this.handleGet(requestContext);
           break;
         default:
           throw new NodeOperationError(
@@ -36,24 +36,24 @@ export class AccountPostingResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleGetAll(authContext: AuthContext): Promise<JsonValue> {
+  private async handleGetAll(requestContext: RequestContext): Promise<JsonValue> {
     const queryParams = this.buildQueryParams();
     const result = await datevConnectClient.accounting.getAccountPostings(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       queryParams
     );
     return result ?? null;
   }
 
-  private async handleGet(authContext: AuthContext): Promise<JsonValue> {
+  private async handleGet(requestContext: RequestContext): Promise<JsonValue> {
     const accountPostingId = this.getRequiredString("accountPostingId");
     const queryParams = this.buildQueryParams();
     const result = await datevConnectClient.accounting.getAccountPosting(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       accountPostingId,
       queryParams
     );

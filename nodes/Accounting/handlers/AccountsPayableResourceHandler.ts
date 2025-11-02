@@ -1,14 +1,11 @@
 import type { IExecuteFunctions, INodeExecutionData } from "n8n-workflow";
+import type { RequestContext } from "../types";
 import { NodeOperationError } from "n8n-workflow";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 import { datevConnectClient } from "../../../src/services/accountingClient";
 
 type AccountsPayableOperation = "getAll" | "get" | "getCondensed";
 
-interface AuthContext {
-  clientId: string;
-  fiscalYearId: string;
-}
 
 /**
  * Handler for Accounts Payable operations
@@ -21,18 +18,18 @@ export class AccountsPayableResourceHandler extends BaseResourceHandler {
 
   async execute(
     operation: AccountsPayableOperation,
-    authContext: AuthContext,
+    requestContext: RequestContext,
     returnData: INodeExecutionData[]
   ): Promise<void> {
     switch (operation) {
       case "getAll":
-        await this.handleGetAll(authContext, returnData);
+        await this.handleGetAll(requestContext, returnData);
         break;
       case "get":
-        await this.handleGet(authContext, returnData);
+        await this.handleGetAll(requestContext, returnData);
         break;
       case "getCondensed":
-        await this.handleGetCondensed(authContext, returnData);
+        await this.handleGetAll(requestContext, returnData);
         break;
       default:
         throw new NodeOperationError(this.context.getNode(), `Unknown operation: ${operation}`, {
@@ -41,13 +38,13 @@ export class AccountsPayableResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleGetAll(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
+  private async handleGetAll(requestContext: RequestContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
       const queryParams = this.buildQueryParams();
       const accountsPayable = await datevConnectClient.accounting.getAccountsPayable(
         this.context,
-        authContext.clientId,
-        authContext.fiscalYearId,
+        requestContext.clientId!,
+        requestContext.fiscalYearId!,
         queryParams
       );
       
@@ -58,14 +55,14 @@ export class AccountsPayableResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleGet(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
+  private async handleGet(requestContext: RequestContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
       const accountsPayableId = this.getRequiredString("accountsPayableId");
       const queryParams = this.buildQueryParams();
       const accountPayable = await datevConnectClient.accounting.getAccountPayable(
         this.context,
-        authContext.clientId,
-        authContext.fiscalYearId,
+        requestContext.clientId!,
+        requestContext.fiscalYearId!,
         accountsPayableId,
         queryParams
       );
@@ -77,13 +74,13 @@ export class AccountsPayableResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleGetCondensed(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
+  private async handleGetCondensed(requestContext: RequestContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
       const queryParams = this.buildQueryParams();
       const condensedAccountsPayable = await datevConnectClient.accounting.getAccountsPayableCondensed(
         this.context,
-        authContext.clientId,
-        authContext.fiscalYearId,
+        requestContext.clientId!,
+        requestContext.fiscalYearId!,
         queryParams
       );
       

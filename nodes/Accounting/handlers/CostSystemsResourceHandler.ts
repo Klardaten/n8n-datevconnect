@@ -1,14 +1,11 @@
 import type { IExecuteFunctions, INodeExecutionData } from "n8n-workflow";
+import type { RequestContext } from "../types";
 import { NodeOperationError } from "n8n-workflow";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 import { datevConnectClient } from "../../../src/services/accountingClient";
 
 type CostSystemsOperation = "getAll" | "get";
 
-interface AuthContext {
-  clientId: string;
-  fiscalYearId: string;
-}
 
 /**
  * Handler for Cost Systems operations
@@ -21,15 +18,15 @@ export class CostSystemsResourceHandler extends BaseResourceHandler {
 
   async execute(
     operation: CostSystemsOperation,
-    authContext: AuthContext,
+    requestContext: RequestContext,
     returnData: INodeExecutionData[]
   ): Promise<void> {
     switch (operation) {
       case "getAll":
-        await this.handleGetAll(authContext, returnData);
+        await this.handleGetAll(requestContext, returnData);
         break;
       case "get":
-        await this.handleGet(authContext, returnData);
+        await this.handleGet(requestContext, returnData);
         break;
       default:
         throw new NodeOperationError(this.context.getNode(), `Unknown operation: ${operation}`, {
@@ -38,13 +35,15 @@ export class CostSystemsResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleGetAll(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
+  private async handleGetAll(requestContext: RequestContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
+      this.validateRequiredParameters(requestContext);
+      
       const queryParams = this.buildQueryParams();
       const costSystems = await datevConnectClient.accounting.getCostSystems(
         this.context,
-        authContext.clientId,
-        authContext.fiscalYearId,
+        requestContext.clientId!,
+        requestContext.fiscalYearId!,
         queryParams
       );
       
@@ -55,14 +54,16 @@ export class CostSystemsResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleGet(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
+  private async handleGet(requestContext: RequestContext, returnData: INodeExecutionData[]): Promise<void> {
     try {
+      this.validateRequiredParameters(requestContext);
+      
       const costSystemId = this.getRequiredString("costSystemId");
       const queryParams = this.buildQueryParams();
       const costSystem = await datevConnectClient.accounting.getCostSystem(
         this.context,
-        authContext.clientId,
-        authContext.fiscalYearId,
+        requestContext.clientId!,
+        requestContext.fiscalYearId!,
         costSystemId,
         queryParams
       );
@@ -71,6 +72,14 @@ export class CostSystemsResourceHandler extends BaseResourceHandler {
       sendSuccess(costSystem);
     } catch (error) {
       this.handleError(error, returnData);
+    }
+  }
+
+  private validateRequiredParameters(requestContext: RequestContext): void {
+    if (!requestContext.clientId || !requestContext.fiscalYearId) {
+      throw new NodeOperationError(this.context.getNode(), "Client ID and Fiscal Year ID are required for this operation", {
+        itemIndex: this.itemIndex,
+      });
     }
   }
 }

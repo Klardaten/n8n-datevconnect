@@ -3,6 +3,7 @@ import { NodeOperationError } from "n8n-workflow";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 import { datevConnectClient } from "../../../src/services/accountingClient";
 import type { JsonValue } from "../../../src/services/datevConnectClient";
+import type { RequestContext } from "../types";
 
 type BusinessPartnersOperation = 
   | "getDebitors" 
@@ -16,11 +17,6 @@ type BusinessPartnersOperation =
   | "updateCreditor" 
   | "getNextAvailableCreditor";
 
-interface AuthContext {
-  clientId: string;
-  fiscalYearId: string;
-}
-
 /**
  * Handler for Business Partners operations
  * Manages operations related to debitors (customers) and creditors (suppliers)
@@ -30,41 +26,49 @@ export class BusinessPartnersResourceHandler extends BaseResourceHandler {
     super(context, itemIndex);
   }
 
+  private validateRequiredParameters(requestContext: RequestContext): void {
+    if (!requestContext.clientId || !requestContext.fiscalYearId) {
+      throw new NodeOperationError(this.context.getNode(), 'Client ID and Fiscal Year ID are required for business partner operations', {
+        itemIndex: this.itemIndex,
+      });
+    }
+  }
+
   async execute(
     operation: BusinessPartnersOperation,
-    authContext: AuthContext,
+    requestContext: RequestContext,
     returnData: INodeExecutionData[]
   ): Promise<void> {
     switch (operation) {
       case "getDebitors":
-        await this.handleGetDebitors(authContext, returnData);
+        await this.handleGetDebitors(requestContext, returnData);
         break;
       case "getDebitor":
-        await this.handleGetDebitor(authContext, returnData);
+        await this.handleGetDebitor(requestContext, returnData);
         break;
       case "createDebitor":
-        await this.handleCreateDebitor(authContext, returnData);
+        await this.handleCreateDebitor(requestContext, returnData);
         break;
       case "updateDebitor":
-        await this.handleUpdateDebitor(authContext, returnData);
+        await this.handleUpdateDebitor(requestContext, returnData);
         break;
       case "getNextAvailableDebitor":
-        await this.handleGetNextAvailableDebitor(authContext, returnData);
+        await this.handleGetNextAvailableDebitor(requestContext, returnData);
         break;
       case "getCreditors":
-        await this.handleGetCreditors(authContext, returnData);
+        await this.handleGetCreditors(requestContext, returnData);
         break;
       case "getCreditor":
-        await this.handleGetCreditor(authContext, returnData);
+        await this.handleGetCreditor(requestContext, returnData);
         break;
       case "createCreditor":
-        await this.handleCreateCreditor(authContext, returnData);
+        await this.handleCreateCreditor(requestContext, returnData);
         break;
       case "updateCreditor":
-        await this.handleUpdateCreditor(authContext, returnData);
+        await this.handleUpdateCreditor(requestContext, returnData);
         break;
       case "getNextAvailableCreditor":
-        await this.handleGetNextAvailableCreditor(authContext, returnData);
+        await this.handleGetNextAvailableCreditor(requestContext, returnData);
         break;
       default:
         throw new NodeOperationError(this.context.getNode(), `Unknown operation: ${operation}`, {
@@ -74,13 +78,20 @@ export class BusinessPartnersResourceHandler extends BaseResourceHandler {
   }
 
   // New handle methods for the converted pattern
-  private async handleGetDebitors(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
+  private async handleGetDebitors(requestContext: RequestContext, returnData: INodeExecutionData[]): Promise<void> {
+    this.validateRequiredParameters(requestContext);
     try {
+      if (!requestContext.clientId || !requestContext.fiscalYearId) {
+        throw new NodeOperationError(this.context.getNode(), 'Client ID and Fiscal Year ID are required for this operation', {
+          itemIndex: this.itemIndex,
+        });
+      }
+
       const queryParams = this.buildQueryParams();
       const debitors = await datevConnectClient.accounting.getDebitors(
         this.context,
-        authContext.clientId,
-        authContext.fiscalYearId,
+        requestContext.clientId!,
+        requestContext.fiscalYearId!,
         queryParams
       );
       
@@ -91,16 +102,17 @@ export class BusinessPartnersResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleGetDebitor(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
+  private async handleGetDebitor(requestContext: RequestContext, returnData: INodeExecutionData[]): Promise<void> {
+    this.validateRequiredParameters(requestContext);
     try {
-      const debitorId = this.getRequiredString("debitorId");
-      const queryParams = this.buildQueryParams();
+      this.validateRequiredParameters(requestContext);
+      
+      const id = this.context.getNodeParameter("debitorId", this.itemIndex) as string;
       const debitor = await datevConnectClient.accounting.getDebitor(
         this.context,
-        authContext.clientId,
-        authContext.fiscalYearId,
-        debitorId,
-        queryParams
+        requestContext.clientId!,
+        requestContext.fiscalYearId!,
+        id
       );
       
       const sendSuccess = this.createSendSuccess(returnData);
@@ -110,7 +122,8 @@ export class BusinessPartnersResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleCreateDebitor(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
+  private async handleCreateDebitor(requestContext: RequestContext, returnData: INodeExecutionData[]): Promise<void> {
+    this.validateRequiredParameters(requestContext);
     try {
       const debitorDataRaw = this.context.getNodeParameter("debitorData", this.itemIndex);
       const debitorData = this.parseJsonParameter(debitorDataRaw, "debitorData");
@@ -120,8 +133,8 @@ export class BusinessPartnersResourceHandler extends BaseResourceHandler {
       
       const result = await datevConnectClient.accounting.createDebitor(
         this.context,
-        authContext.clientId,
-        authContext.fiscalYearId,
+        requestContext.clientId!,
+        requestContext.fiscalYearId!,
         debitorData as JsonValue
       );
       
@@ -132,7 +145,8 @@ export class BusinessPartnersResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleUpdateDebitor(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
+  private async handleUpdateDebitor(requestContext: RequestContext, returnData: INodeExecutionData[]): Promise<void> {
+    this.validateRequiredParameters(requestContext);
     try {
       const debitorId = this.getRequiredString("debitorId");
       const debitorDataRaw = this.context.getNodeParameter("debitorData", this.itemIndex);
@@ -143,8 +157,8 @@ export class BusinessPartnersResourceHandler extends BaseResourceHandler {
       
       const result = await datevConnectClient.accounting.updateDebitor(
         this.context,
-        authContext.clientId,
-        authContext.fiscalYearId,
+        requestContext.clientId!,
+        requestContext.fiscalYearId!,
         debitorId,
         debitorData as JsonValue
       );
@@ -156,13 +170,14 @@ export class BusinessPartnersResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleGetNextAvailableDebitor(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
+  private async handleGetNextAvailableDebitor(requestContext: RequestContext, returnData: INodeExecutionData[]): Promise<void> {
+    this.validateRequiredParameters(requestContext);
     try {
       const queryParams = this.buildQueryParams();
       const nextAvailable = await datevConnectClient.accounting.getNextAvailableDebitor(
         this.context,
-        authContext.clientId,
-        authContext.fiscalYearId,
+        requestContext.clientId!,
+        requestContext.fiscalYearId!,
         queryParams
       );
       
@@ -173,13 +188,14 @@ export class BusinessPartnersResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleGetCreditors(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
+  private async handleGetCreditors(requestContext: RequestContext, returnData: INodeExecutionData[]): Promise<void> {
+    this.validateRequiredParameters(requestContext);
     try {
       const queryParams = this.buildQueryParams();
       const creditors = await datevConnectClient.accounting.getCreditors(
         this.context,
-        authContext.clientId,
-        authContext.fiscalYearId,
+        requestContext.clientId!,
+        requestContext.fiscalYearId!,
         queryParams
       );
       
@@ -190,14 +206,15 @@ export class BusinessPartnersResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleGetCreditor(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
+  private async handleGetCreditor(requestContext: RequestContext, returnData: INodeExecutionData[]): Promise<void> {
+    this.validateRequiredParameters(requestContext);
     try {
       const creditorId = this.getRequiredString("creditorId");
       const queryParams = this.buildQueryParams();
       const creditor = await datevConnectClient.accounting.getCreditor(
         this.context,
-        authContext.clientId,
-        authContext.fiscalYearId,
+        requestContext.clientId!,
+        requestContext.fiscalYearId!,
         creditorId,
         queryParams
       );
@@ -209,7 +226,8 @@ export class BusinessPartnersResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleCreateCreditor(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
+  private async handleCreateCreditor(requestContext: RequestContext, returnData: INodeExecutionData[]): Promise<void> {
+    this.validateRequiredParameters(requestContext);
     try {
       const creditorDataRaw = this.context.getNodeParameter("creditorData", this.itemIndex);
       const creditorData = this.parseJsonParameter(creditorDataRaw, "creditorData");
@@ -219,8 +237,8 @@ export class BusinessPartnersResourceHandler extends BaseResourceHandler {
       
       const result = await datevConnectClient.accounting.createCreditor(
         this.context,
-        authContext.clientId,
-        authContext.fiscalYearId,
+        requestContext.clientId!,
+        requestContext.fiscalYearId!,
         creditorData as JsonValue
       );
       
@@ -231,7 +249,8 @@ export class BusinessPartnersResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleUpdateCreditor(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
+  private async handleUpdateCreditor(requestContext: RequestContext, returnData: INodeExecutionData[]): Promise<void> {
+    this.validateRequiredParameters(requestContext);
     try {
       const creditorId = this.getRequiredString("creditorId");
       const creditorDataRaw = this.context.getNodeParameter("creditorData", this.itemIndex);
@@ -242,8 +261,8 @@ export class BusinessPartnersResourceHandler extends BaseResourceHandler {
       
       const result = await datevConnectClient.accounting.updateCreditor(
         this.context,
-        authContext.clientId,
-        authContext.fiscalYearId,
+        requestContext.clientId!,
+        requestContext.fiscalYearId!,
         creditorId,
         creditorData as JsonValue
       );
@@ -255,13 +274,14 @@ export class BusinessPartnersResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleGetNextAvailableCreditor(authContext: AuthContext, returnData: INodeExecutionData[]): Promise<void> {
+  private async handleGetNextAvailableCreditor(requestContext: RequestContext, returnData: INodeExecutionData[]): Promise<void> {
+    this.validateRequiredParameters(requestContext);
     try {
       const queryParams = this.buildQueryParams();
       const nextAvailable = await datevConnectClient.accounting.getNextAvailableCreditor(
         this.context,
-        authContext.clientId,
-        authContext.fiscalYearId,
+        requestContext.clientId!,
+        requestContext.fiscalYearId!,
         queryParams
       );
       

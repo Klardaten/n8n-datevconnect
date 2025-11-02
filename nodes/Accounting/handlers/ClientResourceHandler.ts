@@ -1,7 +1,7 @@
 import { NodeOperationError, type INodeExecutionData } from "n8n-workflow";
 import type { JsonValue } from "../../../src/services/datevConnectClient";
 import { datevConnectClient } from "../../../src/services/accountingClient";
-import type { AuthContext, ClientOperation } from "../types";
+import type { RequestContext, ClientOperation } from "../types";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 
 /**
@@ -10,7 +10,7 @@ import { BaseResourceHandler } from "./BaseResourceHandler";
 export class ClientResourceHandler extends BaseResourceHandler {
   async execute(
     operation: string,
-    authContext: AuthContext,
+    requestContext: RequestContext,
     returnData: INodeExecutionData[],
   ): Promise<void> {
     const sendSuccess = this.createSendSuccess(returnData);
@@ -20,10 +20,10 @@ export class ClientResourceHandler extends BaseResourceHandler {
 
       switch (operation as ClientOperation) {
         case "getAll":
-          response = await this.handleGetAll(authContext);
+          response = await this.handleGetAll(requestContext);
           break;
         case "get":
-          response = await this.handleGet(authContext);
+          response = await this.handleGet(requestContext);
           break;
         default:
           throw new NodeOperationError(
@@ -39,7 +39,7 @@ export class ClientResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleGetAll(authContext: AuthContext): Promise<JsonValue> {
+  private async handleGetAll(requestContext: RequestContext): Promise<JsonValue> {
     const top = this.getNumberParameter("top", 100);
     const skip = this.getNumberParameter("skip", 0);
     const select = this.getOptionalString("select");
@@ -48,7 +48,7 @@ export class ClientResourceHandler extends BaseResourceHandler {
     return await datevConnectClient.accounting.getClients(
       this.context,
       { 
-        ...authContext,
+        ...requestContext,
         $top: top,
         $skip: skip,
         $select: select,
@@ -57,7 +57,7 @@ export class ClientResourceHandler extends BaseResourceHandler {
     );
   }
 
-  private async handleGet(authContext: AuthContext): Promise<JsonValue> {
+  private async handleGet(requestContext: RequestContext): Promise<JsonValue> {
     const clientId = this.getRequiredString("clientId");
     const select = this.getOptionalString("select");
 
@@ -65,7 +65,7 @@ export class ClientResourceHandler extends BaseResourceHandler {
       this.context,
       clientId,
       {
-        ...authContext,
+        ...requestContext,
         $select: select,
       }
     );

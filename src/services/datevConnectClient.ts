@@ -1655,7 +1655,7 @@ export interface CreateVariousAddressOptions extends BaseRequestOptions {
   variousAddressData: JsonValue;
 }
 
-const ACCOUNTING_BASE_PATH = "datev/api/accounting/v1";
+const ACCOUNTING_BASE_PATH = "datevconnect/accounting/v1";
 
 async function sendAccountingRequest(
   options: MasterDataRequestOptions,

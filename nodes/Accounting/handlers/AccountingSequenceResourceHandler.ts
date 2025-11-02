@@ -1,7 +1,7 @@
 import { NodeOperationError, type INodeExecutionData } from "n8n-workflow";
 import type { JsonValue } from "../../../src/services/datevConnectClient";
 import { datevConnectClient } from "../../../src/services/accountingClient";
-import type { AuthContext, AccountingSequenceOperation } from "../types";
+import type { RequestContext, AccountingSequenceOperation } from "../types";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 
 /**
@@ -10,7 +10,7 @@ import { BaseResourceHandler } from "./BaseResourceHandler";
 export class AccountingSequenceResourceHandler extends BaseResourceHandler {
   async execute(
     operation: string,
-    authContext: AuthContext,
+    requestContext: RequestContext,
     returnData: INodeExecutionData[],
   ): Promise<void> {
     const sendSuccess = this.createSendSuccess(returnData);
@@ -20,19 +20,19 @@ export class AccountingSequenceResourceHandler extends BaseResourceHandler {
 
       switch (operation as AccountingSequenceOperation) {
         case "create":
-          response = await this.handleCreate(authContext);
+          response = await this.handleCreate(requestContext);
           break;
         case "getAll":
-          response = await this.handleGetAll(authContext);
+          response = await this.handleGetAll(requestContext);
           break;
         case "get":
-          response = await this.handleGet(authContext);
+          response = await this.handleGet(requestContext);
           break;
         case "getAccountingRecords":
-          response = await this.handleGetAccountingRecords(authContext);
+          response = await this.handleGetAccountingRecords(requestContext);
           break;
         case "getAccountingRecord":
-          response = await this.handleGetAccountingRecord(authContext);
+          response = await this.handleGetAccountingRecord(requestContext);
           break;
         default:
           throw new NodeOperationError(
@@ -48,7 +48,7 @@ export class AccountingSequenceResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleCreate(authContext: AuthContext): Promise<JsonValue> {
+  private async handleCreate(requestContext: RequestContext): Promise<JsonValue> {
     const accountingSequenceData = this.getRequiredString("accountingSequenceData");
     const data = this.parseJsonParameter(accountingSequenceData, "accountingSequenceData");
     
@@ -62,45 +62,45 @@ export class AccountingSequenceResourceHandler extends BaseResourceHandler {
     
     const result = await datevConnectClient.accounting.createAccountingSequence(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       data,
     );
     
     return result ?? null;
   }
 
-  private async handleGetAll(authContext: AuthContext): Promise<JsonValue> {
+  private async handleGetAll(requestContext: RequestContext): Promise<JsonValue> {
     const result = await datevConnectClient.accounting.getAccountingSequences(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
     );
     
     return result ?? null;
   }
 
-  private async handleGet(authContext: AuthContext): Promise<JsonValue> {
+  private async handleGet(requestContext: RequestContext): Promise<JsonValue> {
     const accountingSequenceId = this.getRequiredString("accountingSequenceId");
     
     const result = await datevConnectClient.accounting.getAccountingSequence(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       accountingSequenceId,
     );
     
     return result ?? null;
   }
 
-  private async handleGetAccountingRecords(authContext: AuthContext): Promise<JsonValue> {
+  private async handleGetAccountingRecords(requestContext: RequestContext): Promise<JsonValue> {
     const accountingSequenceId = this.getRequiredString("accountingSequenceId");
     const queryParams = this.buildQueryParams();
     
     const result = await datevConnectClient.accounting.getAccountingRecords(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       accountingSequenceId,
       queryParams,
     );
@@ -108,15 +108,15 @@ export class AccountingSequenceResourceHandler extends BaseResourceHandler {
     return result ?? null;
   }
 
-  private async handleGetAccountingRecord(authContext: AuthContext): Promise<JsonValue> {
+  private async handleGetAccountingRecord(requestContext: RequestContext): Promise<JsonValue> {
     const accountingSequenceId = this.getRequiredString("accountingSequenceId");
     const accountingRecordId = this.getRequiredString("accountingRecordId");
     const queryParams = this.buildQueryParams();
     
     const result = await datevConnectClient.accounting.getAccountingRecord(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       accountingSequenceId,
       accountingRecordId,
       queryParams,

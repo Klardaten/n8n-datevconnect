@@ -10,6 +10,7 @@ import { authenticate } from "../../src/services/datevConnectClient";
 import { accountingNodeDescription } from "./Accounting.config";
 import type { 
   BaseResourceHandler} from "./handlers";
+import type { RequestContext } from "./types";
 import {
   ClientResourceHandler,
   FiscalYearResourceHandler,
@@ -72,8 +73,6 @@ export class Accounting implements INodeType {
           email: string;
           password: string;
           clientInstanceId: string;
-          clientId: string;
-          fiscalYearId: string;
         }
       | null;
 
@@ -81,9 +80,9 @@ export class Accounting implements INodeType {
       throw new NodeOperationError(this.getNode(), "DATEVconnect credentials are missing");
     }
 
-    const { host, email, password, clientInstanceId, clientId, fiscalYearId } = credentials;
+    const { host, email, password, clientInstanceId } = credentials;
 
-    if (!host || !email || !password || !clientInstanceId || !clientId || !fiscalYearId) {
+    if (!host || !email || !password || !clientInstanceId) {
       throw new NodeOperationError(
         this.getNode(),
         "All DATEVconnect credential fields must be provided"
@@ -105,14 +104,41 @@ export class Accounting implements INodeType {
       });
     }
 
-    // Create authentication context
-    const authContext = { host, token, clientInstanceId, clientId, fiscalYearId };
-
     for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
       try {
         // Get resource and operation from node parameters
         const resource = this.getNodeParameter("resource", itemIndex) as string;
         const operation = this.getNodeParameter("operation", itemIndex) as string;
+        
+        // Create request context with auth data and operation parameters
+        const requestContext: RequestContext = { host, token, clientInstanceId };
+        
+        // Add clientId if needed (all operations except /clients getAll)
+        if (!(resource === "client" && operation === "getAll")) {
+          const clientId = this.getNodeParameter("clientId", itemIndex) as string;
+          if (!clientId) {
+            throw new NodeOperationError(
+              this.getNode(),
+              "clientId is required for this operation",
+              { itemIndex }
+            );
+          }
+          requestContext.clientId = clientId;
+        }
+        
+        // Add fiscalYearId if needed (only for operations that require both client and fiscal year)
+        // Note: fiscalYear resource needs clientId but not fiscalYearId for getAll operation
+        if (resource !== "client" && !(resource === "fiscalYear" && operation === "getAll")) {
+          const fiscalYearId = this.getNodeParameter("fiscalYearId", itemIndex) as string;
+          if (!fiscalYearId) {
+            throw new NodeOperationError(
+              this.getNode(),
+              "fiscalYearId is required for this operation",
+              { itemIndex }
+            );
+          }
+          requestContext.fiscalYearId = fiscalYearId;
+        }
         
         // Get the appropriate handler for this resource
         let handler: BaseResourceHandler;
@@ -182,7 +208,7 @@ export class Accounting implements INodeType {
         }
         
         // Execute the handler and get results
-        await handler.execute(operation, authContext, returnData);
+        await handler.execute(operation, requestContext, returnData);
         
       } catch (error) {
         if (this.continueOnFail()) {

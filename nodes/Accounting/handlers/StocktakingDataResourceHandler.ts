@@ -1,7 +1,7 @@
 import { NodeOperationError, type INodeExecutionData } from "n8n-workflow";
 import type { JsonValue } from "../../../src/services/datevConnectClient";
 import { datevConnectClient } from "../../../src/services/accountingClient";
-import type { AuthContext, StocktakingDataOperation } from "../types";
+import type { RequestContext, StocktakingDataOperation } from "../types";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 
 /**
@@ -11,7 +11,7 @@ import { BaseResourceHandler } from "./BaseResourceHandler";
 export class StocktakingDataResourceHandler extends BaseResourceHandler {
   async execute(
     operation: string,
-    authContext: AuthContext,
+    requestContext: RequestContext,
     returnData: INodeExecutionData[],
   ): Promise<void> {
     const sendSuccess = this.createSendSuccess(returnData);
@@ -21,13 +21,13 @@ export class StocktakingDataResourceHandler extends BaseResourceHandler {
 
       switch (operation as StocktakingDataOperation) {
         case "getAll":
-          response = await this.handleGetAll(authContext);
+          response = await this.handleGetAll(requestContext);
           break;
         case "get":
-          response = await this.handleGet(authContext);
+          response = await this.handleGet(requestContext);
           break;
         case "update":
-          response = await this.handleUpdate(authContext);
+          response = await this.handleUpdate(requestContext);
           break;
         default:
           throw new NodeOperationError(
@@ -43,31 +43,31 @@ export class StocktakingDataResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleGetAll(authContext: AuthContext): Promise<JsonValue> {
+  private async handleGetAll(requestContext: RequestContext): Promise<JsonValue> {
     const queryParams = this.buildQueryParams();
     const result = await datevConnectClient.accounting.getStocktakingData(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       queryParams
     );
     return result ?? null;
   }
 
-  private async handleGet(authContext: AuthContext): Promise<JsonValue> {
+  private async handleGet(requestContext: RequestContext): Promise<JsonValue> {
     const assetId = this.getRequiredString("assetId");
     const queryParams = this.buildQueryParams();
     const result = await datevConnectClient.accounting.getStocktakingDataByAsset(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       assetId,
       queryParams
     );
     return result ?? null;
   }
 
-  private async handleUpdate(authContext: AuthContext): Promise<JsonValue> {
+  private async handleUpdate(requestContext: RequestContext): Promise<JsonValue> {
     const assetId = this.getRequiredString("assetId");
     const stocktakingData = this.getRequiredString("stocktakingData");
     const data = this.parseJsonParameter(stocktakingData, "stocktakingData");
@@ -82,8 +82,8 @@ export class StocktakingDataResourceHandler extends BaseResourceHandler {
     
     const result = await datevConnectClient.accounting.updateStocktakingData(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       assetId,
       data
     );

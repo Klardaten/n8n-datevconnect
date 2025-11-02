@@ -1,7 +1,7 @@
 import { NodeOperationError, type INodeExecutionData } from "n8n-workflow";
 import type { JsonValue } from "../../../src/services/datevConnectClient";
 import { datevConnectClient } from "../../../src/services/accountingClient";
-import type { AuthContext, VariousAddressOperation } from "../types";
+import type { RequestContext, VariousAddressOperation } from "../types";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 
 /**
@@ -11,7 +11,7 @@ import { BaseResourceHandler } from "./BaseResourceHandler";
 export class VariousAddressesResourceHandler extends BaseResourceHandler {
   async execute(
     operation: string,
-    authContext: AuthContext,
+    requestContext: RequestContext,
     returnData: INodeExecutionData[],
   ): Promise<void> {
     const sendSuccess = this.createSendSuccess(returnData);
@@ -21,13 +21,13 @@ export class VariousAddressesResourceHandler extends BaseResourceHandler {
 
       switch (operation as VariousAddressOperation) {
         case "getAll":
-          response = await this.handleGetAll(authContext);
+          response = await this.handleGetAll(requestContext);
           break;
         case "get":
-          response = await this.handleGet(authContext);
+          response = await this.handleGet(requestContext);
           break;
         case "create":
-          response = await this.handleCreate(authContext);
+          response = await this.handleCreate(requestContext);
           break;
         default:
           throw new NodeOperationError(
@@ -43,31 +43,31 @@ export class VariousAddressesResourceHandler extends BaseResourceHandler {
     }
   }
 
-  private async handleGetAll(authContext: AuthContext): Promise<JsonValue> {
+  private async handleGetAll(requestContext: RequestContext): Promise<JsonValue> {
     const queryParams = this.buildQueryParams();
     const result = await datevConnectClient.accounting.getVariousAddresses(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       queryParams
     );
     return result ?? null;
   }
 
-  private async handleGet(authContext: AuthContext): Promise<JsonValue> {
+  private async handleGet(requestContext: RequestContext): Promise<JsonValue> {
     const variousAddressId = this.getRequiredString("variousAddressId");
     const queryParams = this.buildQueryParams();
     const result = await datevConnectClient.accounting.getVariousAddress(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       variousAddressId,
       queryParams
     );
     return result ?? null;
   }
 
-  private async handleCreate(authContext: AuthContext): Promise<JsonValue> {
+  private async handleCreate(requestContext: RequestContext): Promise<JsonValue> {
     const variousAddressData = this.getRequiredString("variousAddressData");
     const data = this.parseJsonParameter(variousAddressData, "variousAddressData");
     
@@ -81,8 +81,8 @@ export class VariousAddressesResourceHandler extends BaseResourceHandler {
     
     const result = await datevConnectClient.accounting.createVariousAddress(
       this.context,
-      authContext.clientId,
-      authContext.fiscalYearId,
+      requestContext.clientId!,
+      requestContext.fiscalYearId!,
       data
     );
     return result ?? null;
