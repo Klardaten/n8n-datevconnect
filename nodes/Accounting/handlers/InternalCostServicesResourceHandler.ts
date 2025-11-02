@@ -23,7 +23,7 @@ export class InternalCostServicesResourceHandler extends BaseResourceHandler {
   ): Promise<void> {
     switch (operation) {
       case "create":
-        await this.handleGetAll(requestContext, returnData);
+        await this.handleCreate(requestContext, returnData);
         break;
       default:
         throw new NodeOperationError(this.context.getNode(), `Unknown operation: ${operation}`, {
