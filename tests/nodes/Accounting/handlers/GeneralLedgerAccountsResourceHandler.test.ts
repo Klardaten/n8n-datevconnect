@@ -9,7 +9,6 @@ let getGeneralLedgerAccountsSpy: any;
 let getGeneralLedgerAccountSpy: any;
 let getUtilizedGeneralLedgerAccountsSpy: any;
 
-// Mock data based on schema_general-ledger-account from OpenAPI spec
 const mockGeneralLedgerAccountsData = [
   {
     id: "10000000",
@@ -179,8 +178,7 @@ describe("GeneralLedgerAccountsResourceHandler", () => {
 
       await handler.execute("get", mockAuthContext, returnData);
 
-      // Note: Due to implementation issue, this currently calls getGeneralLedgerAccounts instead of getGeneralLedgerAccount
-      expect(getGeneralLedgerAccountsSpy).toHaveBeenCalledWith(context, "client-123", "2023", {
+      expect(getGeneralLedgerAccountSpy).toHaveBeenCalledWith(context, "client-123", "2023", "1000", {
         top: 50,
         skip: 10,
         select: "id,name,account_type",
@@ -188,7 +186,7 @@ describe("GeneralLedgerAccountsResourceHandler", () => {
         expand: "transactions"
       });
 
-      expect(returnData).toHaveLength(2);
+      expect(returnData).toHaveLength(1);
       expect(returnData[0].json).toEqual({
         id: "10000000",
         account_number: 10000000,
@@ -197,15 +195,6 @@ describe("GeneralLedgerAccountsResourceHandler", () => {
         function_description: "Kasse",
         function_extension: 0,
         main_function: 1
-      });
-      expect(returnData[1].json).toEqual({
-        id: "40000000",
-        account_number: 40000000,
-        caption: "Umsatzerlöse",
-        additional_function: 0,
-        function_description: "Sales Revenue",
-        function_extension: 80,
-        main_function: 40
       });
     });
 
@@ -225,9 +214,8 @@ describe("GeneralLedgerAccountsResourceHandler", () => {
 
       await handler.execute("get", mockAuthContext, returnData);
 
-      // Note: Due to implementation issue, this currently calls getGeneralLedgerAccounts instead of getGeneralLedgerAccount
-      expect(getGeneralLedgerAccountsSpy).toHaveBeenCalledWith(context, "client-123", "2023", {
-        top: 100  // Default value when top is undefined
+      expect(getGeneralLedgerAccountSpy).toHaveBeenCalledWith(context, "client-123", "2023", "test-account-id", {
+        top: 100
       });
     });
   });
@@ -240,8 +228,7 @@ describe("GeneralLedgerAccountsResourceHandler", () => {
 
       await handler.execute("getUtilized", mockAuthContext, returnData);
 
-      // Note: Due to implementation issue, this currently calls getGeneralLedgerAccounts instead of getUtilizedGeneralLedgerAccounts
-      expect(getGeneralLedgerAccountsSpy).toHaveBeenCalledWith(context, "client-123", "2023", {
+      expect(getUtilizedGeneralLedgerAccountsSpy).toHaveBeenCalledWith(context, "client-123", "2023", {
         top: 50,
         skip: 10,
         select: "id,name,account_type",
@@ -255,23 +242,19 @@ describe("GeneralLedgerAccountsResourceHandler", () => {
         account_number: 10000000,
         caption: "Kasse",
         additional_function: 0,
-        function_description: "Kasse",
-        function_extension: 0,
-        main_function: 1
+        function_description: "Kasse"
       });
       expect(returnData[1].json).toEqual({
-        id: "40000000",
-        account_number: 40000000,
-        caption: "Umsatzerlöse",
+        id: "12000000",
+        account_number: 12000000,
+        caption: "Forderungen",
         additional_function: 0,
-        function_description: "Sales Revenue",
-        function_extension: 80,
-        main_function: 40
+        function_description: "Accounts Receivable"
       });
     });
 
     test("handles empty utilized results", async () => {
-      getGeneralLedgerAccountsSpy.mockResolvedValueOnce([]);
+      getUtilizedGeneralLedgerAccountsSpy.mockResolvedValueOnce([]);
       const context = createMockContext();
       const handler = new GeneralLedgerAccountsResourceHandler(context, 0);
       const returnData: any[] = [];
@@ -409,8 +392,6 @@ describe("GeneralLedgerAccountsResourceHandler", () => {
 
       await handler.execute("getAll", mockAuthContext, returnData);
 
-      // Since the implementation currently has a bug where all operations call getGeneralLedgerAccounts,
-      // we test that the handler works with the current implementation
       expect(getGeneralLedgerAccountsSpy).toHaveBeenCalledWith(
         context,
         "client-123",

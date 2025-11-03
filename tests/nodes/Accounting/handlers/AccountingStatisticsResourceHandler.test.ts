@@ -7,34 +7,24 @@ import { datevConnectClient } from "../../../../src/services/accountingClient";
 // Test spies
 let getAccountingStatisticsSpy: any;
 
-// Mock data
 const mockAccountingStatisticsData = [
   {
-    period: "2023-01",
-    total_revenue: 150000.00,
-    total_expenses: 120000.00,
-    net_income: 30000.00,
-    transactions_count: 1250,
-    active_customers: 89,
-    active_suppliers: 34
+    id: "1",
+    count_of_accounting_journal: 1250,
+    count_of_accounting_prima_nota: 125,
+    month: 1
   },
   {
-    period: "2023-02",
-    total_revenue: 165000.00,
-    total_expenses: 135000.00,
-    net_income: 30000.00,
-    transactions_count: 1380,
-    active_customers: 92,
-    active_suppliers: 36
+    id: "2",
+    count_of_accounting_journal: 1380,
+    count_of_accounting_prima_nota: 138,
+    month: 2
   },
   {
-    period: "2023-03",
-    total_revenue: 180000.00,
-    total_expenses: 145000.00,
-    net_income: 35000.00,
-    transactions_count: 1450,
-    active_customers: 95,
-    active_suppliers: 38
+    id: "3",
+    count_of_accounting_journal: 1450,
+    count_of_accounting_prima_nota: 145,
+    month: 3
   }
 ];
 
@@ -51,8 +41,8 @@ const createMockContext = (overrides: any = {}) => ({
     const mockParams: Record<string, unknown> = {
       "top": 50,
       "skip": 10,
-      "select": "period,total_revenue,net_income",
-      "filter": "period ge '2023-01'",
+      "select": "id,count_of_accounting_journal,month",
+      "filter": "month ge 1",
       "expand": "details",
 
       ...overrides.parameters,
@@ -98,20 +88,17 @@ describe("AccountingStatisticsResourceHandler", () => {
       expect(getAccountingStatisticsSpy).toHaveBeenCalledWith(context, "client-123", "2023", {
         top: 50,
         skip: 10,
-        select: "period,total_revenue,net_income",
-        filter: "period ge '2023-01'",
+        select: "id,count_of_accounting_journal,month",
+        filter: "month ge 1",
         expand: "details"
       });
 
       expect(returnData).toHaveLength(3);
       expect(returnData[0].json).toEqual({
-        period: "2023-01",
-        total_revenue: 150000.00,
-        total_expenses: 120000.00,
-        net_income: 30000.00,
-        transactions_count: 1250,
-        active_customers: 89,
-        active_suppliers: 34
+        id: "1",
+        count_of_accounting_journal: 1250,
+        count_of_accounting_prima_nota: 125,
+        month: 1
       });
     });
 
@@ -308,7 +295,7 @@ describe("AccountingStatisticsResourceHandler", () => {
   describe("parameter handling", () => {
     test("correctly retrieves select parameter", async () => {
       const context = createMockContext({
-        parameters: { select: "period,total_revenue" }
+        parameters: { select: "id,count_of_accounting_journal" }
       });
       const handler = new AccountingStatisticsResourceHandler(context, 0);
       const returnData: any[] = [];
@@ -319,13 +306,13 @@ describe("AccountingStatisticsResourceHandler", () => {
         context,
         "client-123",
         "2023",
-        expect.objectContaining({ select: "period,total_revenue" })
+        expect.objectContaining({ select: "id,count_of_accounting_journal" })
       );
     });
 
     test("correctly retrieves filter parameter", async () => {
       const context = createMockContext({
-        parameters: { filter: "total_revenue gt 100000" }
+        parameters: { filter: "count_of_accounting_journal gt 1000" }
       });
       const handler = new AccountingStatisticsResourceHandler(context, 0);
       const returnData: any[] = [];
@@ -336,7 +323,7 @@ describe("AccountingStatisticsResourceHandler", () => {
         context,
         "client-123", 
         "2023",
-        expect.objectContaining({ filter: "total_revenue gt 100000" })
+        expect.objectContaining({ filter: "count_of_accounting_journal gt 1000" })
       );
     });
 
@@ -379,12 +366,10 @@ describe("AccountingStatisticsResourceHandler", () => {
     test("handles statistics data with various numeric formats", async () => {
       const mockDataWithVariousNumbers = [
         {
-          period: "2023-01",
-          total_revenue: 150000.50,
-          total_expenses: 120000,
-          net_income: 30000.5,
-          transactions_count: 1250,
-          percentage_growth: 15.75
+          id: "15",
+          count_of_accounting_journal: 1250,
+          count_of_accounting_prima_nota: 125,
+          month: 15
         }
       ];
       
@@ -396,23 +381,19 @@ describe("AccountingStatisticsResourceHandler", () => {
       await handler.execute("getAll", mockAuthContext, returnData);
 
       expect(returnData[0].json).toEqual({
-        period: "2023-01",
-        total_revenue: 150000.50,
-        total_expenses: 120000,
-        net_income: 30000.5,
-        transactions_count: 1250,
-        percentage_growth: 15.75
+        id: "15",
+        count_of_accounting_journal: 1250,
+        count_of_accounting_prima_nota: 125,
+        month: 15
       });
     });
 
     test("handles statistics data with missing optional fields", async () => {
       const mockDataWithMissingFields = [
         {
-          period: "2023-01",
-          total_revenue: 150000.00,
-          total_expenses: 120000.00,
-          net_income: 30000.00
-          // missing transactions_count, active_customers, active_suppliers
+          id: "1",
+          count_of_accounting_journal: 1250
+          // missing count_of_accounting_prima_nota, month
         }
       ];
       
@@ -424,10 +405,8 @@ describe("AccountingStatisticsResourceHandler", () => {
       await handler.execute("getAll", mockAuthContext, returnData);
 
       expect(returnData[0].json).toEqual({
-        period: "2023-01",
-        total_revenue: 150000.00,
-        total_expenses: 120000.00,
-        net_income: 30000.00
+        id: "1",
+        count_of_accounting_journal: 1250
       });
     });
   });

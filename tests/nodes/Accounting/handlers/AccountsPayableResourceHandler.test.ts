@@ -168,8 +168,7 @@ describe("AccountsPayableResourceHandler", () => {
 
       await handler.execute("get", mockAuthContext, returnData);
 
-      // Note: Due to implementation issue, this currently calls getAccountsPayable instead of getAccountPayable
-      expect(getAccountsPayableSpy).toHaveBeenCalledWith(context, "client-123", "2023", {
+      expect(getAccountPayableSpy).toHaveBeenCalledWith(context, "client-123", "2023", "ap-123", {
         top: 50,
         skip: 10,
         select: "id,vendor_id,amount",
@@ -177,13 +176,14 @@ describe("AccountsPayableResourceHandler", () => {
         expand: "vendor"
       });
 
-      expect(returnData).toHaveLength(2);
+      expect(returnData).toHaveLength(1);
       expect(returnData[0].json).toEqual({
         id: "ap-123",
         vendor_id: "vendor-123",
         amount: 2000.00,
         due_date: "2023-12-31",
-        status: "open"
+        status: "open",
+        description: "Supplier invoice payment"
       });
     });
 
@@ -203,9 +203,8 @@ describe("AccountsPayableResourceHandler", () => {
 
       await handler.execute("get", mockAuthContext, returnData);
 
-      // Note: Due to implementation issue, this currently calls getAccountsPayable instead of getAccountPayable
-      expect(getAccountsPayableSpy).toHaveBeenCalledWith(context, "client-123", "2023", {
-        top: 100  // Default value when top is undefined
+      expect(getAccountPayableSpy).toHaveBeenCalledWith(context, "client-123", "2023", "test-ap-id", {
+        top: 100
       });
     });
   });
@@ -218,8 +217,7 @@ describe("AccountsPayableResourceHandler", () => {
 
       await handler.execute("getCondensed", mockAuthContext, returnData);
 
-      // Note: Due to implementation issue, this currently calls getAccountsPayable instead of getAccountsPayableCondensed
-      expect(getAccountsPayableSpy).toHaveBeenCalledWith(context, "client-123", "2023", {
+      expect(getAccountsPayableCondensedSpy).toHaveBeenCalledWith(context, "client-123", "2023", {
         top: 50,
         skip: 10,
         select: "id,vendor_id,amount",
@@ -229,16 +227,19 @@ describe("AccountsPayableResourceHandler", () => {
 
       expect(returnData).toHaveLength(2);
       expect(returnData[0].json).toEqual({
-        id: "ap-123",
         vendor_id: "vendor-123",
-        amount: 2000.00,
-        due_date: "2023-12-31",
-        status: "open"
+        total_amount: 3500.00,
+        count: 2
+      });
+      expect(returnData[1].json).toEqual({
+        vendor_id: "vendor-456",
+        total_amount: 1250.75,
+        count: 1
       });
     });
 
     test("handles empty condensed results", async () => {
-      getAccountsPayableSpy.mockResolvedValueOnce([]);
+      getAccountsPayableCondensedSpy.mockResolvedValueOnce([]);
       const context = createMockContext();
       const handler = new AccountsPayableResourceHandler(context, 0);
       const returnData: any[] = [];
@@ -376,8 +377,6 @@ describe("AccountsPayableResourceHandler", () => {
 
       await handler.execute("getAll", mockAuthContext, returnData);
 
-      // Since the implementation currently has a bug where all operations call getAccountsPayable,
-      // we test that the handler works with the current implementation
       expect(getAccountsPayableSpy).toHaveBeenCalledWith(
         context,
         "client-123",

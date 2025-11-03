@@ -182,15 +182,14 @@ describe("AccountingSumsAndBalancesResourceHandler", () => {
   });
 
   describe("get operation", () => {
-    test("fetches single sums and balances by ID (but calls getAll due to implementation bug)", async () => {
+    test("fetches single sums and balances by ID", async () => {
       const context = createMockContext();
       const handler = new AccountingSumsAndBalancesResourceHandler(context, 0);
       const returnData: any[] = [];
 
       await handler.execute("get", mockAuthContext, returnData);
 
-      // Note: Due to implementation bug, this currently calls getAccountingSumsAndBalances instead of getAccountingSumsAndBalance
-      expect(getAccountingSumsAndBalancesSpy).toHaveBeenCalledWith(context, "client-123", "2023", {
+      expect(getAccountingSumsAndBalanceSpy).toHaveBeenCalledWith(context, "client-123", "2023", "BALANCE001", {
         top: 50,
         skip: 10,
         select: "account_number,account_name,closing_balance",
@@ -198,7 +197,7 @@ describe("AccountingSumsAndBalancesResourceHandler", () => {
         expand: "details"
       });
 
-      expect(returnData).toHaveLength(3);
+      expect(returnData).toHaveLength(1);
       expect(returnData[0].json).toEqual({
         account_number: "1000",
         account_name: "Cash and Cash Equivalents",
@@ -207,23 +206,28 @@ describe("AccountingSumsAndBalancesResourceHandler", () => {
         period_debits: 125000.00,
         period_credits: 85000.00,
         closing_balance: 90000.00,
-        period: "2023-Q1"
+        period: "2023-Q1",
+        details: {
+          transactions_count: 245,
+          last_updated: "2023-03-31T23:59:59Z"
+        }
       });
     });
 
     test("handles empty results for get operation", async () => {
-      getAccountingSumsAndBalancesSpy.mockResolvedValueOnce([]);
+      getAccountingSumsAndBalanceSpy.mockResolvedValueOnce(null);
       const context = createMockContext();
       const handler = new AccountingSumsAndBalancesResourceHandler(context, 0);
       const returnData: any[] = [];
 
       await handler.execute("get", mockAuthContext, returnData);
 
-      expect(returnData).toHaveLength(0);
+      expect(returnData).toHaveLength(1);
+      expect(returnData[0].json).toEqual({ success: true });
     });
 
     test("handles null response for get operation", async () => {
-      getAccountingSumsAndBalancesSpy.mockResolvedValueOnce(null);
+      getAccountingSumsAndBalanceSpy.mockResolvedValueOnce(null);
       const context = createMockContext();
       const handler = new AccountingSumsAndBalancesResourceHandler(context, 0);
       const returnData: any[] = [];
@@ -250,9 +254,8 @@ describe("AccountingSumsAndBalancesResourceHandler", () => {
 
       await handler.execute("get", mockAuthContext, returnData);
 
-      // Note: Due to implementation bug, this currently calls getAccountingSumsAndBalances instead of getAccountingSumsAndBalance
-      expect(getAccountingSumsAndBalancesSpy).toHaveBeenCalledWith(context, "client-123", "2023", {
-        top: 100  // Default value when top is undefined
+      expect(getAccountingSumsAndBalanceSpy).toHaveBeenCalledWith(context, "client-123", "2023", "test-id", {
+        top: 100
       });
     });
   });
@@ -424,8 +427,6 @@ describe("AccountingSumsAndBalancesResourceHandler", () => {
 
       await handler.execute("getAll", mockAuthContext, returnData);
 
-      // Since the implementation currently has a bug where all operations call getAccountingSumsAndBalances,
-      // we test that the handler works with the current implementation
       expect(getAccountingSumsAndBalancesSpy).toHaveBeenCalledWith(
         context,
         "client-123",

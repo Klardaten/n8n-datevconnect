@@ -10,36 +10,36 @@ let getTermOfPaymentSpy: any;
 let createTermOfPaymentSpy: any;
 let updateTermOfPaymentSpy: any;
 
-// Mock data based on schema_term-of-payment from OpenAPI spec
-const mockTermsOfPaymentData = [
-  {
-    id: "123",
-    caption: "30 Tage netto",
-    due_type: "due_in_days",
-    cash_discount1_percentage: 2.0,
-    cash_discount2_percentage: 1.0,
-    due_in_days: {
-      cash_discount1_days: 10,
-      cash_discount2_days: 20,
-      due_date_net_days: 30
-    }
-  },
-  {
-    id: "456", 
-    caption: "44 days net",
-    due_type: "due_as_period",
-    cash_discount1_percentage: 3.0,
-    due_as_period: {
-      period1: {
-        invoice_day_of_month: 15,
-        due_date_net: {
-          day_of_month: 15,
-          related_month: "following_month"
-        }
+const mockTermOfPaymentDays = {
+  id: "123",
+  caption: "30 Tage netto",
+  due_type: "due_in_days",
+  cash_discount1_percentage: 2.0,
+  cash_discount2_percentage: 1.0,
+  due_in_days: {
+    cash_discount1_days: 10,
+    cash_discount2_days: 20,
+    due_in_days: 30
+  }
+};
+
+const mockTermOfPaymentPeriod = {
+  id: "456", 
+  caption: "44 days net",
+  due_type: "due_as_period",
+  cash_discount1_percentage: 3.0,
+  due_as_period: {
+    period1: {
+      invoice_day_of_month: 15,
+      due_date_net: {
+        day_of_month: 15,
+        related_month: "next_month"
       }
     }
   }
-];
+};
+
+const mockTermsOfPaymentData = [mockTermOfPaymentDays, mockTermOfPaymentPeriod];
 
 const mockSingleTermOfPayment = {
   id: "123",
@@ -50,7 +50,7 @@ const mockSingleTermOfPayment = {
   due_in_days: {
     cash_discount1_days: 10,
     cash_discount2_days: 20,
-    due_date_net_days: 30
+    due_in_days: 30
   }
 };
 
@@ -60,17 +60,19 @@ const mockCreateResponse = {
   due_type: "due_in_days",
   cash_discount1_percentage: 0,
   due_in_days: {
-    due_date_net_days: 60
+    due_in_days: 60
   }
 };
 
 const mockUpdateResponse = {
   id: "NET30",
-  name: "Net 30 Days Updated",
-  payment_days: 30,
-  discount_percentage: 1.5,
-  discount_days: 15,
-  is_active: true
+  caption: "Net 30 Days Updated",
+  due_type: "due_in_days",
+  cash_discount1_percentage: 1.5,
+  due_in_days: {
+    cash_discount1_days: 15,
+    due_in_days: 30
+  }
 };
 
 // Mock IExecuteFunctions
@@ -161,7 +163,7 @@ describe("TermsOfPaymentResourceHandler", () => {
         due_in_days: {
           cash_discount1_days: 10,
           cash_discount2_days: 20,
-          due_date_net_days: 30
+          due_in_days: 30
         }
       });
     });
@@ -224,7 +226,7 @@ describe("TermsOfPaymentResourceHandler", () => {
         due_in_days: {
           cash_discount1_days: 10,
           cash_discount2_days: 20,
-          due_date_net_days: 30
+          due_in_days: 30
         }
       });
     });
@@ -277,7 +279,7 @@ describe("TermsOfPaymentResourceHandler", () => {
         due_type: "due_in_days",
         cash_discount1_percentage: 0,
         due_in_days: {
-          due_date_net_days: 60
+          due_in_days: 60
         }
       });
     });
@@ -362,11 +364,13 @@ describe("TermsOfPaymentResourceHandler", () => {
       expect(returnData).toHaveLength(1);
       expect(returnData[0].json).toEqual({
         id: "NET30",
-        name: "Net 30 Days Updated",
-        payment_days: 30,
-        discount_percentage: 1.5,
-        discount_days: 15,
-        is_active: true
+        caption: "Net 30 Days Updated",
+        due_type: "due_in_days",
+        cash_discount1_percentage: 1.5,
+        due_in_days: {
+          cash_discount1_days: 15,
+          due_in_days: 30
+        }
       });
     });
 
@@ -476,7 +480,7 @@ describe("TermsOfPaymentResourceHandler", () => {
 
       await handler.execute("getAll", mockAuthContext, returnData);
 
-      expect(returnData[0].json).toEqual(mockTermsOfPaymentData[0]);
+      expect(returnData[0].json).toEqual(mockTermOfPaymentDays);
     });
 
     test("respects item index in error handling", async () => {

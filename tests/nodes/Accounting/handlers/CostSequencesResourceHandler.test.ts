@@ -317,23 +317,20 @@ describe("CostSequencesResourceHandler", () => {
     });
   });
 
-  describe("get operation - IMPLEMENTATION BUG", () => {
-    // NOTE: This handler has a bug where all operations call handleGetAll
-    // instead of their respective handlers. These tests document the current behavior.
-    
-    test("calls handleGetAll instead of handleGet (bug)", async () => {
+  describe("get operation", () => {
+    test("fetches single cost sequence by ID", async () => {
       const context = createMockContext();
       const handler = new CostSequencesResourceHandler(context, 0);
       const returnData: any[] = [];
 
       await handler.execute("get", mockAuthContext, returnData);
 
-      // Due to the bug, get operation calls getCostSequences instead of getCostSequence
-      expect(getCostSequencesSpy).toHaveBeenCalledWith(
+      expect(getCostSequenceSpy).toHaveBeenCalledWith(
         context,
         "client-123",
         "FY2023",
         "CS01",
+        "SEQ001",
         {
           top: 50,
           skip: 10,
@@ -343,41 +340,126 @@ describe("CostSequencesResourceHandler", () => {
         }
       );
 
-      // getCostSequence should NOT be called due to the bug
-      expect(getCostSequenceSpy).not.toHaveBeenCalled();
-
-      expect(returnData).toHaveLength(3);
+      expect(returnData).toHaveLength(1);
+      expect(returnData[0].json).toEqual({
+        id: "SEQ001",
+        name: "Production Sequence A",
+        description: "Main production cost sequence",
+        cost_system_id: "CS01",
+        sequence_number: 1,
+        sequence_type: "production",
+        is_active: true,
+        start_date: "2023-01-01",
+        end_date: "2023-12-31",
+        total_cost: 125000.50,
+        unit_cost: 25.75,
+        quantity: 4854,
+        status: "active",
+        created_date: "2023-01-01T08:00:00Z",
+        last_modified: "2023-11-01T16:45:00Z",
+        cost_centers: [
+          {
+            id: "CC001",
+            name: "Production Center A",
+            allocated_cost: 75000.30
+          },
+          {
+            id: "CC002",
+            name: "Quality Control",
+            allocated_cost: 25000.10
+          }
+        ],
+        cost_drivers: [
+          {
+            driver_type: "machine_hours",
+            driver_value: 2400.5,
+            cost_per_unit: 10.42
+          },
+          {
+            driver_type: "labor_hours",
+            driver_value: 1800,
+            cost_per_unit: 15.33
+          }
+        ]
+      });
     });
 
-    test("get operation returns all cost sequences due to bug", async () => {
+    test("handles null response for get operation", async () => {
+      getCostSequenceSpy.mockReset().mockResolvedValue(null);
       const context = createMockContext();
       const handler = new CostSequencesResourceHandler(context, 0);
       const returnData: any[] = [];
 
       await handler.execute("get", mockAuthContext, returnData);
 
-      // Should return all cost sequences instead of a single one due to bug
-      expect(returnData).toHaveLength(3);
-      expect(returnData[0].json.id).toBe("SEQ001");
-      expect(returnData[1].json.id).toBe("SEQ002");
-      expect(returnData[2].json.id).toBe("SEQ003");
+      expect(returnData).toHaveLength(1);
+      expect(returnData[0].json).toEqual({ success: true });
     });
   });
 
-  describe("create operation - IMPLEMENTATION BUG", () => {
-    test("calls handleGetAll instead of handleCreate (bug)", async () => {
+  describe("create operation", () => {
+    test("creates new cost sequence with valid data", async () => {
       const context = createMockContext();
       const handler = new CostSequencesResourceHandler(context, 0);
       const returnData: any[] = [];
 
       await handler.execute("create", mockAuthContext, returnData);
 
-      // Due to the bug, create operation calls getCostSequences instead of createCostSequence
-      expect(getCostSequencesSpy).toHaveBeenCalledWith(
+      expect(createCostSequenceSpy).toHaveBeenCalledWith(
         context,
         "client-123",
         "FY2023",
         "CS01",
+        "SEQ001",
+        {
+          name: "New Test Sequence",
+          description: "Test sequence created via API",
+          sequence_type: "test",
+          is_active: true
+        }
+      );
+
+      expect(returnData).toHaveLength(1);
+      expect(returnData[0].json).toEqual({
+        id: "SEQ004",
+        name: "New Test Sequence",
+        description: "Test sequence created via API",
+        cost_system_id: "CS01",
+        sequence_number: 4,
+        sequence_type: "test",
+        is_active: true,
+        created_date: "2023-11-01T17:00:00Z",
+        status: "created"
+      });
+    });
+
+    test("handles null response from create", async () => {
+      createCostSequenceSpy.mockReset().mockResolvedValue(null);
+      const context = createMockContext();
+      const handler = new CostSequencesResourceHandler(context, 0);
+      const returnData: any[] = [];
+
+      await handler.execute("create", mockAuthContext, returnData);
+
+      expect(returnData).toHaveLength(1);
+      expect(returnData[0].json).toEqual({ success: true });
+    });
+  });
+
+  describe("getCostAccountingRecords operation", () => {
+    test("fetches cost accounting records for sequence", async () => {
+      const context = createMockContext();
+      const handler = new CostSequencesResourceHandler(context, 0);
+      const returnData: any[] = [];
+
+      await handler.execute("getCostAccountingRecords", mockAuthContext, returnData);
+
+      expect(getCostAccountingRecordsSpy).toHaveBeenCalledWith(
+        context,
+        "client-123",
+        "FY2023",
+        "CS01",
+        "SEQ001",
         {
           top: 50,
           skip: 10,
@@ -387,65 +469,30 @@ describe("CostSequencesResourceHandler", () => {
         }
       );
 
-      // createCostSequence should NOT be called due to the bug
-      expect(createCostSequenceSpy).not.toHaveBeenCalled();
-
       expect(returnData).toHaveLength(3);
+      expect(returnData[0].json).toEqual({
+        id: "REC001",
+        sequence_id: "SEQ001",
+        record_date: "2023-10-01",
+        cost_amount: 2500.75,
+        quantity: 100,
+        unit_cost: 25.01,
+        cost_center_id: "CC001",
+        account_id: "ACC001",
+        description: "Production costs for October",
+        transaction_type: "direct_cost"
+      });
     });
 
-    test("create operation returns all cost sequences instead of creating (bug)", async () => {
-      const context = createMockContext();
-      const handler = new CostSequencesResourceHandler(context, 0);
-      const returnData: any[] = [];
-
-      await handler.execute("create", mockAuthContext, returnData);
-
-      // Should return all cost sequences instead of created sequence due to bug
-      expect(returnData).toHaveLength(3);
-      expect(returnData[0].json.id).toBe("SEQ001");
-    });
-  });
-
-  describe("getCostAccountingRecords operation - IMPLEMENTATION BUG", () => {
-    test("calls handleGetAll instead of handleGetCostAccountingRecords (bug)", async () => {
-      const context = createMockContext();
-      const handler = new CostSequencesResourceHandler(context, 0);
-      const returnData: any[] = [];
-
-      await handler.execute("getCostAccountingRecords", mockAuthContext, returnData);
-
-      // Due to the bug, getCostAccountingRecords operation calls getCostSequences
-      expect(getCostSequencesSpy).toHaveBeenCalledWith(
-        context,
-        "client-123",
-        "FY2023",
-        "CS01",
-        {
-          top: 50,
-          skip: 10,
-          select: "id,name,description,sequence_type,is_active,total_cost",
-          filter: "is_active eq true",
-          expand: "cost_centers,cost_drivers"
-        }
-      );
-
-      // getCostAccountingRecords should NOT be called due to the bug
-      expect(getCostAccountingRecordsSpy).not.toHaveBeenCalled();
-
-      expect(returnData).toHaveLength(3);
-    });
-
-    test("getCostAccountingRecords operation returns cost sequences due to bug", async () => {
+    test("handles empty cost accounting records results", async () => {
+      getCostAccountingRecordsSpy.mockResolvedValueOnce([]);
       const context = createMockContext();
       const handler = new CostSequencesResourceHandler(context, 0);
       const returnData: any[] = [];
 
       await handler.execute("getCostAccountingRecords", mockAuthContext, returnData);
 
-      // Should return cost sequences instead of accounting records due to bug
-      expect(returnData).toHaveLength(3);
-      expect(returnData[0].json.id).toBe("SEQ001");
-      expect(returnData[0].json.name).toBe("Production Sequence A");
+      expect(returnData).toHaveLength(0);
     });
   });
 
@@ -539,11 +586,9 @@ describe("CostSequencesResourceHandler", () => {
       const handler = new CostSequencesResourceHandler(context, 0);
       const returnData: any[] = [];
 
-      // Due to the bug, create operation calls handleGetAll so it won't parse JSON
-      await handler.execute("create", mockAuthContext, returnData);
-
-      // Should still work because it calls handleGetAll instead of handleCreate
-      expect(returnData).toHaveLength(3);
+      await expect(
+        handler.execute("create", mockAuthContext, returnData)
+      ).rejects.toThrow("Invalid JSON in parameter \"costSequenceData\"");
     });
   });
 

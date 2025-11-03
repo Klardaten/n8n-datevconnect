@@ -221,15 +221,14 @@ describe("CostCenterPropertiesResourceHandler", () => {
   });
 
   describe("get operation", () => {
-    test("fetches single cost center property by ID (but calls getAll due to implementation bug)", async () => {
+    test("fetches single cost center property by ID", async () => {
       const context = createMockContext();
       const handler = new CostCenterPropertiesResourceHandler(context, 0);
       const returnData: any[] = [];
 
       await handler.execute("get", mockAuthContext, returnData);
 
-      // Note: Due to implementation bug, this currently calls getCostCenterProperties instead of getCostCenterProperty
-      expect(getCostCenterPropertiesSpy).toHaveBeenCalledWith(context, "client-123", "2023", "COSTSYS001", {
+      expect(getCostCenterPropertySpy).toHaveBeenCalledWith(context, "client-123", "2023", "COSTSYS001", "PROP001", {
         top: 50,
         skip: 10,
         select: "id,name,data_type,is_required",
@@ -237,7 +236,7 @@ describe("CostCenterPropertiesResourceHandler", () => {
         expand: "usage_statistics"
       });
 
-      expect(returnData).toHaveLength(3);
+      expect(returnData).toHaveLength(1);
       expect(returnData[0].json).toEqual({
         id: "PROP001",
         name: "Department",
@@ -247,23 +246,27 @@ describe("CostCenterPropertiesResourceHandler", () => {
         is_active: true,
         default_value: null,
         allowed_values: ["Sales", "Marketing", "IT", "HR", "Finance"],
-        sort_order: 1
+        sort_order: 1,
+        created_date: "2023-01-15T09:00:00Z",
+        last_modified: "2023-10-20T15:30:00Z",
+        usage_count: 45
       });
     });
 
     test("handles empty results for get operation", async () => {
-      getCostCenterPropertiesSpy.mockResolvedValueOnce([]);
+      getCostCenterPropertySpy.mockResolvedValueOnce(null);
       const context = createMockContext();
       const handler = new CostCenterPropertiesResourceHandler(context, 0);
       const returnData: any[] = [];
 
       await handler.execute("get", mockAuthContext, returnData);
 
-      expect(returnData).toHaveLength(0);
+      expect(returnData).toHaveLength(1);
+      expect(returnData[0].json).toEqual({ success: true });
     });
 
     test("handles null response for get operation", async () => {
-      getCostCenterPropertiesSpy.mockResolvedValueOnce(null);
+      getCostCenterPropertySpy.mockResolvedValueOnce(null);
       const context = createMockContext();
       const handler = new CostCenterPropertiesResourceHandler(context, 0);
       const returnData: any[] = [];
@@ -284,11 +287,7 @@ describe("CostCenterPropertiesResourceHandler", () => {
       const handler = new CostCenterPropertiesResourceHandler(context, 0);
       const returnData: any[] = [];
 
-      // Note: Due to implementation bug, this test shows that even though we expect costCenterPropertyId to be required,
-      // the current implementation only uses costSystemId because it calls handleGetAll
-      await handler.execute("get", mockAuthContext, returnData);
-
-      expect(getCostCenterPropertiesSpy).toHaveBeenCalledWith(context, "client-123", "2023", "COSTSYS001", expect.any(Object));
+      await expect(handler.execute("get", mockAuthContext, returnData)).rejects.toThrow('Parameter "costCenterPropertyId" is required');
     });
 
     test("handles parameters with default values for get", async () => {
@@ -308,8 +307,7 @@ describe("CostCenterPropertiesResourceHandler", () => {
 
       await handler.execute("get", mockAuthContext, returnData);
 
-      // Note: Due to implementation bug, this currently calls getCostCenterProperties instead of getCostCenterProperty
-      expect(getCostCenterPropertiesSpy).toHaveBeenCalledWith(context, "client-123", "2023", "COSTSYS002", {
+      expect(getCostCenterPropertySpy).toHaveBeenCalledWith(context, "client-123", "2023", "COSTSYS002", "PROP999", {
         top: 100  // Default value when top is undefined
       });
     });
@@ -512,8 +510,6 @@ describe("CostCenterPropertiesResourceHandler", () => {
 
       await handler.execute("getAll", mockAuthContext, returnData);
 
-      // Since the implementation currently has a bug where all operations call getCostCenterProperties,
-      // we test that the handler works with the current implementation
       expect(getCostCenterPropertiesSpy).toHaveBeenCalledWith(
         context,
         "client-123",

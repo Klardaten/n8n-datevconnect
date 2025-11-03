@@ -9,7 +9,6 @@ let getVariousAddressesSpy: any;
 let getVariousAddressSpy: any;
 let createVariousAddressSpy: any;
 
-// Mock data for various addresses - based on schema_various_address from OpenAPI spec
 const mockVariousAddresses = [
   {
     id: "1_-672289624",

@@ -244,23 +244,21 @@ describe("CostCentersUnitsResourceHandler", () => {
     });
   });
 
-  describe("get operation - IMPLEMENTATION BUG", () => {
-    // NOTE: This handler has a bug where both getAll and get operations call handleGetAll
-    // instead of get calling handleGet. These tests document the current behavior.
+  describe("get operation", () => {
     
-    test("calls handleGetAll instead of handleGet (bug)", async () => {
+    test("fetches single cost center by ID", async () => {
       const context = createMockContext();
       const handler = new CostCentersUnitsResourceHandler(context, 0);
       const returnData: any[] = [];
 
       await handler.execute("get", mockAuthContext, returnData);
 
-      // Due to the bug, get operation calls getCostCenters instead of getCostCenter
-      expect(getCostCentersSpy).toHaveBeenCalledWith(
+      expect(getCostCenterSpy).toHaveBeenCalledWith(
         context,
         "client-123",
         "FY2023",
         "CS01",
+        "CC001",
         {
           top: 50,
           skip: 10,
@@ -270,24 +268,20 @@ describe("CostCentersUnitsResourceHandler", () => {
         }
       );
 
-      // getCostCenter should NOT be called due to the bug
-      expect(getCostCenterSpy).not.toHaveBeenCalled();
-
-      expect(returnData).toHaveLength(3);
+      expect(returnData).toHaveLength(1);
+      expect(returnData[0].json).toEqual(mockSingleCostCenter);
     });
 
-    test("get operation returns all cost centers due to bug", async () => {
+    test("handles null response for get operation", async () => {
+      getCostCenterSpy.mockResolvedValueOnce(null);
       const context = createMockContext();
       const handler = new CostCentersUnitsResourceHandler(context, 0);
       const returnData: any[] = [];
 
       await handler.execute("get", mockAuthContext, returnData);
 
-      // Should return all cost centers instead of a single one due to bug
-      expect(returnData).toHaveLength(3);
-      expect(returnData[0].json.id).toBe("CC001");
-      expect(returnData[1].json.id).toBe("CC002");
-      expect(returnData[2].json.id).toBe("CC003");
+      expect(returnData).toHaveLength(1);
+      expect(returnData[0].json).toEqual({ success: true });
     });
   });
 

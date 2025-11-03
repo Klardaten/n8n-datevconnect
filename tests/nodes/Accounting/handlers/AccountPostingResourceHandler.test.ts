@@ -8,31 +8,51 @@ import { datevConnectClient } from "../../../../src/services/accountingClient";
 let getAccountPostingsSpy: any;
 let getAccountPostingSpy: any;
 
-// Mock data
 const mockAccountPostingData = [
   {
-    id: "account-posting-123",
-    account: "1200",
-    amount: 1000.00,
-    debit: true,
-    credit: false
+    id: "5318111",
+    account_number: 43370000,
+    accounting_reason: "independent_from_accounting_reason",
+    accounting_sequence_id: "02-2024/0001",
+    accounting_transaction_key: 7,
+    amount_credit: 0,
+    amount_debit: 4008.62,
+    amount_entered: 4008.62,
+    currency_code: "EUR",
+    date: "2024-02-29T00:00:00+01:00",
+    document_field1: "G-1295",
+    document_field2: "020224"
   },
   {
-    id: "account-posting-456", 
-    account: "4000",
-    amount: 500.50,
-    debit: false,
-    credit: true
+    id: "5318112",
+    account_number: 44010000,
+    accounting_reason: "independent_from_accounting_reason",
+    accounting_sequence_id: "02-2024/0002",
+    accounting_transaction_key: 19,
+    amount_credit: 500.50,
+    amount_debit: 0,
+    amount_entered: 500.50,
+    currency_code: "EUR",
+    date: "2024-03-01T00:00:00+01:00",
+    document_field1: "R-4567",
+    document_field2: "010324"
   }
 ];
 
 const mockSingleAccountPosting = {
-  id: "account-posting-123",
-  account: "1200",
-  amount: 1000.00,
-  debit: true,
-  credit: false,
-  description: "Test account posting"
+  id: "5318111",
+  account_number: 43370000,
+  accounting_reason: "independent_from_accounting_reason",
+  accounting_sequence_id: "02-2024/0001",
+  accounting_transaction_key: 7,
+  amount_credit: 0,
+  amount_debit: 4008.62,
+  amount_entered: 4008.62,
+  currency_code: "EUR",
+  date: "2024-02-29T00:00:00+01:00",
+  document_field1: "G-1295",
+  document_field2: "020224",
+  contra_account_number: 44010000
 };
 
 // Mock IExecuteFunctions
@@ -46,12 +66,12 @@ const createMockContext = (overrides: any = {}) => ({
   }),
   getNodeParameter: mock((name: string, itemIndex: number, defaultValue?: unknown) => {
     const mockParams: Record<string, unknown> = {
-      "accountPostingId": "account-posting-123",
+      "accountPostingId": "5318111",
       "top": 50,
       "skip": 10,
-      "select": "id,account,amount",
-      "filter": "amount gt 100",
-      "expand": "relationships",
+      "select": "id,account_number,amount_debit,amount_credit",
+      "filter": "amount_debit gt 100",
+      "expand": "additional_information",
       ...overrides.parameters,
     };
     return mockParams[name] !== undefined ? mockParams[name] : defaultValue;
@@ -98,20 +118,27 @@ describe("AccountPostingResourceHandler", () => {
       await handler.execute("getAll", mockAuthContext, returnData);
 
       expect(getAccountPostingsSpy).toHaveBeenCalledWith(context, "client-123", "2023", {
+        select: "id,account_number,amount_debit,amount_credit",
+        filter: "amount_debit gt 100",
+        expand: "additional_information",
         top: 50,
-        skip: 10,
-        select: "id,account,amount",
-        filter: "amount gt 100",
-        expand: "relationships"
+        skip: 10
       });
 
       expect(returnData).toHaveLength(2);
       expect(returnData[0].json).toEqual({
-        id: "account-posting-123",
-        account: "1200",
-        amount: 1000.00,
-        debit: true,
-        credit: false
+        id: "5318111",
+        account_number: 43370000,
+        accounting_reason: "independent_from_accounting_reason",
+        accounting_sequence_id: "02-2024/0001",
+        accounting_transaction_key: 7,
+        amount_credit: 0,
+        amount_debit: 4008.62,
+        amount_entered: 4008.62,
+        currency_code: "EUR",
+        date: "2024-02-29T00:00:00+01:00",
+        document_field1: "G-1295",
+        document_field2: "020224"
       });
     });
 
@@ -141,8 +168,8 @@ describe("AccountPostingResourceHandler", () => {
       await handler.execute("getAll", mockAuthContext, returnData);
 
       expect(getAccountPostingsSpy).toHaveBeenCalledWith(context, "client-123", "2023", {
-        top: 100,  // Default value when top is undefined
-        expand: "relationships"
+        expand: "additional_information",
+        top: 100  // Default value when top is undefined
       });
     });
   });
@@ -155,12 +182,12 @@ describe("AccountPostingResourceHandler", () => {
 
       await handler.execute("get", mockAuthContext, returnData);
 
-      expect(getAccountPostingSpy).toHaveBeenCalledWith(context, "client-123", "2023", "account-posting-123", {
+      expect(getAccountPostingSpy).toHaveBeenCalledWith(context, "client-123", "2023", "5318111", {
         top: 50,
         skip: 10,
-        select: "id,account,amount",
-        filter: "amount gt 100",
-        expand: "relationships"
+        select: "id,account_number,amount_debit,amount_credit",
+        filter: "amount_debit gt 100",
+        expand: "additional_information"
       });
 
       expect(returnData).toHaveLength(1);
@@ -184,7 +211,7 @@ describe("AccountPostingResourceHandler", () => {
 
       expect(getAccountPostingSpy).toHaveBeenCalledWith(context, "client-123", "2023", "test-account-posting-id", {
         top: 100,  // Default value when top is undefined
-        expand: "relationships"
+        expand: "additional_information"
       });
     });
   });

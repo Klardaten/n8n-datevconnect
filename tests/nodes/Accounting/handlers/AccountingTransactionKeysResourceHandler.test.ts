@@ -8,52 +8,68 @@ import { datevConnectClient } from "../../../../src/services/accountingClient";
 let getAccountingTransactionKeysSpy: any;
 let getAccountingTransactionKeySpy: any;
 
-// Mock data
 const mockAccountingTransactionKeysData = [
   {
-    id: "TXN001",
-    key: "BANK_TRANSFER",
-    name: "Bank Transfer",
-    description: "Electronic bank transfer transaction",
-    category: "payment",
-    is_active: true,
-    default_account: "1200",
-    requires_approval: false
+    id: "51202401010",
+    additional_function: "input_tax",
+    caption: "Vorsteuer 19%",
+    cases_related_to_goods_and_services: 1,
+    date_from: "2024-01-01T00:00:00+01:00",
+    date_to: "2024-12-31T00:00:00+01:00",
+    factor2_account1: 66440000,
+    factor2_account2: 0,
+    factor2_percent: 19.0,
+    is_tax_rate_selectable: false,
+    number: 51,
+    tax_rate: 19.0,
+    group: "Vorsteuerbeträge aus Rechnungen von anderen Unternehmen"
   },
   {
-    id: "TXN002",
-    key: "CASH_PAYMENT",
-    name: "Cash Payment",
-    description: "Cash payment transaction",
-    category: "payment",
-    is_active: true,
-    default_account: "1000",
-    requires_approval: false
+    id: "52202401010",
+    additional_function: "vat",
+    caption: "Umsatzsteuer 19%",
+    cases_related_to_goods_and_services: 2,
+    date_from: "2024-01-01T00:00:00+01:00",
+    date_to: "2024-12-31T00:00:00+01:00",
+    factor2_account1: 48110000,
+    factor2_account2: 0,
+    factor2_percent: 19.0,
+    is_tax_rate_selectable: false,
+    number: 52,
+    tax_rate: 19.0,
+    group: "Umsatzsteuer 19%"
   },
   {
-    id: "TXN003",
-    key: "INVOICE_RECEIPT",
-    name: "Invoice Receipt",
-    description: "Receipt of customer invoice",
-    category: "receivable",
-    is_active: true,
-    default_account: "1300",
-    requires_approval: true
+    id: "53202401010",
+    additional_function: "input_tax",
+    caption: "Vorsteuer 7%",
+    cases_related_to_goods_and_services: 1,
+    date_from: "2024-01-01T00:00:00+01:00",
+    date_to: "2024-12-31T00:00:00+01:00",
+    factor2_account1: 66440000,
+    factor2_account2: 0,
+    factor2_percent: 7.0,
+    is_tax_rate_selectable: false,
+    number: 53,
+    tax_rate: 7.0,
+    group: "Vorsteuerbeträge aus Rechnungen von anderen Unternehmen"
   }
 ];
 
 const mockSingleAccountingTransactionKey = {
-  id: "TXN001",
-  key: "BANK_TRANSFER",
-  name: "Bank Transfer",
-  description: "Electronic bank transfer transaction",
-  category: "payment",
-  is_active: true,
-  default_account: "1200",
-  requires_approval: false,
-  created_date: "2023-01-15T10:30:00Z",
-  last_modified: "2023-03-20T14:45:00Z",
-  usage_count: 1247
+  id: "51202401010",
+  additional_function: "input_tax",
+  caption: "Vorsteuer 19%",
+  cases_related_to_goods_and_services: 1,
+  date_from: "2024-01-01T00:00:00+01:00",
+  date_to: "2024-12-31T00:00:00+01:00",
+  factor2_account1: 66440000,
+  factor2_account2: 0,
+  factor2_percent: 19.0,
+  is_tax_rate_selectable: false,
+  number: 51,
+  tax_rate: 19.0,
+  group: "Vorsteuerbeträge aus Rechnungen von anderen Unternehmen"
 };
 
 // Mock IExecuteFunctions
@@ -125,14 +141,19 @@ describe("AccountingTransactionKeysResourceHandler", () => {
 
       expect(returnData).toHaveLength(3);
       expect(returnData[0].json).toEqual({
-        id: "TXN001",
-        key: "BANK_TRANSFER",
-        name: "Bank Transfer",
-        description: "Electronic bank transfer transaction",
-        category: "payment",
-        is_active: true,
-        default_account: "1200",
-        requires_approval: false
+        id: "51202401010",
+        additional_function: "input_tax",
+        caption: "Vorsteuer 19%",
+        cases_related_to_goods_and_services: 1,
+        date_from: "2024-01-01T00:00:00+01:00",
+        date_to: "2024-12-31T00:00:00+01:00",
+        factor2_account1: 66440000,
+        factor2_account2: 0,
+        factor2_percent: 19.0,
+        is_tax_rate_selectable: false,
+        number: 51,
+        tax_rate: 19.0,
+        group: "Vorsteuerbeträge aus Rechnungen von anderen Unternehmen"
       });
     });
 
@@ -201,15 +222,14 @@ describe("AccountingTransactionKeysResourceHandler", () => {
   });
 
   describe("get operation", () => {
-    test("fetches single transaction key by ID (but calls getAll due to implementation bug)", async () => {
+    test("fetches single transaction key by ID", async () => {
       const context = createMockContext();
       const handler = new AccountingTransactionKeysResourceHandler(context, 0);
       const returnData: any[] = [];
 
       await handler.execute("get", mockAuthContext, returnData);
 
-      // Note: Due to implementation bug, this currently calls getAccountingTransactionKeys instead of getAccountingTransactionKey
-      expect(getAccountingTransactionKeysSpy).toHaveBeenCalledWith(context, "client-123", "2023", {
+      expect(getAccountingTransactionKeySpy).toHaveBeenCalledWith(context, "client-123", "2023", "TXN001", {
         top: 50,
         skip: 10,
         select: "id,key,name,category",
@@ -217,32 +237,38 @@ describe("AccountingTransactionKeysResourceHandler", () => {
         expand: "usage_statistics"
       });
 
-      expect(returnData).toHaveLength(3);
+      expect(returnData).toHaveLength(1);
       expect(returnData[0].json).toEqual({
-        id: "TXN001",
-        key: "BANK_TRANSFER",
-        name: "Bank Transfer",
-        description: "Electronic bank transfer transaction",
-        category: "payment",
-        is_active: true,
-        default_account: "1200",
-        requires_approval: false
+        id: "51202401010",
+        additional_function: "input_tax",
+        caption: "Vorsteuer 19%",
+        cases_related_to_goods_and_services: 1,
+        date_from: "2024-01-01T00:00:00+01:00",
+        date_to: "2024-12-31T00:00:00+01:00",
+        factor2_account1: 66440000,
+        factor2_account2: 0,
+        factor2_percent: 19.0,
+        is_tax_rate_selectable: false,
+        number: 51,
+        tax_rate: 19.0,
+        group: "Vorsteuerbeträge aus Rechnungen von anderen Unternehmen"
       });
     });
 
     test("handles empty results for get operation", async () => {
-      getAccountingTransactionKeysSpy.mockResolvedValueOnce([]);
+      getAccountingTransactionKeySpy.mockResolvedValueOnce(null);
       const context = createMockContext();
       const handler = new AccountingTransactionKeysResourceHandler(context, 0);
       const returnData: any[] = [];
 
       await handler.execute("get", mockAuthContext, returnData);
 
-      expect(returnData).toHaveLength(0);
+      expect(returnData).toHaveLength(1);
+      expect(returnData[0].json).toEqual({ success: true });
     });
 
     test("handles null response for get operation", async () => {
-      getAccountingTransactionKeysSpy.mockResolvedValueOnce(null);
+      getAccountingTransactionKeySpy.mockResolvedValueOnce(null);
       const context = createMockContext();
       const handler = new AccountingTransactionKeysResourceHandler(context, 0);
       const returnData: any[] = [];
@@ -269,8 +295,7 @@ describe("AccountingTransactionKeysResourceHandler", () => {
 
       await handler.execute("get", mockAuthContext, returnData);
 
-      // Note: Due to implementation bug, this currently calls getAccountingTransactionKeys instead of getAccountingTransactionKey
-      expect(getAccountingTransactionKeysSpy).toHaveBeenCalledWith(context, "client-123", "2023", {
+      expect(getAccountingTransactionKeySpy).toHaveBeenCalledWith(context, "client-123", "2023", "test-key-id", {
         top: 100  // Default value when top is undefined
       });
     });
@@ -443,8 +468,6 @@ describe("AccountingTransactionKeysResourceHandler", () => {
 
       await handler.execute("getAll", mockAuthContext, returnData);
 
-      // Since the implementation currently has a bug where all operations call getAccountingTransactionKeys,
-      // we test that the handler works with the current implementation
       expect(getAccountingTransactionKeysSpy).toHaveBeenCalledWith(
         context,
         "client-123",
@@ -489,27 +512,33 @@ describe("AccountingTransactionKeysResourceHandler", () => {
   });
 
   describe("data validation", () => {
-    test("handles transaction keys with various categories", async () => {
-      const mockDataWithVariousCategories = [
+    test("handles transaction keys with various additional functions", async () => {
+      const mockDataWithVariousAdditionalFunctions = [
         {
-          id: "TXN001",
-          key: "SALE_INVOICE",
-          name: "Sales Invoice",
-          category: "sales",
-          is_active: true,
-          requires_approval: false
+          id: "51202401010",
+          additional_function: "input_tax",
+          caption: "Vorsteuer 19%",
+          cases_related_to_goods_and_services: 1,
+          date_from: "2024-01-01T00:00:00+01:00",
+          date_to: "2024-12-31T00:00:00+01:00",
+          number: 51,
+          tax_rate: 19.0,
+          is_tax_rate_selectable: false
         },
         {
-          id: "TXN002",
-          key: "EXPENSE_CLAIM", 
-          name: "Expense Claim",
-          category: "expense",
-          is_active: true,
-          requires_approval: true
+          id: "52202401010",
+          additional_function: "vat",
+          caption: "Umsatzsteuer 19%",
+          cases_related_to_goods_and_services: 2,
+          date_from: "2024-01-01T00:00:00+01:00",
+          date_to: "2024-12-31T00:00:00+01:00",
+          number: 52,
+          tax_rate: 19.0,
+          is_tax_rate_selectable: false
         }
       ];
       
-      getAccountingTransactionKeysSpy.mockResolvedValueOnce(mockDataWithVariousCategories);
+      getAccountingTransactionKeysSpy.mockResolvedValueOnce(mockDataWithVariousAdditionalFunctions);
       const context = createMockContext();
       const handler = new AccountingTransactionKeysResourceHandler(context, 0);
       const returnData: any[] = [];
@@ -517,27 +546,27 @@ describe("AccountingTransactionKeysResourceHandler", () => {
       await handler.execute("getAll", mockAuthContext, returnData);
 
       expect(returnData).toHaveLength(2);
-      expect(returnData[0].json.category).toBe("sales");
-      expect(returnData[1].json.category).toBe("expense");
+      expect(returnData[0].json.additional_function).toBe("input_tax");
+      expect(returnData[1].json.additional_function).toBe("vat");
     });
 
     test("handles transaction keys with boolean flags", async () => {
       const mockDataWithBooleans = [
         {
-          id: "TXN001",
-          key: "AUTOMATED_PAYMENT",
-          name: "Automated Payment",
-          is_active: true,
-          requires_approval: false,
-          auto_reconcile: true
+          id: "51202401010",
+          additional_function: "input_tax",
+          caption: "Vorsteuer 19%",
+          is_tax_rate_selectable: false,
+          number: 51,
+          tax_rate: 19.0
         },
         {
-          id: "TXN002",
-          key: "MANUAL_ADJUSTMENT",
-          name: "Manual Adjustment",
-          is_active: false,
-          requires_approval: true,
-          auto_reconcile: false
+          id: "54202401010",
+          additional_function: "vat",
+          caption: "Wählbarer Steuersatz",
+          is_tax_rate_selectable: true,
+          number: 54,
+          tax_rate: 0.0
         }
       ];
       
@@ -548,19 +577,17 @@ describe("AccountingTransactionKeysResourceHandler", () => {
 
       await handler.execute("getAll", mockAuthContext, returnData);
 
-      expect(returnData[0].json.is_active).toBe(true);
-      expect(returnData[0].json.requires_approval).toBe(false);
-      expect(returnData[1].json.is_active).toBe(false);
-      expect(returnData[1].json.requires_approval).toBe(true);
+      expect(returnData[0].json.is_tax_rate_selectable).toBe(false);
+      expect(returnData[1].json.is_tax_rate_selectable).toBe(true);
     });
 
     test("handles transaction keys with missing optional fields", async () => {
       const mockDataWithMissingFields = [
         {
-          id: "TXN001",
-          key: "MINIMAL_KEY",
-          name: "Minimal Transaction Key"
-          // missing description, category, default_account, etc.
+          id: "55202401010",
+          caption: "Minimaler Steuerschlüssel",
+          number: 55
+          // missing optional fields like group, factor2_account1, factor2_percent, etc.
         }
       ];
       
@@ -572,19 +599,20 @@ describe("AccountingTransactionKeysResourceHandler", () => {
       await handler.execute("getAll", mockAuthContext, returnData);
 
       expect(returnData[0].json).toEqual({
-        id: "TXN001",
-        key: "MINIMAL_KEY",
-        name: "Minimal Transaction Key"
+        id: "55202401010",
+        caption: "Minimaler Steuerschlüssel",
+        number: 55
       });
     });
 
-    test("handles transaction keys with special characters in names", async () => {
+    test("handles transaction keys with special characters in captions", async () => {
       const mockDataWithSpecialChars = [
         {
-          id: "TXN001",
-          key: "SPECIAL_CHARS",
-          name: "Transaction with Special Chars: & / - _ (Test)",
-          description: "Contains special chars: €, $, £, ¥, ©, ®"
+          id: "56202401010",
+          caption: "Steuerschlüssel mit Sonderzeichen: & / - _ (Test)",
+          group: "Gruppe mit Zeichen: €, %, §, UStG",
+          number: 56,
+          tax_rate: 19.0
         }
       ];
       
@@ -595,8 +623,8 @@ describe("AccountingTransactionKeysResourceHandler", () => {
 
       await handler.execute("getAll", mockAuthContext, returnData);
 
-      expect(returnData[0].json.name).toBe("Transaction with Special Chars: & / - _ (Test)");
-      expect(returnData[0].json.description).toBe("Contains special chars: €, $, £, ¥, ©, ®");
+      expect(returnData[0].json.caption).toBe("Steuerschlüssel mit Sonderzeichen: & / - _ (Test)");
+      expect(returnData[0].json.group).toBe("Gruppe mit Zeichen: €, %, §, UStG");
     });
   });
 });

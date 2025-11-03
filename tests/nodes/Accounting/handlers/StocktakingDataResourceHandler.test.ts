@@ -9,7 +9,6 @@ let getStocktakingDataSpy: any;
 let getStocktakingDataByAssetSpy: any;
 let updateStocktakingDataSpy: any;
 
-// Mock data for stocktaking based on schema_stocktaking_record from OpenAPI spec
 const mockStocktakingData = [
   {
     id: "501",
