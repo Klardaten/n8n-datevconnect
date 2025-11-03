@@ -1,5 +1,4 @@
 import { NodeOperationError } from "n8n-workflow";
-import type { JsonValue } from "../../../src/services/datevConnectClient";
 import { DocumentManagementClient } from "../../../src/services/documentManagementClient";
 import type { AuthContext, SendSuccessFunction } from "../types";
 import { BaseResourceHandler } from "./BaseResourceHandler";

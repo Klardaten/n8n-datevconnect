@@ -70,10 +70,10 @@ export interface CreateDocumentStateOptions extends BaseDocumentManagementReques
 }
 
 // Info endpoint interfaces
-export interface FetchInfoOptions extends BaseDocumentManagementRequestOptions {}
+export type FetchInfoOptions = BaseDocumentManagementRequestOptions;
 
 // Secure Areas endpoint interfaces
-export interface FetchSecureAreasOptions extends BaseDocumentManagementRequestOptions {}
+export type FetchSecureAreasOptions = BaseDocumentManagementRequestOptions;
 
 // Property Templates endpoint interfaces  
 export interface FetchPropertyTemplatesOptions extends BaseDocumentManagementRequestOptions {
@@ -81,7 +81,7 @@ export interface FetchPropertyTemplatesOptions extends BaseDocumentManagementReq
 }
 
 // Individual Properties endpoint interfaces
-export interface FetchIndividualPropertiesOptions extends BaseDocumentManagementRequestOptions {}
+export type FetchIndividualPropertiesOptions = BaseDocumentManagementRequestOptions;
 
 // Individual References1 endpoint interfaces
 export interface FetchIndividualReferences1Options extends BaseDocumentManagementRequestOptions {
@@ -101,6 +101,36 @@ export interface FetchIndividualReferences2Options extends BaseDocumentManagemen
 
 export interface CreateIndividualReference2Options extends BaseDocumentManagementRequestOptions {
   individualReference: JsonValue;
+}
+
+// Structure Items endpoint interfaces
+export interface FetchStructureItemsOptions extends BaseDocumentManagementRequestOptions {
+  documentId: string;
+  top?: number;
+  skip?: number;
+}
+
+export interface FetchStructureItemOptions extends BaseDocumentManagementRequestOptions {
+  documentId: string;
+  structureItemId: string;
+}
+
+export interface AddStructureItemOptions extends BaseDocumentManagementRequestOptions {
+  documentId: string;
+  structureItem: JsonValue;
+  insertPosition?: string;
+}
+
+export interface UpdateStructureItemOptions extends BaseDocumentManagementRequestOptions {
+  documentId: string;
+  structureItemId: string;
+  structureItem: JsonValue;
+}
+
+// Dispatcher Information endpoint interfaces
+export interface CreateDispatcherInformationOptions extends BaseDocumentManagementRequestOptions {
+  documentId: string;
+  dispatcherInformation: JsonValue;
 }
 
 const DOCUMENT_MANAGEMENT_BASE_PATH = '/datev/api/dms/v2';
@@ -170,6 +200,28 @@ export class DocumentManagementClient {
   }
 
   /**
+   * GET /documents/{id} - Get a single document by ID
+   */
+  static async fetchDocument(options: FetchDocumentOptions): Promise<JsonValue> {
+    const fetchImpl = options.fetchImpl || fetch;
+    
+    const response = await fetchImpl(`${options.host}${DOCUMENT_MANAGEMENT_BASE_PATH}/documents/${encodeURIComponent(options.documentId)}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${options.token}`,
+        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'Accept': 'application/json;charset=utf-8',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch document: ${response.status} ${response.statusText}`);
+    }
+
+    return await response.json() as JsonValue;
+  }
+
+  /**
    * POST /documents - Create a new document
    */
   static async createDocument(options: CreateDocumentOptions): Promise<JsonValue> {
@@ -194,6 +246,35 @@ export class DocumentManagementClient {
     if (response.status === 201) {
       const location = response.headers.get('Location');
       return { success: true, location };
+    }
+
+    return await response.json() as JsonValue;
+  }
+
+  /**
+   * PUT /documents/{id} - Update a document
+   */
+  static async updateDocument(options: UpdateDocumentOptions): Promise<JsonValue> {
+    const fetchImpl = options.fetchImpl || fetch;
+    
+    const response = await fetchImpl(`${options.host}${DOCUMENT_MANAGEMENT_BASE_PATH}/documents/${encodeURIComponent(options.documentId)}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${options.token}`,
+        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'Content-Type': 'application/json;charset=utf-8',
+        'Accept': 'application/json;charset=utf-8',
+      },
+      body: JSON.stringify(options.document),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to update document: ${response.status} ${response.statusText}`);
+    }
+
+    // Handle 204 No Content response
+    if (response.status === 204) {
+      return { success: true, documentId: options.documentId };
     }
 
     return await response.json() as JsonValue;
@@ -575,6 +656,150 @@ export class DocumentManagementClient {
 
     if (!response.ok) {
       throw new Error(`Failed to create individual reference 2: ${response.status} ${response.statusText}`);
+    }
+
+    return await response.json() as JsonValue;
+  }
+
+  /**
+   * GET /documents/{id}/structure-items - Get structure items for a document
+   */
+  static async fetchStructureItems(options: FetchStructureItemsOptions): Promise<JsonValue> {
+    const fetchImpl = options.fetchImpl || fetch;
+    const queryParams = new URLSearchParams();
+    
+    if (options.top) queryParams.append('top', options.top.toString());
+    if (options.skip) queryParams.append('skip', options.skip.toString());
+    
+    const url = `${options.host}${DOCUMENT_MANAGEMENT_BASE_PATH}/documents/${encodeURIComponent(options.documentId)}/structure-items${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    
+    const response = await fetchImpl(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${options.token}`,
+        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'Accept': 'application/json;charset=utf-8',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch structure items: ${response.status} ${response.statusText}`);
+    }
+
+    return await response.json() as JsonValue;
+  }
+
+  /**
+   * GET /documents/{id}/structure-items/{itemId} - Get a single structure item
+   */
+  static async fetchStructureItem(options: FetchStructureItemOptions): Promise<JsonValue> {
+    const fetchImpl = options.fetchImpl || fetch;
+    
+    const response = await fetchImpl(`${options.host}${DOCUMENT_MANAGEMENT_BASE_PATH}/documents/${encodeURIComponent(options.documentId)}/structure-items/${encodeURIComponent(options.structureItemId)}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${options.token}`,
+        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'Accept': 'application/json;charset=utf-8',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch structure item: ${response.status} ${response.statusText}`);
+    }
+
+    return await response.json() as JsonValue;
+  }
+
+  /**
+   * POST /documents/{id}/structure-items - Add a structure item to a document
+   */
+  static async addStructureItem(options: AddStructureItemOptions): Promise<JsonValue> {
+    const fetchImpl = options.fetchImpl || fetch;
+    const queryParams = new URLSearchParams();
+    
+    if (options.insertPosition) queryParams.append('insertPosition', options.insertPosition);
+    
+    const url = `${options.host}${DOCUMENT_MANAGEMENT_BASE_PATH}/documents/${encodeURIComponent(options.documentId)}/structure-items${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    
+    const response = await fetchImpl(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${options.token}`,
+        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'Content-Type': 'application/json;charset=utf-8',
+        'Accept': 'application/json;charset=utf-8',
+      },
+      body: JSON.stringify(options.structureItem),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to add structure item: ${response.status} ${response.statusText}`);
+    }
+
+    // Handle 201 Created response
+    if (response.status === 201) {
+      const location = response.headers.get('Location');
+      return { success: true, location };
+    }
+
+    return await response.json() as JsonValue;
+  }
+
+  /**
+   * PUT /documents/{id}/structure-items/{itemId} - Update a structure item
+   */
+  static async updateStructureItem(options: UpdateStructureItemOptions): Promise<JsonValue> {
+    const fetchImpl = options.fetchImpl || fetch;
+    
+    const response = await fetchImpl(`${options.host}${DOCUMENT_MANAGEMENT_BASE_PATH}/documents/${encodeURIComponent(options.documentId)}/structure-items/${encodeURIComponent(options.structureItemId)}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${options.token}`,
+        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'Content-Type': 'application/json;charset=utf-8',
+        'Accept': 'application/json;charset=utf-8',
+      },
+      body: JSON.stringify(options.structureItem),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to update structure item: ${response.status} ${response.statusText}`);
+    }
+
+    // Handle 204 No Content response
+    if (response.status === 204) {
+      return { success: true, documentId: options.documentId, structureItemId: options.structureItemId };
+    }
+
+    return await response.json() as JsonValue;
+  }
+
+  /**
+   * POST /documents/{id}/dispatcher-information - Create dispatcher information for a document
+   */
+  static async createDispatcherInformation(options: CreateDispatcherInformationOptions): Promise<JsonValue> {
+    const fetchImpl = options.fetchImpl || fetch;
+    
+    const response = await fetchImpl(`${options.host}${DOCUMENT_MANAGEMENT_BASE_PATH}/documents/${encodeURIComponent(options.documentId)}/dispatcher-information`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${options.token}`,
+        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'Content-Type': 'application/json;charset=utf-8',
+        'Accept': 'application/json;charset=utf-8',
+      },
+      body: JSON.stringify(options.dispatcherInformation),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to create dispatcher information: ${response.status} ${response.statusText}`);
+    }
+
+    // Handle 201 Created response
+    if (response.status === 201) {
+      const location = response.headers.get('Location');
+      return { success: true, location };
     }
 
     return await response.json() as JsonValue;

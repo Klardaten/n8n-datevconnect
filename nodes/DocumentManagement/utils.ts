@@ -1,4 +1,4 @@
-import type { IDataObject, IExecuteFunctions } from "n8n-workflow";
+import type { IDataObject, IExecuteFunctions, ILoadOptionsFunctions } from "n8n-workflow";
 import type { JsonValue } from "../../src/services/datevConnectClient";
 
 /**
@@ -55,21 +55,21 @@ export function normaliseToObjects(data: JsonValue): IDataObject[] {
  * Parses a JSON parameter with proper error handling
  */
 export function parseJsonParameter(
-  rawValue: unknown,
-  parameterLabel: string,
-  context: IExecuteFunctions,
-  itemIndex: number,
+  value: JsonValue,
+  parameterName: string,
+  _context: IExecuteFunctions | ILoadOptionsFunctions,
+  _itemIndex: number,
 ): JsonValue {
-  if (typeof rawValue === "string") {
+  if (typeof value === "string") {
     try {
-      return JSON.parse(rawValue);
+      return JSON.parse(value);
     } catch (error) {
       throw new Error(
-        `Invalid JSON in parameter '${parameterLabel}': ${toErrorMessage(error)}`
+        `Invalid JSON in parameter '${parameterName}': ${toErrorMessage(error)}`
       );
     }
   }
-  return rawValue as JsonValue;
+  return value as JsonValue;
 }
 
 /**
@@ -135,7 +135,7 @@ export function getRequiredJsonData(
   parameterName: string,
   itemIndex: number,
 ): JsonValue {
-  const rawValue = context.getNodeParameter(parameterName, itemIndex) as unknown;
+  const rawValue = context.getNodeParameter(parameterName, itemIndex) as JsonValue;
   if (!rawValue) {
     throw new Error(`Parameter '${parameterName}' is required`);
   }

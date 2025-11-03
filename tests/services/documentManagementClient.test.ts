@@ -144,6 +144,252 @@ describe('DocumentManagementClient - All Endpoints', () => {
     expect(result).toEqual({ id: "uploaded-file-123", success: true });
   });
 
+  test("17. GET /documents/{id} - fetchDocument", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id: "doc-123", description: "Test document", domain: { id: 1 } })
+    } as Response);
+
+    const result = await DocumentManagementClient.fetchDocument({
+      host: "https://localhost:58452",
+      token: "test-token",
+      clientInstanceId: "test-client-id",
+      documentId: "doc-123",
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://localhost:58452/datev/api/dms/v2/documents/doc-123",
+      {
+        method: "GET",
+        headers: {
+          "Authorization": "Bearer test-token",
+          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "Accept": "application/json;charset=utf-8",
+        },
+      }
+    );
+
+    expect(result).toEqual({ id: "doc-123", description: "Test document", domain: { id: 1 } });
+  });
+
+  test("18. PUT /documents/{id} - updateDocument", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 204,
+    } as Response);
+
+    const documentData = {
+      description: "Updated document",
+      domain: { id: 2 },
+    };
+
+    const result = await DocumentManagementClient.updateDocument({
+      host: "https://localhost:58452",
+      token: "test-token",
+      clientInstanceId: "test-client-id",
+      documentId: "doc-123",
+      document: documentData,
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://localhost:58452/datev/api/dms/v2/documents/doc-123",
+      {
+        method: "PUT",
+        headers: {
+          "Authorization": "Bearer test-token",
+          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "Content-Type": "application/json;charset=utf-8",
+          "Accept": "application/json;charset=utf-8",
+        },
+        body: JSON.stringify(documentData),
+      }
+    );
+
+    expect(result).toEqual({ success: true, documentId: "doc-123" });
+  });
+
+  test("19. GET /documents/{id}/structure-items - fetchStructureItems", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => [
+        { id: "item-123", name: "document.pdf", type: 1, counter: 1 },
+        { id: "item-456", name: "attachment.docx", type: 2, counter: 2 }
+      ]
+    } as Response);
+
+    const result = await DocumentManagementClient.fetchStructureItems({
+      host: "https://localhost:58452",
+      token: "test-token",
+      clientInstanceId: "test-client-id",
+      documentId: "doc-123",
+      top: 10,
+      skip: 0,
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://localhost:58452/datev/api/dms/v2/documents/doc-123/structure-items?top=10",
+      {
+        method: "GET",
+        headers: {
+          "Authorization": "Bearer test-token",
+          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "Accept": "application/json;charset=utf-8",
+        },
+      }
+    );
+
+    expect(result).toEqual([
+      { id: "item-123", name: "document.pdf", type: 1, counter: 1 },
+      { id: "item-456", name: "attachment.docx", type: 2, counter: 2 }
+    ]);
+  });
+
+  test("20. GET /documents/{id}/structure-items/{itemId} - fetchStructureItem", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id: "item-123", name: "document.pdf", type: 1, counter: 1 })
+    } as Response);
+
+    const result = await DocumentManagementClient.fetchStructureItem({
+      host: "https://localhost:58452",
+      token: "test-token",
+      clientInstanceId: "test-client-id",
+      documentId: "doc-123",
+      structureItemId: "item-123",
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://localhost:58452/datev/api/dms/v2/documents/doc-123/structure-items/item-123",
+      {
+        method: "GET",
+        headers: {
+          "Authorization": "Bearer test-token",
+          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "Accept": "application/json;charset=utf-8",
+        },
+      }
+    );
+
+    expect(result).toEqual({ id: "item-123", name: "document.pdf", type: 1, counter: 1 });
+  });
+
+  test("21. POST /documents/{id}/structure-items - addStructureItem", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 201,
+      headers: {
+        get: (name: string) => name === "Location" ? "/documents/doc-123/structure-items/new-item-456" : null
+      },
+    } as any);
+
+    const structureItemData = {
+      name: "new-attachment.pdf",
+      type: 1,
+    };
+
+    const result = await DocumentManagementClient.addStructureItem({
+      host: "https://localhost:58452",
+      token: "test-token",
+      clientInstanceId: "test-client-id",
+      documentId: "doc-123",
+      structureItem: structureItemData,
+      insertPosition: "last",
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://localhost:58452/datev/api/dms/v2/documents/doc-123/structure-items?insertPosition=last",
+      {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer test-token",
+          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "Content-Type": "application/json;charset=utf-8",
+          "Accept": "application/json;charset=utf-8",
+        },
+        body: JSON.stringify(structureItemData),
+      }
+    );
+
+    expect(result).toEqual({ success: true, location: "/documents/doc-123/structure-items/new-item-456" });
+  });
+
+  test("22. PUT /documents/{id}/structure-items/{itemId} - updateStructureItem", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 204,
+    } as Response);
+
+    const structureItemData = {
+      name: "updated-document.pdf",
+      type: 1,
+    };
+
+    const result = await DocumentManagementClient.updateStructureItem({
+      host: "https://localhost:58452",
+      token: "test-token",
+      clientInstanceId: "test-client-id",
+      documentId: "doc-123",
+      structureItemId: "item-123",
+      structureItem: structureItemData,
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://localhost:58452/datev/api/dms/v2/documents/doc-123/structure-items/item-123",
+      {
+        method: "PUT",
+        headers: {
+          "Authorization": "Bearer test-token",
+          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "Content-Type": "application/json;charset=utf-8",
+          "Accept": "application/json;charset=utf-8",
+        },
+        body: JSON.stringify(structureItemData),
+      }
+    );
+
+    expect(result).toEqual({ success: true, documentId: "doc-123", structureItemId: "item-123" });
+  });
+
+  test("23. POST /documents/{id}/dispatcher-information - createDispatcherInformation", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 201,
+      headers: {
+        get: (name: string) => name === "Location" ? "/documents/doc-123/dispatcher-information/new-info-789" : null
+      },
+    } as any);
+
+    const dispatcherData = {
+      recipient: "John Doe",
+      dispatch_date: "2023-12-01",
+      method: "email",
+    };
+
+    const result = await DocumentManagementClient.createDispatcherInformation({
+      host: "https://localhost:58452",
+      token: "test-token",
+      clientInstanceId: "test-client-id",
+      documentId: "doc-123",
+      dispatcherInformation: dispatcherData,
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://localhost:58452/datev/api/dms/v2/documents/doc-123/dispatcher-information",
+      {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer test-token",
+          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "Content-Type": "application/json;charset=utf-8",
+          "Accept": "application/json;charset=utf-8",
+        },
+        body: JSON.stringify(dispatcherData),
+      }
+    );
+
+    expect(result).toEqual({ success: true, location: "/documents/doc-123/dispatcher-information/new-info-789" });
+  });
+
   test("5. GET /domains - fetchDomains", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,

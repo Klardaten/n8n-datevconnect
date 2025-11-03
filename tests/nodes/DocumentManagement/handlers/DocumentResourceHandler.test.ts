@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { describe, expect, test, beforeEach, afterEach, spyOn, mock } from "bun:test";
+import { describe, expect, test, beforeEach, spyOn, mock } from "bun:test";
 import { DocumentResourceHandler } from "../../../../nodes/DocumentManagement/handlers/DocumentResourceHandler";
 import { DocumentManagementClient } from "../../../../src/services/documentManagementClient";
 import type { AuthContext } from "../../../../nodes/DocumentManagement/types";
@@ -37,6 +37,13 @@ describe("DocumentResourceHandler", () => {
       id: "new-doc-123",
       success: true,
       location: "/documents/new-doc-123",
+    });
+
+    spyOn(DocumentManagementClient, "fetchDocument").mockResolvedValue({
+      id: "doc-123",
+      description: "Sample document",
+      class: { id: 1, name: "Document" },
+      state: { id: "active", name: "Active" },
     });
 
     spyOn(DocumentManagementClient, "deleteDocument").mockResolvedValue(undefined);

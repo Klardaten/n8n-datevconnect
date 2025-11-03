@@ -1,5 +1,4 @@
 import { NodeOperationError } from "n8n-workflow";
-import type { JsonValue } from "../../../src/services/datevConnectClient";
 import { DocumentManagementClient } from "../../../src/services/documentManagementClient";
 import type { AuthContext, SendSuccessFunction } from "../types";
 import { BaseResourceHandler } from "./BaseResourceHandler";
@@ -83,21 +82,14 @@ export class DocumentResourceHandler extends BaseResourceHandler {
   ): Promise<void> {
     const documentId = this.getRequiredString("documentId");
 
-    // TODO: Implement actual API call
-    // const response = await documentManagementClient.getDocument({
-    //   ...authContext,
-    //   documentId,
-    // });
+    const response = await DocumentManagementClient.fetchDocument({
+      host: authContext.host,
+      token: authContext.token,
+      clientInstanceId: authContext.clientInstanceId,
+      documentId,
+    });
 
-    // For now, return mock data
-    const mockResponse: JsonValue = {
-      id: documentId,
-      description: "Sample document",
-      class: { id: 1, name: "Document" },
-      state: { id: "active", name: "Active" },
-    };
-
-    sendSuccess(mockResponse);
+    sendSuccess(response);
   }
 
   private async createDocument(
@@ -123,14 +115,15 @@ export class DocumentResourceHandler extends BaseResourceHandler {
     const documentId = this.getRequiredString("documentId");
     const documentData = this.getRequiredJsonData("documentData");
 
-    // TODO: Implement actual API call
-    // const response = await documentManagementClient.updateDocument({
-    //   ...authContext,
-    //   documentId,
-    //   documentData,
-    // });
+    const response = await DocumentManagementClient.updateDocument({
+      host: authContext.host,
+      token: authContext.token,
+      clientInstanceId: authContext.clientInstanceId,
+      documentId,
+      document: documentData,
+    });
 
-    sendSuccess({ success: true, documentId });
+    sendSuccess(response);
   }
 
   private async deleteDocument(
@@ -173,30 +166,16 @@ export class DocumentResourceHandler extends BaseResourceHandler {
     const top = this.getNumberParameter("top", 0);
     const skip = this.getNumberParameter("skip", 0);
 
-    const query = this.buildQueryParams({
+    const response = await DocumentManagementClient.fetchStructureItems({
+      host: authContext.host,
+      token: authContext.token,
+      clientInstanceId: authContext.clientInstanceId,
+      documentId,
       top: top || undefined,
       skip: skip || undefined,
     });
 
-    // TODO: Implement actual API call
-    // const response = await documentManagementClient.getStructureItems({
-    //   ...authContext,
-    //   documentId,
-    //   ...query,
-    // });
-
-    const mockResponse: JsonValue = {
-      structureItems: [
-        {
-          id: "item-123",
-          name: "document.pdf",
-          type: 1,
-          counter: 1,
-        },
-      ],
-    };
-
-    sendSuccess(mockResponse);
+    sendSuccess(response);
   }
 
   private async addStructureItem(
@@ -207,20 +186,16 @@ export class DocumentResourceHandler extends BaseResourceHandler {
     const structureItemData = this.getRequiredJsonData("structureItemData");
     const insertPosition = this.getOptionalString("insertPosition") || "last";
 
-    // TODO: Implement actual API call
-    // const response = await documentManagementClient.addStructureItem({
-    //   ...authContext,
-    //   documentId,
-    //   structureItemData,
-    //   insertPosition,
-    // });
+    const response = await DocumentManagementClient.addStructureItem({
+      host: authContext.host,
+      token: authContext.token,
+      clientInstanceId: authContext.clientInstanceId,
+      documentId,
+      structureItem: structureItemData,
+      insertPosition,
+    });
 
-    const mockResponse: JsonValue = {
-      id: "new-item-123",
-      success: true,
-    };
-
-    sendSuccess(mockResponse);
+    sendSuccess(response);
   }
 
   private async getStructureItem(
@@ -230,22 +205,15 @@ export class DocumentResourceHandler extends BaseResourceHandler {
     const documentId = this.getRequiredString("documentId");
     const structureItemId = this.getRequiredString("structureItemId");
 
-    // TODO: Implement actual API call
-    // const response = await documentManagementClient.getStructureItem({
-    //   ...authContext,
-    //   documentId,
-    //   structureItemId,
-    // });
-
-    const mockResponse: JsonValue = {
-      id: structureItemId,
-      name: "document.pdf",
-      type: 1,
-      counter: 1,
+    const response = await DocumentManagementClient.fetchStructureItem({
+      host: authContext.host,
+      token: authContext.token,
+      clientInstanceId: authContext.clientInstanceId,
       documentId,
-    };
+      structureItemId,
+    });
 
-    sendSuccess(mockResponse);
+    sendSuccess(response);
   }
 
   private async updateStructureItem(
@@ -256,15 +224,16 @@ export class DocumentResourceHandler extends BaseResourceHandler {
     const structureItemId = this.getRequiredString("structureItemId");
     const structureItemData = this.getRequiredJsonData("structureItemData");
 
-    // TODO: Implement actual API call
-    // await documentManagementClient.updateStructureItem({
-    //   ...authContext,
-    //   documentId,
-    //   structureItemId,
-    //   structureItemData,
-    // });
+    const response = await DocumentManagementClient.updateStructureItem({
+      host: authContext.host,
+      token: authContext.token,
+      clientInstanceId: authContext.clientInstanceId,
+      documentId,
+      structureItemId,
+      structureItem: structureItemData,
+    });
 
-    sendSuccess({ success: true, documentId, structureItemId });
+    sendSuccess(response);
   }
 
   private async createDispatcherInformation(
@@ -274,13 +243,14 @@ export class DocumentResourceHandler extends BaseResourceHandler {
     const documentId = this.getRequiredString("documentId");
     const dispatcherData = this.getRequiredJsonData("dispatcherData");
 
-    // TODO: Implement actual API call
-    // await documentManagementClient.createDispatcherInformation({
-    //   ...authContext,
-    //   documentId,
-    //   dispatcherData,
-    // });
+    const response = await DocumentManagementClient.createDispatcherInformation({
+      host: authContext.host,
+      token: authContext.token,
+      clientInstanceId: authContext.clientInstanceId,
+      documentId,
+      dispatcherInformation: dispatcherData,
+    });
 
-    sendSuccess({ success: true, documentId });
+    sendSuccess(response);
   }
 }

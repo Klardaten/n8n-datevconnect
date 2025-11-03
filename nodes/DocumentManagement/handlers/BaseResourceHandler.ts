@@ -44,8 +44,6 @@ export abstract class BaseResourceHandler {
     returnData: INodeExecutionData[],
   ): Promise<void> {
     try {
-      const continueOnFail = this.context.continueOnFail();
-
       const sendSuccess: SendSuccessFunction = (payload?: JsonValue) => {
         const data = payload ? normaliseToObjects(payload) : [{}];
         data.forEach((item) => {
@@ -150,7 +148,7 @@ export abstract class BaseResourceHandler {
    * Parses a JSON parameter
    */
   protected parseJsonParameter(rawValue: unknown, parameterLabel: string): JsonValue {
-    return parseJsonParameter(rawValue, parameterLabel, this.context, this.itemIndex);
+    return parseJsonParameter(rawValue as JsonValue, parameterLabel, this.context, this.itemIndex);
   }
 
   /**
