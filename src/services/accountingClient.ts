@@ -178,7 +178,6 @@ export const datevConnectClient = {
         clientId,
         fiscalYearId,
         select: queryParams.select as string,
-        filter: queryParams.filter as string,
         top: queryParams.top as number,
         skip: queryParams.skip as number,
       });
