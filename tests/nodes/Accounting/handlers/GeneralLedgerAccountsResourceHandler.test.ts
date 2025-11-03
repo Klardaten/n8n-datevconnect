@@ -9,47 +9,52 @@ let getGeneralLedgerAccountsSpy: any;
 let getGeneralLedgerAccountSpy: any;
 let getUtilizedGeneralLedgerAccountsSpy: any;
 
-// Mock data
+// Mock data based on schema_general-ledger-account from OpenAPI spec
 const mockGeneralLedgerAccountsData = [
   {
-    id: "1000",
-    name: "Cash",
-    account_type: "asset",
-    balance: 15000.00,
-    is_active: true
+    id: "10000000",
+    account_number: 10000000,
+    caption: "Kasse",
+    additional_function: 0,
+    function_description: "Kasse",
+    function_extension: 0,
+    main_function: 1
   },
   {
-    id: "4000",
-    name: "Sales Revenue",
-    account_type: "revenue",
-    balance: 25000.00,
-    is_active: true
+    id: "40000000",
+    account_number: 40000000,
+    caption: "Umsatzerlöse",
+    additional_function: 0,
+    function_description: "Sales Revenue",
+    function_extension: 80,
+    main_function: 40
   }
 ];
 
 const mockSingleGeneralLedgerAccount = {
-  id: "1000",
-  name: "Cash",
-  account_type: "asset",
-  balance: 15000.00,
-  is_active: true,
-  description: "Primary cash account"
+  id: "10000000",
+  account_number: 10000000,
+  caption: "Kasse",
+  additional_function: 0,
+  function_description: "Kasse",
+  function_extension: 0,
+  main_function: 1
 };
 
 const mockUtilizedAccountsData = [
   {
-    id: "1000",
-    name: "Cash",
-    account_type: "asset",
-    balance: 15000.00,
-    transaction_count: 45
+    id: "10000000",
+    account_number: 10000000,
+    caption: "Kasse",
+    additional_function: 0,
+    function_description: "Kasse"
   },
   {
-    id: "1200",
-    name: "Accounts Receivable",
-    account_type: "asset",
-    balance: 8500.00,
-    transaction_count: 23
+    id: "12000000",
+    account_number: 12000000,
+    caption: "Forderungen",
+    additional_function: 0,
+    function_description: "Accounts Receivable"
   }
 ];
 
@@ -124,11 +129,13 @@ describe("GeneralLedgerAccountsResourceHandler", () => {
 
       expect(returnData).toHaveLength(2);
       expect(returnData[0].json).toEqual({
-        id: "1000",
-        name: "Cash",
-        account_type: "asset",
-        balance: 15000.00,
-        is_active: true
+        id: "10000000",
+        account_number: 10000000,
+        caption: "Kasse",
+        additional_function: 0,
+        function_description: "Kasse",
+        function_extension: 0,
+        main_function: 1
       });
     });
 
@@ -183,11 +190,22 @@ describe("GeneralLedgerAccountsResourceHandler", () => {
 
       expect(returnData).toHaveLength(2);
       expect(returnData[0].json).toEqual({
-        id: "1000",
-        name: "Cash",
-        account_type: "asset",
-        balance: 15000.00,
-        is_active: true
+        id: "10000000",
+        account_number: 10000000,
+        caption: "Kasse",
+        additional_function: 0,
+        function_description: "Kasse",
+        function_extension: 0,
+        main_function: 1
+      });
+      expect(returnData[1].json).toEqual({
+        id: "40000000",
+        account_number: 40000000,
+        caption: "Umsatzerlöse",
+        additional_function: 0,
+        function_description: "Sales Revenue",
+        function_extension: 80,
+        main_function: 40
       });
     });
 
@@ -233,11 +251,22 @@ describe("GeneralLedgerAccountsResourceHandler", () => {
 
       expect(returnData).toHaveLength(2);
       expect(returnData[0].json).toEqual({
-        id: "1000",
-        name: "Cash",
-        account_type: "asset",
-        balance: 15000.00,
-        is_active: true
+        id: "10000000",
+        account_number: 10000000,
+        caption: "Kasse",
+        additional_function: 0,
+        function_description: "Kasse",
+        function_extension: 0,
+        main_function: 1
+      });
+      expect(returnData[1].json).toEqual({
+        id: "40000000",
+        account_number: 40000000,
+        caption: "Umsatzerlöse",
+        additional_function: 0,
+        function_description: "Sales Revenue",
+        function_extension: 80,
+        main_function: 40
       });
     });
 

@@ -26,7 +26,7 @@ export class AccountingTransactionKeysResourceHandler extends BaseResourceHandle
         await this.handleGetAll(requestContext, returnData);
         break;
       case "get":
-        await this.handleGetAll(requestContext, returnData);
+        await this.handleGet(requestContext, returnData);
         break;
       default:
         throw new NodeOperationError(this.context.getNode(), `Unknown operation: ${operation}`, {

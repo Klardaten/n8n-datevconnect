@@ -26,10 +26,10 @@ export class AccountsPayableResourceHandler extends BaseResourceHandler {
         await this.handleGetAll(requestContext, returnData);
         break;
       case "get":
-        await this.handleGetAll(requestContext, returnData);
+        await this.handleGet(requestContext, returnData);
         break;
       case "getCondensed":
-        await this.handleGetAll(requestContext, returnData);
+        await this.handleGetCondensed(requestContext, returnData);
         break;
       default:
         throw new NodeOperationError(this.context.getNode(), `Unknown operation: ${operation}`, {

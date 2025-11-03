@@ -61,24 +61,52 @@ describe("BusinessPartnersResourceHandler", () => {
   beforeEach(() => {
     getDebitorsSpy = spyOn(datevConnectClient.accounting, "getDebitors").mockResolvedValue([
       {
-        id: "debitor-1",
-        name: "Test Debitor 1",
-        account_number: "10000",
-        address: { street: "Test Street 1" }
+        id: "100990000",
+        account_number: 100990000,
+        caption: "Tech Solutions GmbH",
+        business_partner_number: "2250829",
+        alternative_search_name: "Tech Solutions",
+        is_business_partner_active: true,
+        eu_vat_id_country_code: "DE",
+        eu_vat_id_number: "123456789",
+        accounting_information: {
+          account_balance: 15000.50
+        },
+        addresses: [
+          {
+            id: "addr_deb_001",
+            street: "Hauptstr. 123",
+            zip_code: "10115",
+            city: "Berlin",
+            country_code: "DE"
+          }
+        ]
       },
       {
-        id: "debitor-2",
-        name: "Test Debitor 2", 
-        account_number: "10001",
-        address: { street: "Test Street 2" }
+        id: "100990001",
+        account_number: 100990001,
+        caption: "Mueller & Associates",
+        business_partner_number: "2250830",
+        alternative_search_name: "Mueller",
+        is_business_partner_active: true,
+        accounting_information: {
+          account_balance: 2500.00
+        }
       }
     ]);
     
     getDebitorSpy = spyOn(datevConnectClient.accounting, "getDebitor").mockResolvedValue({
-      id: "debitor-123",
-      name: "Test Debitor",
-      account_number: "10000",
-      address: { street: "Test Street" }
+      id: "100990000",
+      account_number: 100990000,
+      caption: "Tech Solutions GmbH",
+      business_partner_number: "2250829",
+      alternative_search_name: "Tech Solutions",
+      is_business_partner_active: true,
+      eu_vat_id_country_code: "DE",
+      eu_vat_id_number: "123456789",
+      accounting_information: {
+        account_balance: 15000.50
+      }
     });
     
     createDebitorSpy = spyOn(datevConnectClient.accounting, "createDebitor").mockResolvedValue(undefined);
@@ -86,24 +114,48 @@ describe("BusinessPartnersResourceHandler", () => {
     
     getCreditorsSpy = spyOn(datevConnectClient.accounting, "getCreditors").mockResolvedValue([
       {
-        id: "creditor-1",
-        name: "Test Creditor 1",
-        account_number: "70000",
-        address: { street: "Supplier Street 1" }
+        id: "701000000",
+        account_number: 701000000,
+        caption: "Office Supplies GmbH",
+        business_partner_number: "SUP001",
+        alternative_search_name: "Office Supplies",
+        is_business_partner_active: true,
+        accounting_information: {
+          alternative_contact_person: "Anna Schmidt"
+        },
+        addresses: [
+          {
+            id: "addr_cred_001",
+            street: "Industriestr. 45",
+            zip_code: "20095",
+            city: "Hamburg",
+            country_code: "DE"
+          }
+        ]
       },
       {
-        id: "creditor-2",
-        name: "Test Creditor 2",
-        account_number: "70001", 
-        address: { street: "Supplier Street 2" }
+        id: "701000001",
+        account_number: 701000001,
+        caption: "IT Services Ltd",
+        business_partner_number: "SUP002",
+        alternative_search_name: "IT Services",
+        is_business_partner_active: true,
+        accounting_information: {
+          alternative_contact_person: "John Smith"
+        }
       }
     ]);
     
     getCreditorSpy = spyOn(datevConnectClient.accounting, "getCreditor").mockResolvedValue({
-      id: "creditor-123",
-      name: "Test Creditor",
-      account_number: "70000",
-      address: { street: "Supplier Street" }
+      id: "701000000",
+      account_number: 701000000,
+      caption: "Office Supplies GmbH",
+      business_partner_number: "SUP001",
+      alternative_search_name: "Office Supplies",
+      is_business_partner_active: true,
+      accounting_information: {
+        alternative_contact_person: "Anna Schmidt"
+      }
     });
     
     createCreditorSpy = spyOn(datevConnectClient.accounting, "createCreditor").mockResolvedValue(undefined);
@@ -140,10 +192,26 @@ describe("BusinessPartnersResourceHandler", () => {
 
         expect(returnData).toHaveLength(2);
         expect(returnData[0].json).toEqual({
-          id: "debitor-1",
-          name: "Test Debitor 1",
-          account_number: "10000",
-          address: { street: "Test Street 1" }
+          id: "100990000",
+          account_number: 100990000,
+          caption: "Tech Solutions GmbH",
+          business_partner_number: "2250829",
+          alternative_search_name: "Tech Solutions",
+          is_business_partner_active: true,
+          eu_vat_id_country_code: "DE",
+          eu_vat_id_number: "123456789",
+          accounting_information: {
+            account_balance: 15000.50
+          },
+          addresses: [
+            {
+              id: "addr_deb_001",
+              street: "Hauptstr. 123",
+              zip_code: "10115",
+              city: "Berlin",
+              country_code: "DE"
+            }
+          ]
         });
       });
 
@@ -197,10 +265,17 @@ describe("BusinessPartnersResourceHandler", () => {
 
         expect(returnData).toHaveLength(1);
         expect(returnData[0].json).toEqual({
-          id: "debitor-123",
-          name: "Test Debitor",
-          account_number: "10000",
-          address: { street: "Test Street" }
+          id: "100990000",
+          account_number: 100990000,
+          caption: "Tech Solutions GmbH",
+          business_partner_number: "2250829",
+          alternative_search_name: "Tech Solutions",
+          is_business_partner_active: true,
+          eu_vat_id_country_code: "DE",
+          eu_vat_id_number: "123456789",
+          accounting_information: {
+            account_balance: 15000.50
+          }
         });
       });
     });
@@ -268,10 +343,24 @@ describe("BusinessPartnersResourceHandler", () => {
 
         expect(returnData).toHaveLength(2);
         expect(returnData[0].json).toEqual({
-          id: "creditor-1",
-          name: "Test Creditor 1",
-          account_number: "70000",
-          address: { street: "Supplier Street 1" }
+          id: "701000000",
+          account_number: 701000000,
+          caption: "Office Supplies GmbH",
+          business_partner_number: "SUP001",
+          alternative_search_name: "Office Supplies",
+          is_business_partner_active: true,
+          accounting_information: {
+            alternative_contact_person: "Anna Schmidt"
+          },
+          addresses: [
+            {
+              id: "addr_cred_001",
+              street: "Industriestr. 45",
+              zip_code: "20095",
+              city: "Hamburg",
+              country_code: "DE"
+            }
+          ]
         });
       });
     });
@@ -294,10 +383,15 @@ describe("BusinessPartnersResourceHandler", () => {
 
         expect(returnData).toHaveLength(1);
         expect(returnData[0].json).toEqual({
-          id: "creditor-123",
-          name: "Test Creditor",
-          account_number: "70000",
-          address: { street: "Supplier Street" }
+          id: "701000000",
+          account_number: 701000000,
+          caption: "Office Supplies GmbH",
+          business_partner_number: "SUP001",
+          alternative_search_name: "Office Supplies",
+          is_business_partner_active: true,
+          accounting_information: {
+            alternative_contact_person: "Anna Schmidt"
+          }
         });
       });
     });

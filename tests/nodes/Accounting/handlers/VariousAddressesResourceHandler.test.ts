@@ -9,156 +9,179 @@ let getVariousAddressesSpy: any;
 let getVariousAddressSpy: any;
 let createVariousAddressSpy: any;
 
-// Mock data for various addresses
+// Mock data for various addresses - based on schema_various_address from OpenAPI spec
 const mockVariousAddresses = [
   {
-    address_id: "ADDR001",
-    address_type: "business_partner",
-    partner_id: "BP001",
-    partner_name: "Tech Solutions GmbH",
-    is_primary: true,
-    address_category: "billing",
-    company_name: "Tech Solutions GmbH",
-    street: "Hauptstraße 123",
-    postal_code: "10115",
-    city: "Berlin",
-    state: "Berlin",
-    country: "Germany",
-    country_code: "DE",
-    contact_person: "Max Mustermann",
-    title: "Geschäftsführer",
-    phone: "+49 30 12345678",
-    mobile: "+49 170 1234567",
-    fax: "+49 30 12345679",
-    email: "info@techsolutions.de",
-    website: "https://www.techsolutions.de",
-    tax_number: "12/345/67890",
-    vat_id: "DE123456789",
-    created_date: "2023-01-15T10:30:00Z",
-    created_by: "admin@company.com",
-    last_modified: "2023-11-01T14:20:00Z",
-    last_modified_by: "manager@company.com",
-    status: "active",
-    notes: "Primary business partner for IT services"
+    id: "1_-672289624",
+    account_number: 295080394,
+    business_partner_number: "10000",
+    caption: "Tech Solutions GmbH",
+    correspondence_title: "Herr",
+    addresses: [
+      {
+        id: "addr_001",
+        address_usage_type: {
+          is_correspondence_address: true
+        },
+        street: "Hauptstraße 123",
+        zip_code: "10115",
+        city: "Berlin",
+        country_code: "DE"
+      }
+    ],
+    communications: [
+      {
+        id: "comm_001",
+        communication_usage_type: {
+          is_main_communication_usage_type: true
+        },
+        communication_type: "email",
+        communication_connection: "info@techsolutions.de"
+      },
+      {
+        id: "comm_002",
+        communication_type: "phone",
+        communication_connection: "+49 30 12345678"
+      }
+    ],
+    banks: [
+      {
+        id: "bank_001",
+        bank_code: "12030000",
+        bank_account_number: "1234567890",
+        bank_name: "Deutsche Bank"
+      }
+    ],
+    correspondence_information: {
+      alternative_contact_person: "Max Mustermann"
+    }
   },
   {
-    address_id: "ADDR002",
-    address_type: "supplier",
-    partner_id: "SUP001",
-    partner_name: "Office Supplies Ltd",
-    is_primary: false,
-    address_category: "shipping",
-    company_name: "Office Supplies Ltd",
-    street: "Industrial Park 45",
-    postal_code: "20095",
-    city: "Hamburg",
-    state: "Hamburg",
-    country: "Germany",
-    country_code: "DE",
-    contact_person: "Anna Schmidt",
-    title: "Sales Manager",
-    phone: "+49 40 9876543",
-    email: "orders@officesupplies.de",
-    department: "Sales Department",
-    created_date: "2023-02-20T09:15:00Z",
-    status: "active",
-    delivery_instructions: "Use loading dock entrance",
-    preferred_delivery_time: "08:00-16:00"
+    id: "2_-672289625",
+    account_number: 295080395,
+    business_partner_number: "10001",
+    caption: "Office Supplies Ltd",
+    correspondence_title: "Frau",
+    addresses: [
+      {
+        id: "addr_002",
+        address_usage_type: {
+          is_correspondence_address: true
+        },
+        street: "Industrial Park 45",
+        zip_code: "20095",
+        city: "Hamburg",
+        country_code: "DE"
+      }
+    ],
+    communications: [
+      {
+        id: "comm_003",
+        communication_usage_type: {
+          is_main_communication_usage_type: true
+        },
+        communication_type: "email",
+        communication_connection: "orders@officesupplies.de"
+      },
+      {
+        id: "comm_004",
+        communication_type: "phone",
+        communication_connection: "+49 40 9876543"
+      }
+    ],
+    correspondence_information: {
+      alternative_contact_person: "Anna Schmidt"
+    }
   }
 ];
 
 const mockSingleVariousAddress = {
-  address_id: "ADDR001",
-  address_type: "business_partner",
-  partner_id: "BP001",
-  partner_name: "Tech Solutions GmbH",
-  is_primary: true,
-  address_category: "billing",
-  company_name: "Tech Solutions GmbH",
-  street: "Hauptstraße 123",
-  street_2: "Building A, Floor 3",
-  postal_code: "10115",
-  city: "Berlin",
-  state: "Berlin",
-  country: "Germany",
-  country_code: "DE",
-  region: "Central Europe",
-  contact_person: "Max Mustermann",
-  title: "Geschäftsführer",
-  phone: "+49 30 12345678",
-  mobile: "+49 170 1234567",
-  fax: "+49 30 12345679",
-  email: "info@techsolutions.de",
-  email_2: "support@techsolutions.de",
-  website: "https://www.techsolutions.de",
-  tax_number: "12/345/67890",
-  vat_id: "DE123456789",
-  commercial_register: "HRB 12345",
-  bank_details: {
-    bank_name: "Deutsche Bank AG",
-    iban: "DE12345678901234567890",
-    bic: "DEUTDEFF",
-    account_holder: "Tech Solutions GmbH"
-  },
-  business_hours: {
-    monday: "08:00-18:00",
-    tuesday: "08:00-18:00",
-    wednesday: "08:00-18:00",
-    thursday: "08:00-18:00",
-    friday: "08:00-17:00",
-    saturday: "closed",
-    sunday: "closed"
-  },
-  address_validation: {
-    is_validated: true,
-    validation_date: "2023-01-15T10:30:00Z",
-    validation_method: "postal_service",
-    deliverable: true
-  },
-  created_date: "2023-01-15T10:30:00Z",
-  created_by: "admin@company.com",
-  last_modified: "2023-11-01T14:20:00Z",
-  last_modified_by: "manager@company.com",
-  status: "active",
-  notes: "Primary business partner for IT services",
-  custom_fields: {
-    industry: "Information Technology",
-    employee_count: "50-100",
-    annual_revenue: "5M-10M EUR"
+  id: "1_-672289624",
+  account_number: 295080394,
+  business_partner_number: "10000",
+  caption: "Tech Solutions GmbH",
+  correspondence_title: "Herr",
+  addresses: [
+    {
+      id: "addr_001",
+      address_usage_type: {
+        is_correspondence_address: true
+      },
+      street: "Hauptstraße 123",
+      zip_code: "10115",
+      city: "Berlin",
+      country_code: "DE"
+    }
+  ],
+  communications: [
+    {
+      id: "comm_001",
+      communication_usage_type: {
+        is_main_communication_usage_type: true
+      },
+      communication_type: "email",
+      communication_connection: "info@techsolutions.de"
+    },
+    {
+      id: "comm_002",
+      communication_type: "phone",
+      communication_connection: "+49 30 12345678"
+    },
+    {
+      id: "comm_003",
+      communication_type: "fax",
+      communication_connection: "+49 30 12345679"
+    }
+  ],
+  banks: [
+    {
+      id: "bank_001",
+      bank_code: "12030000",
+      bank_account_number: "1234567890",
+      bank_name: "Deutsche Bank"
+    }
+  ],
+  correspondence_information: {
+    alternative_contact_person: "Max Mustermann"
   }
 };
 
 const mockCreateResult = {
-  address_id: "ADDR003",
-  creation_status: "success",
-  created_address: {
-    address_id: "ADDR003",
-    address_type: "customer",
-    partner_id: "CUST001",
-    partner_name: "New Customer Corp",
-    company_name: "New Customer Corp",
-    street: "Innovation Street 100",
-    postal_code: "80331",
-    city: "Munich",
-    country: "Germany",
-    contact_person: "John Doe",
-    email: "contact@newcustomer.com",
-    phone: "+49 89 12345678"
-  },
-  validation_results: {
-    address_format: "valid",
-    postal_code_check: "valid",
-    country_validation: "valid",
-    email_format: "valid",
-    phone_format: "valid"
-  },
-  created_by: "system",
-  creation_timestamp: "2023-12-01T10:00:00Z",
-  next_steps: [
-    "Address verification initiated",
-    "Welcome package scheduled",
-    "Account setup in progress"
-  ]
+  id: "3_-672289626",
+  account_number: 295080396,
+  business_partner_number: "10002",
+  caption: "New Customer Corp",
+  correspondence_title: "Herr",
+  addresses: [
+    {
+      id: "addr_003",
+      address_usage_type: {
+        is_correspondence_address: true
+      },
+      street: "Innovation Street 100",
+      zip_code: "80331",
+      city: "Munich",
+      country_code: "DE"
+    }
+  ],
+  communications: [
+    {
+      id: "comm_005",
+      communication_usage_type: {
+        is_main_communication_usage_type: true
+      },
+      communication_type: "email",
+      communication_connection: "contact@newcustomer.com"
+    },
+    {
+      id: "comm_006",
+      communication_type: "phone",
+      communication_connection: "+49 89 12345678"
+    }
+  ],
+  correspondence_information: {
+    alternative_contact_person: "John Doe"
+  }
 };
 
 // Mock IExecuteFunctions

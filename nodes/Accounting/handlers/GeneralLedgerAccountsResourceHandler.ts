@@ -26,10 +26,10 @@ export class GeneralLedgerAccountsResourceHandler extends BaseResourceHandler {
         await this.handleGetAll(requestContext, returnData);
         break;
       case "get":
-        await this.handleGetAll(requestContext, returnData);
+        await this.handleGet(requestContext, returnData);
         break;
       case "getUtilized":
-        await this.handleGetAll(requestContext, returnData);
+        await this.handleGetUtilized(requestContext, returnData);
         break;
       default:
         throw new NodeOperationError(this.context.getNode(), `Unknown operation: ${operation}`, {

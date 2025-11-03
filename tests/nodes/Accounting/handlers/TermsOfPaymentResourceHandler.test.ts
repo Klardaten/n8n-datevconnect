@@ -10,43 +10,58 @@ let getTermOfPaymentSpy: any;
 let createTermOfPaymentSpy: any;
 let updateTermOfPaymentSpy: any;
 
-// Mock data
+// Mock data based on schema_term-of-payment from OpenAPI spec
 const mockTermsOfPaymentData = [
   {
-    id: "NET30",
-    name: "Net 30 Days",
-    payment_days: 30,
-    discount_percentage: 0,
-    discount_days: 0,
-    is_active: true
+    id: "123",
+    caption: "30 Tage netto",
+    due_type: "due_in_days",
+    cash_discount1_percentage: 2.0,
+    cash_discount2_percentage: 1.0,
+    due_in_days: {
+      cash_discount1_days: 10,
+      cash_discount2_days: 20,
+      due_date_net_days: 30
+    }
   },
   {
-    id: "NET15",
-    name: "Net 15 Days",
-    payment_days: 15,
-    discount_percentage: 2.0,
-    discount_days: 10,
-    is_active: true
+    id: "456", 
+    caption: "44 days net",
+    due_type: "due_as_period",
+    cash_discount1_percentage: 3.0,
+    due_as_period: {
+      period1: {
+        invoice_day_of_month: 15,
+        due_date_net: {
+          day_of_month: 15,
+          related_month: "following_month"
+        }
+      }
+    }
   }
 ];
 
 const mockSingleTermOfPayment = {
-  id: "NET30",
-  name: "Net 30 Days",
-  payment_days: 30,
-  discount_percentage: 0,
-  discount_days: 0,
-  is_active: true,
-  description: "Standard 30-day payment terms"
+  id: "123",
+  caption: "30 Tage netto",
+  due_type: "due_in_days",
+  cash_discount1_percentage: 2.0,
+  cash_discount2_percentage: 1.0,
+  due_in_days: {
+    cash_discount1_days: 10,
+    cash_discount2_days: 20,
+    due_date_net_days: 30
+  }
 };
 
 const mockCreateResponse = {
-  id: "NET60",
-  name: "Net 60 Days",
-  payment_days: 60,
-  discount_percentage: 0,
-  discount_days: 0,
-  is_active: true
+  id: "789",
+  caption: "60 Tage netto",
+  due_type: "due_in_days",
+  cash_discount1_percentage: 0,
+  due_in_days: {
+    due_date_net_days: 60
+  }
 };
 
 const mockUpdateResponse = {
@@ -138,12 +153,16 @@ describe("TermsOfPaymentResourceHandler", () => {
 
       expect(returnData).toHaveLength(2);
       expect(returnData[0].json).toEqual({
-        id: "NET30",
-        name: "Net 30 Days",
-        payment_days: 30,
-        discount_percentage: 0,
-        discount_days: 0,
-        is_active: true
+        id: "123",
+        caption: "30 Tage netto",
+        due_type: "due_in_days",
+        cash_discount1_percentage: 2.0,
+        cash_discount2_percentage: 1.0,
+        due_in_days: {
+          cash_discount1_days: 10,
+          cash_discount2_days: 20,
+          due_date_net_days: 30
+        }
       });
     });
 
@@ -197,13 +216,16 @@ describe("TermsOfPaymentResourceHandler", () => {
 
       expect(returnData).toHaveLength(1);
       expect(returnData[0].json).toEqual({
-        id: "NET30",
-        name: "Net 30 Days",
-        payment_days: 30,
-        discount_percentage: 0,
-        discount_days: 0,
-        is_active: true,
-        description: "Standard 30-day payment terms"
+        id: "123",
+        caption: "30 Tage netto",
+        due_type: "due_in_days",
+        cash_discount1_percentage: 2.0,
+        cash_discount2_percentage: 1.0,
+        due_in_days: {
+          cash_discount1_days: 10,
+          cash_discount2_days: 20,
+          due_date_net_days: 30
+        }
       });
     });
 
@@ -250,12 +272,13 @@ describe("TermsOfPaymentResourceHandler", () => {
 
       expect(returnData).toHaveLength(1);
       expect(returnData[0].json).toEqual({
-        id: "NET60",
-        name: "Net 60 Days",
-        payment_days: 60,
-        discount_percentage: 0,
-        discount_days: 0,
-        is_active: true
+        id: "789",
+        caption: "60 Tage netto",
+        due_type: "due_in_days",
+        cash_discount1_percentage: 0,
+        due_in_days: {
+          due_date_net_days: 60
+        }
       });
     });
 

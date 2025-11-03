@@ -9,156 +9,62 @@ let getStocktakingDataSpy: any;
 let getStocktakingDataByAssetSpy: any;
 let updateStocktakingDataSpy: any;
 
-// Mock data for stocktaking
+// Mock data for stocktaking based on schema_stocktaking_record from OpenAPI spec
 const mockStocktakingData = [
   {
-    asset_id: "ASSET001",
-    asset_number: "A-001",
-    asset_name: "Production Machine #1",
-    asset_category: "machinery",
-    location: "Production Floor A",
-    department: "Manufacturing",
-    responsible_person: "John Smith",
-    stocktaking_date: "2023-12-31",
-    counted_quantity: 1,
-    expected_quantity: 1,
-    difference: 0,
-    unit: "pieces",
-    unit_value: 25000.00,
-    total_book_value: 25000.00,
-    depreciation_method: "straight_line",
-    useful_life_years: 10,
-    acquisition_date: "2020-01-15",
-    acquisition_cost: 30000.00,
-    accumulated_depreciation: 5000.00,
-    net_book_value: 25000.00,
-    condition: "good",
-    last_maintenance: "2023-11-15",
-    next_maintenance: "2024-05-15",
-    status: "active",
-    notes: "Regular maintenance completed",
-    verified_by: "Jane Doe",
-    verification_date: "2023-12-31T14:30:00Z"
+    id: "501",
+    asset_number: 100,
+    inventory_number: "320009",
+    accounting_reason: 30,
+    general_ledger_account: {
+      account_number: 8400
+    },
+    inventory_name: "MB Vito 109 CDI Kombi",
+    acquisition_date: "2005-04-29T00:00:00+02:00",
+    economic_lifetime: 120,
+    kost1_cost_center_id: "cc_001"
   },
   {
-    asset_id: "ASSET002", 
-    asset_number: "A-002",
-    asset_name: "Office Computer Dell",
-    asset_category: "equipment",
-    location: "Office Room 201",
-    department: "Administration",
-    responsible_person: "Alice Johnson",
-    stocktaking_date: "2023-12-31",
-    counted_quantity: 1,
-    expected_quantity: 1,
-    difference: 0,
-    unit: "pieces",
-    unit_value: 800.00,
-    total_book_value: 800.00,
-    depreciation_method: "declining_balance",
-    useful_life_years: 3,
-    acquisition_date: "2022-03-10",
-    acquisition_cost: 1200.00,
-    accumulated_depreciation: 400.00,
-    net_book_value: 800.00,
-    condition: "good",
-    status: "active",
-    serial_number: "DL123456789",
-    manufacturer: "Dell Technologies",
-    model: "OptiPlex 7090",
-    warranty_until: "2025-03-10",
-    verified_by: "Bob Wilson",
-    verification_date: "2023-12-31T16:45:00Z"
+    id: "502",
+    asset_number: 101,
+    inventory_number: "320010",
+    accounting_reason: 50,
+    general_ledger_account: {
+      account_number: 8500
+    },
+    inventory_name: "Dell Laptop Precision",
+    acquisition_date: "2023-01-15T00:00:00+01:00",
+    economic_lifetime: 36,
+    kost1_cost_center_id: "cc_002"
   }
 ];
 
 const mockSingleStocktakingData = {
-  asset_id: "ASSET001",
-  asset_number: "A-001",
-  asset_name: "Production Machine #1",
-  asset_category: "machinery",
-  location: "Production Floor A",
-  department: "Manufacturing",
-  responsible_person: "John Smith",
-  stocktaking_date: "2023-12-31",
-  counted_quantity: 1,
-  expected_quantity: 1,
-  difference: 0,
-  unit: "pieces",
-  unit_value: 25000.00,
-  total_book_value: 25000.00,
-  depreciation_method: "straight_line",
-  useful_life_years: 10,
-  acquisition_date: "2020-01-15",
-  acquisition_cost: 30000.00,
-  accumulated_depreciation: 5000.00,
-  net_book_value: 25000.00,
-  condition: "good",
-  last_maintenance: "2023-11-15",
-  next_maintenance: "2024-05-15",
-  status: "active",
-  notes: "Regular maintenance completed",
-  stocktaking_history: [
-    {
-      date: "2022-12-31",
-      counted_quantity: 1,
-      condition: "good",
-      verified_by: "Previous Inspector"
-    },
-    {
-      date: "2021-12-31", 
-      counted_quantity: 1,
-      condition: "excellent",
-      verified_by: "Initial Inspector"
-    }
-  ],
-  maintenance_records: [
-    {
-      date: "2023-11-15",
-      type: "preventive",
-      description: "Regular oil change and inspection",
-      cost: 150.00,
-      technician: "Mike Tech"
-    },
-    {
-      date: "2023-06-10",
-      type: "repair",
-      description: "Replaced worn belt",
-      cost: 75.00,
-      technician: "Sarah Repair"
-    }
-  ],
-  verified_by: "Jane Doe",
-  verification_date: "2023-12-31T14:30:00Z",
-  verification_notes: "Asset in excellent condition, no discrepancies found"
+  id: "501",
+  asset_number: 100,
+  inventory_number: "320009",
+  accounting_reason: 30,
+  general_ledger_account: {
+    account_number: 8400
+  },
+  inventory_name: "MB Vito 109 CDI Kombi",
+  acquisition_date: "2005-04-29T00:00:00+02:00",
+  economic_lifetime: 120,
+  kost1_cost_center_id: "cc_001"
 };
 
 const mockUpdateResult = {
-  asset_id: "ASSET001",
-  update_status: "success",
-  updated_fields: [
-    "counted_quantity",
-    "condition",
-    "notes",
-    "verification_date"
-  ],
-  previous_values: {
-    counted_quantity: 1,
-    condition: "good",
-    notes: "Regular maintenance completed"
+  id: "501",
+  asset_number: 100,
+  inventory_number: "320009",
+  accounting_reason: 30,
+  general_ledger_account: {
+    account_number: 8400
   },
-  new_values: {
-    counted_quantity: 1,
-    condition: "excellent", 
-    notes: "Updated after thorough inspection"
-  },
-  updated_by: "system",
-  update_timestamp: "2023-12-31T15:30:00Z",
-  validation_results: {
-    quantity_check: "passed",
-    condition_check: "passed",
-    location_verification: "passed"
-  }
+  inventory_name: "MB Vito 109 CDI Kombi - Updated",
+  acquisition_date: "2005-04-29T00:00:00+02:00",
+  economic_lifetime: 120,
+  kost1_cost_center_id: "cc_001"
 };
 
 // Mock IExecuteFunctions
