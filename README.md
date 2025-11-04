@@ -7,6 +7,7 @@ This repository provides custom n8n nodes for integrating with the DATEVconnect 
 | Node | Description |
 | ---- | ----------- |
 | `MasterData` | Fetches master data entities from DATEV using the configured credentials. |
+| `Accounting` | Access DATEV Accounting API for clients, fiscal years, accounts receivable, account postings, and accounting sequences. |
 
 Refer to the node descriptions inside the n8n editor for input parameters and output structure.
 
@@ -43,12 +44,14 @@ bun test
 ## Usage in n8n
 
 1. Create a new workflow in n8n.
-2. Add the **Klardaten DATEVconnect: Master Data** node and choose the credential you configured.
+2. Add the **Klardaten DATEVconnect: Master Data** or **Accounting** node and choose the credential you configured.
 3. Select the desired operation (e.g., list client entries) and configure any filters.
 4. Execute the workflow or schedule it as part of a larger automation.
 
-The node will authenticate using the stored credentials and interact with the DATEVconnect API to retrieve the requested master data.
+All nodes authenticate using the stored credentials and interact with their respective DATEVconnect APIs.
 
 ## Additional Notes
 
-- DATEV provides endpoint reference details under [Client Master Data](https://developer.datev.de/en/product-detail/client-master-data/1.7.0/reference).
+DATEV provides endpoint reference details under 
+- [Client Master Data](https://developer.datev.de/en/product-detail/client-master-data/1.7.0/reference).
+- [Accounting](https://developer.datev.de/en/product-detail/accounting/1.7.4/reference)
