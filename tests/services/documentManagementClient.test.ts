@@ -30,7 +30,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "GET",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Accept": "application/json;charset=utf-8",
         },
       }
@@ -68,7 +68,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "POST",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Content-Type": "application/json;charset=utf-8",
           "Accept": "application/json;charset=utf-8",
         },
@@ -103,7 +103,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "GET",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Accept": "application/octet-stream",
         },
       }
@@ -133,7 +133,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "POST",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Content-Type": "application/octet-stream",
           "Accept": "application/json;charset=utf-8",
         },
@@ -163,7 +163,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "GET",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Accept": "application/json;charset=utf-8",
         },
       }
@@ -197,7 +197,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "PUT",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Content-Type": "application/json;charset=utf-8",
           "Accept": "application/json;charset=utf-8",
         },
@@ -232,7 +232,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "GET",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Accept": "application/json;charset=utf-8",
         },
       }
@@ -264,7 +264,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "GET",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Accept": "application/json;charset=utf-8",
         },
       }
@@ -302,7 +302,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "POST",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Content-Type": "application/json;charset=utf-8",
           "Accept": "application/json;charset=utf-8",
         },
@@ -339,7 +339,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "PUT",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Content-Type": "application/json;charset=utf-8",
           "Accept": "application/json;charset=utf-8",
         },
@@ -379,7 +379,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "POST",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Content-Type": "application/json;charset=utf-8",
           "Accept": "application/json;charset=utf-8",
         },
@@ -412,7 +412,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "GET",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Accept": "application/json;charset=utf-8",
         },
       }
@@ -445,7 +445,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "GET",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Accept": "application/json;charset=utf-8",
         },
       }
@@ -479,7 +479,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "GET",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Accept": "application/json;charset=utf-8",
         },
       }
@@ -510,7 +510,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "DELETE",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
         },
       }
     );
@@ -534,7 +534,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "DELETE",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
         },
       }
     );
@@ -561,7 +561,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "GET",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Accept": "application/json;charset=utf-8",
         },
       }
@@ -595,7 +595,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "GET",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Accept": "application/json;charset=utf-8",
         },
       }
@@ -628,7 +628,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "GET",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Accept": "application/json;charset=utf-8",
         },
       }
@@ -663,7 +663,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "GET",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Accept": "application/json;charset=utf-8",
         },
       }
@@ -701,7 +701,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "POST",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Accept": "application/json;charset=utf-8",
           "Content-Type": "application/json;charset=utf-8",
         },
@@ -737,7 +737,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "GET",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Accept": "application/json;charset=utf-8",
         },
       }
@@ -781,7 +781,7 @@ describe('DocumentManagementClient - All Endpoints', () => {
         method: "POST",
         headers: {
           "Authorization": "Bearer test-token",
-          "X-DATEV-Client-Instance-Id": "test-client-id",
+          "x-client-instance-id": "test-client-id",
           "Accept": "application/json;charset=utf-8",
           "Content-Type": "application/json;charset=utf-8",
         },

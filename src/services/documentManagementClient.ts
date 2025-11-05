@@ -164,7 +164,7 @@ export class DocumentManagementClient {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Accept': 'application/json;charset=utf-8',
       },
     });
@@ -186,7 +186,7 @@ export class DocumentManagementClient {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Accept': 'application/json;charset=utf-8',
       },
     });
@@ -208,7 +208,7 @@ export class DocumentManagementClient {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Content-Type': 'application/json;charset=utf-8',
         'Accept': 'application/json;charset=utf-8',
       },
@@ -238,7 +238,7 @@ export class DocumentManagementClient {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Content-Type': 'application/json;charset=utf-8',
         'Accept': 'application/json;charset=utf-8',
       },
@@ -267,7 +267,7 @@ export class DocumentManagementClient {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Accept': 'application/octet-stream',
       },
     });
@@ -289,7 +289,7 @@ export class DocumentManagementClient {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Content-Type': 'application/octet-stream',
         'Accept': 'application/json;charset=utf-8',
       },
@@ -318,7 +318,7 @@ export class DocumentManagementClient {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Accept': 'application/json;charset=utf-8',
       },
     });
@@ -345,7 +345,7 @@ export class DocumentManagementClient {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Accept': 'application/json;charset=utf-8',
       },
     });
@@ -367,7 +367,7 @@ export class DocumentManagementClient {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Accept': 'application/json;charset=utf-8',
       },
     });
@@ -389,7 +389,7 @@ export class DocumentManagementClient {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Content-Type': 'application/json;charset=utf-8',
         'Accept': 'application/json;charset=utf-8',
       },
@@ -413,7 +413,7 @@ export class DocumentManagementClient {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Accept': 'application/json;charset=utf-8',
       },
     });
@@ -435,7 +435,7 @@ export class DocumentManagementClient {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
       },
     });
 
@@ -454,7 +454,7 @@ export class DocumentManagementClient {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
       },
     });
 
@@ -473,7 +473,7 @@ export class DocumentManagementClient {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Accept': 'application/json;charset=utf-8',
       },
     });
@@ -500,7 +500,7 @@ export class DocumentManagementClient {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Accept': 'application/json;charset=utf-8',
       },
     });
@@ -522,7 +522,7 @@ export class DocumentManagementClient {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Accept': 'application/json;charset=utf-8',
       },
     });
@@ -550,7 +550,7 @@ export class DocumentManagementClient {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Accept': 'application/json;charset=utf-8',
       },
     });
@@ -572,7 +572,7 @@ export class DocumentManagementClient {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Accept': 'application/json;charset=utf-8',
         'Content-Type': 'application/json;charset=utf-8',
       },
@@ -602,7 +602,7 @@ export class DocumentManagementClient {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Accept': 'application/json;charset=utf-8',
       },
     });
@@ -624,7 +624,7 @@ export class DocumentManagementClient {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Accept': 'application/json;charset=utf-8',
         'Content-Type': 'application/json;charset=utf-8',
       },
@@ -654,7 +654,7 @@ export class DocumentManagementClient {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Accept': 'application/json;charset=utf-8',
       },
     });
@@ -676,7 +676,7 @@ export class DocumentManagementClient {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Accept': 'application/json;charset=utf-8',
       },
     });
@@ -703,7 +703,7 @@ export class DocumentManagementClient {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Content-Type': 'application/json;charset=utf-8',
         'Accept': 'application/json;charset=utf-8',
       },
@@ -733,7 +733,7 @@ export class DocumentManagementClient {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Content-Type': 'application/json;charset=utf-8',
         'Accept': 'application/json;charset=utf-8',
       },
@@ -762,7 +762,7 @@ export class DocumentManagementClient {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${options.token}`,
-        'X-DATEV-Client-Instance-Id': options.clientInstanceId,
+        'x-client-instance-id': options.clientInstanceId,
         'Content-Type': 'application/json;charset=utf-8',
         'Accept': 'application/json;charset=utf-8',
       },
