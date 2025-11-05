@@ -16,6 +16,9 @@ import { normaliseToObjects, toErrorMessage } from "../utils";
  * as specified in the document management-2.3.1.yaml specification.
  */
 export class DocumentFileResourceHandler extends BaseResourceHandler {
+  protected executeOperation(operation: string, authContext: AuthContext, sendSuccess: SendSuccessFunction): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
   /**
    * Override execute method to handle binary data for document file operations
    */
@@ -117,20 +120,28 @@ export class DocumentFileResourceHandler extends BaseResourceHandler {
     authContext: AuthContext,
     sendSuccess: SendSuccessFunction,
   ): Promise<void> {
-    const binaryData = this.getRequiredString("binaryData");
+    // Get binary data from the input data
+    const inputData = this.context.getInputData();
+    const currentItem = inputData[this.itemIndex];
+    
+    if (!currentItem?.binary?.data) {
+      throw new NodeOperationError(
+        this.context.getNode(),
+        "No binary data found. Please provide binary data through the 'data' binary property.",
+        { itemIndex: this.itemIndex }
+      );
+    }
 
-    // Convert base64 string to binary data if needed
-    const bufferData = binaryData.startsWith('data:') 
-      ? Buffer.from(binaryData.split(',')[1], 'base64')
-      : Buffer.from(binaryData, 'base64');
+    // Get from binary property
+    const binaryDataObj = currentItem.binary.data;
+    const bufferData = Buffer.from(binaryDataObj.data, 'base64');
 
     const response = await DocumentManagementClient.uploadDocumentFile({
       host: authContext.host,
       token: authContext.token,
       clientInstanceId: authContext.clientInstanceId,
-      binaryData: bufferData,
+      binaryData: bufferData as BodyInit,
     });
-
     sendSuccess(response);
   }
 }

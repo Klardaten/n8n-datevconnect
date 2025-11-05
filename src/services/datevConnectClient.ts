@@ -101,7 +101,7 @@ export interface FetchTaxAuthoritiesOptions extends BaseRequestOptions {
 export interface FetchRelationshipsOptions extends BaseRequestOptions {
   top?: number;
   skip?: number;
-  select?: string;  
+  select?: string;
   filter?: string;
 }
 
@@ -301,13 +301,17 @@ function extractErrorMessage(
   }
 
   if (body && typeof body === "object") {
+    const errorDescription = "error_description" in body && typeof body.error_description === "string"
+      ? body.error_description
+      : undefined;
+
     const message =
       ("message" in body && typeof body.message === "string"
         ? body.message
         : undefined) ||
       ("error" in body && typeof body.error === "string" ? body.error : undefined);
     if (message) {
-      return `${prefix}: ${message}`;
+      return `${prefix}: ${message}${errorDescription ? `: ${errorDescription}` : ""}`;
     }
   }
 
