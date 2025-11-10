@@ -24,11 +24,13 @@
     "url": "git+https://github.com/Klardaten/n8n-nodes-datevconnect.git"
   },
   "scripts": {
+    "test": "bun test",
     "build": "n8n-node build",
     "build:watch": "tsc --watch",
     "build:types": "tsc -p tsconfig.declarations.json",
     "dev": "n8n-node dev",
     "lint": "n8n-node lint",
+    "typecheck": "tsc --noEmit",
     "lint:fix": "n8n-node lint --fix",
     "release": "n8n-node release",
     "prepublishOnly": "n8n-node prerelease"
@@ -38,6 +40,7 @@
     "dist"
   ],
   "n8n": {
+    "n8nNodesApiVersion": 1,
     "nodes": [
       "dist/nodes/MasterData/MasterData.node.js",
       "dist/nodes/Accounting/Accounting.node.js",
@@ -54,11 +57,14 @@
   "types": "./dist/index.d.ts",
   "devDependencies": {
     "@n8n/node-cli": "*",
+    "@types/node": "^24.10.0",
+    "bun": "^1.3.2",
+    "bun-types": "^1.3.2",
     "eslint": "9.39.1",
+    "nock": "14.0.10",
     "prettier": "3.6.2",
     "release-it": "^19.0.4",
-    "typescript": "5.9.3",
-    "nock": "14.0.10"
+    "typescript": "5.9.3"
   },
   "peerDependencies": {
     "n8n-workflow": "*"
